@@ -13,32 +13,53 @@ PressVideo is tested on the IAC devsite (`https://devsite.iac-intl.com`) but is 
 ## Local source
 `C:\Users\pransburg\iac-dev\plugins\pressvideo`
 
-## Deploying to devsite
-No local WordPress install — always deploy via FTP to devsite for testing.
+---
 
-```bash
-# Full deploy (all plugin files)
-node deploy.js
+## Workflow (REQUIRED every session)
 
-# Targeted deploy (edit FILES array in deploy-ui.js first)
-node deploy-ui.js
+### 1. Edit
+Edit source files directly in `C:\Users\pransburg\iac-dev\plugins\pressvideo`.
+No build step — `assets/dist/` = `assets/src/` — edit dist files directly.
+
+### 2. Deploy to devsite (FTP)
+```powershell
+# From C:\Users\pransburg\iac-dev\plugins\pressvideo
+node deploy.js        # full deploy (all plugin files)
+node deploy-ui.js     # targeted deploy (edit FILES array first)
 ```
-
-FTP credentials are read from (in priority order):
+FTP credentials are read from (priority order):
 1. `.env` in this directory (not committed)
 2. `../../Development Sites/devsite.iac-intl.com/public_html/wp-content/themes/storefront-child/.env`
 
-Remote plugin path on server: `/devsite.iac-intl.com/public_html/wp-content/plugins/pv-youtube-importer`
+Remote plugin path: `/devsite.iac-intl.com/public_html/wp-content/plugins/pv-youtube-importer`
 
-## No build step
-`assets/dist/` = `assets/src/` — edit dist files directly, no compile step.
+### 3. Test
+Test on `https://devsite.iac-intl.com`. Deactivate/reactivate plugin in WP admin if OPcache doesn't pick up changes.
+
+### 4. Commit and push to GitHub
+Claude is authorized to commit and push to GitHub on Phillip's behalf.
+```powershell
+git add .
+git commit -m "Descriptive message"
+git push
+```
+- Branch: `main`
+- Remote: `https://github.com/pransburg816/pressvideo.git`
+- Never use vague commit messages ("updates", "changes", "fix stuff")
+- Always co-author commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+
+### 5. Session wrap-up
+At the end of every session, commit and push all changes with a descriptive message summarizing what was done.
+
+---
 
 ## Key architecture
 - CPT slug: `pv_youtube` | rewrite slug: `pv-videos`
 - Shortcodes: `[pv_video]`, `[pv_video_grid]`, `[pv_video_latest]`, `[pv_launcher]`
 - Watch page layouts: `hero-top`, `hero-split`, `theater` (in `templates/single/layouts/`)
-- Content in layout templates **must use `the_content()`**, not `echo $post->post_content` — the latter bypasses `do_blocks()` and `do_shortcode()`, breaking shortcode rendering.
-- Display mode + archive layout + content width are saved as AJAX from the Dashboard page (`Videos > Dashboard`), not the Settings form.
+- **Content in layout templates MUST use `the_content()`**, not `echo $post->post_content` — the latter bypasses `do_blocks()` and `do_shortcode()`, breaking shortcode rendering inside Gutenberg posts.
+- Display mode, archive layout, and content width are saved via AJAX from the Dashboard page (`Videos > Dashboard`), not the Settings form.
+- `pv_player_enqueued` action signals the offcanvas footer HTML to render — does NOT enqueue assets.
 
 ## WordPress admin (devsite)
-`https://devsite.iac-intl.com/wp-admin` — deactivate/reactivate plugin after deploy if OPcache doesn't pick up changes.
+`https://devsite.iac-intl.com/wp-admin`
