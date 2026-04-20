@@ -27,6 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			<p class="pv-desc"></p>
 		</div>
 
+		<div class="pv-rail" aria-label="<?php esc_attr_e( 'Playlist', 'pv-youtube-importer' ); ?>" role="list"></div>
+
 		<div class="pv-nav" aria-label="<?php esc_attr_e( 'Video navigation', 'pv-youtube-importer' ); ?>">
 			<button class="pv-nav-btn pv-prev" aria-label="<?php esc_attr_e( 'Previous video', 'pv-youtube-importer' ); ?>">&#8592; <?php esc_html_e( 'Prev', 'pv-youtube-importer' ); ?></button>
 			<span class="pv-nav-count"></span>

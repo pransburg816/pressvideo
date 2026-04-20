@@ -35,6 +35,7 @@ class PV_Video_Grid {
 				'desc'      => wp_trim_words( $post->post_content, 20 ),
 				'accent'    => pv_resolve_accent_color( $post->ID ),
 				'thumb'     => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '',
+				'duration'  => get_post_meta( $post->ID, '_pv_duration', true ) ?: '',
 			];
 		}
 
@@ -63,6 +64,9 @@ class PV_Video_Grid {
 		$embed_url = 'https://www.youtube.com/embed/' . $youtube_id;
 		$desc      = wp_trim_words( get_the_excerpt( $post ) ?: $post->post_content, 18 );
 
+		$cats     = get_the_terms( $post->ID, 'pv_category' );
+		$cat_name = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0]->name : '';
+
 		// Playlist JSON for offcanvas nav (scoped to this video).
 		$card_pl   = array_values( array_filter( $playlist, fn( $v ) => $v['youtubeId'] === $youtube_id ) );
 		$pl_json   = wp_json_encode( $card_pl ?: [
@@ -73,14 +77,17 @@ class PV_Video_Grid {
 		?>
 		<div class="pv-card <?php echo $thumb_url ? '' : 'pv-card--no-thumb'; ?>"
 		     style="--pv-accent:<?php echo esc_attr( $accent ); ?>;<?php if ( $thumb_url ) : ?> background-image: linear-gradient(to top right,rgba(0,0,0,.75),rgba(0,0,0,.05)),url(<?php echo esc_url( $thumb_url ); ?>);<?php endif; ?>">
+			<?php if ( $cat_name ) : ?>
+				<span class="pv-card__cat"><?php echo esc_html( $cat_name ); ?></span>
+			<?php endif; ?>
 			<span class="pv-card__circle" aria-hidden="true">
 				<span class="pv-card__circle-icon">&#9654;</span>
 			</span>
+			<?php if ( $duration ) : ?>
+				<span class="pv-card__duration"><?php echo esc_html( $duration ); ?></span>
+			<?php endif; ?>
 			<div class="pv-card__footer">
 				<div class="pv-card__title"><?php echo esc_html( $post->post_title ); ?></div>
-				<?php if ( $duration ) : ?>
-					<span class="pv-card__duration"><?php echo esc_html( $duration ); ?></span>
-				<?php endif; ?>
 			</div>
 			<div class="pv-card__hover-content">
 				<?php if ( $desc ) : ?>

@@ -6,7 +6,7 @@
 	'use strict';
 
 	const CANVAS_ID = 'pv-canvas';
-	let   canvas, panel, backdrop, closeBtn, titleEl, descEl, badgeEl, iframeHolder, navCount, prevBtn, nextBtn;
+	let   canvas, panel, backdrop, closeBtn, titleEl, descEl, badgeEl, iframeHolder, navCount, prevBtn, nextBtn, railEl;
 
 	let playlist   = [];
 	let current    = 0;
@@ -25,15 +25,13 @@
 		navCount    = canvas.querySelector('.pv-nav-count');
 		prevBtn     = canvas.querySelector('.pv-prev');
 		nextBtn     = canvas.querySelector('.pv-next');
+		railEl      = canvas.querySelector('.pv-rail');
 
-		// Trigger clicks — delegated to document.
 		document.addEventListener('click', onTriggerClick);
 
-		// Close controls.
 		if (closeBtn)  closeBtn.addEventListener('click',  close);
 		if (backdrop)  backdrop.addEventListener('click',  close);
 
-		// Keyboard.
 		document.addEventListener('keydown', function (e) {
 			if (!canvas.classList.contains('pv-open')) return;
 			if (e.key === 'Escape')      { e.preventDefault(); close(); }
@@ -41,7 +39,6 @@
 			if (e.key === 'ArrowLeft')   { e.preventDefault(); navigate(-1); }
 		});
 
-		// Nav buttons.
 		if (prevBtn) prevBtn.addEventListener('click', function () { navigate(-1); });
 		if (nextBtn) nextBtn.addEventListener('click', function () { navigate(1);  });
 	}
@@ -54,28 +51,28 @@
 		e.stopPropagation();
 
 		const data = {
-			videoId:  trigger.dataset.videoId   || '',
-			youtubeId:trigger.dataset.youtubeId || '',
-			embedUrl: trigger.dataset.embedUrl  || '',
-			title:    trigger.dataset.title     || '',
+			videoId:  trigger.dataset.videoId    || '',
+			youtubeId:trigger.dataset.youtubeId  || '',
+			embedUrl: trigger.dataset.embedUrl   || '',
+			title:    trigger.dataset.title      || '',
 			desc:     trigger.dataset.description || '',
-			accent:   trigger.dataset.accent    || '#4f46e5',
-			playlist: trigger.dataset.playlist  || '[]',
+			accent:   trigger.dataset.accent     || '#4f46e5',
+			playlist: trigger.dataset.playlist   || '[]',
 		};
 
-		// Parse the playlist and find the current index.
 		try {
 			playlist = JSON.parse(data.playlist);
 		} catch (_) {
-			playlist = [{ youtubeId: data.youtubeId, embedUrl: data.embedUrl, title: data.title, desc: data.desc, accent: data.accent }];
+			playlist = [];
 		}
 		if (!playlist.length) {
-			playlist = [{ youtubeId: data.youtubeId, embedUrl: data.embedUrl, title: data.title, desc: data.desc, accent: data.accent }];
+			playlist = [{ youtubeId: data.youtubeId, embedUrl: data.embedUrl, title: data.title, desc: data.desc, accent: data.accent, thumb: '', duration: '' }];
 		}
 
 		current = playlist.findIndex(function (v) { return v.youtubeId === data.youtubeId; });
 		if (current < 0) current = 0;
 
+		buildRail();
 		loadSlide(current);
 		open();
 	}
@@ -84,12 +81,7 @@
 		canvas.classList.add('pv-open');
 		canvas.setAttribute('aria-hidden', 'false');
 		document.body.style.overflow = 'hidden';
-
-		// Move focus inside panel.
-		if (closeBtn) {
-			requestAnimationFrame(function () { closeBtn.focus(); });
-		}
-
+		if (closeBtn) requestAnimationFrame(function () { closeBtn.focus(); });
 		canvas.dispatchEvent(new CustomEvent('pv:opened', { bubbles: true }));
 	}
 
@@ -104,31 +96,30 @@
 		const slide = playlist[index];
 		if (!slide) return;
 
-		// Update accent.
 		canvas.style.setProperty('--pv-accent', slide.accent || '#4f46e5');
 
-		// Update meta.
 		if (titleEl)  titleEl.textContent  = slide.title || '';
 		if (descEl)   descEl.textContent   = slide.desc  || '';
 		if (badgeEl)  badgeEl.textContent  = 'Video';
 
-		// Signal to lazy-video.js which URL to load.
 		if (iframeHolder) {
 			iframeHolder.dataset.embedUrl = slide.embedUrl || '';
 			delete iframeHolder.dataset.loaded;
 		}
 
-		// Nav controls.
 		updateNav();
+		updateRail(index);
 
 		canvas.dispatchEvent(new CustomEvent('pv:slide-changed', { bubbles: true, detail: { index, slide } }));
 	}
 
 	function navigate(delta) {
-		const next = current + delta;
-		if (next < 0 || next >= playlist.length) return;
-		current = next;
-		// Close current iframe first so lazy-video re-fires.
+		navigateTo(current + delta);
+	}
+
+	function navigateTo(index) {
+		if (index === current || index < 0 || index >= playlist.length) return;
+		current = index;
 		canvas.dispatchEvent(new CustomEvent('pv:closed', { bubbles: false }));
 		loadSlide(current);
 		canvas.dispatchEvent(new CustomEvent('pv:opened', { bubbles: false }));
@@ -142,6 +133,79 @@
 		}
 		if (prevBtn) prevBtn.disabled = (current === 0);
 		if (nextBtn) nextBtn.disabled = (current === playlist.length - 1);
+	}
+
+	// ── Playlist rail ────────────────────────────────────────────────
+
+	function esc(str) {
+		return String(str || '')
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
+	}
+
+	function buildRail() {
+		if (!railEl) return;
+		railEl.innerHTML = '';
+
+		if (playlist.length <= 1) {
+			railEl.style.display = 'none';
+			return;
+		}
+		railEl.style.display = '';
+
+		const heading = document.createElement('p');
+		heading.className = 'pv-rail__heading';
+		heading.textContent = 'Up Next';
+		railEl.appendChild(heading);
+
+		playlist.forEach(function (slide, i) {
+			const item = document.createElement('div');
+			item.className = 'pv-rail__item' + (i === current ? ' pv-rail__item--active' : '');
+			item.setAttribute('role', 'listitem');
+			item.setAttribute('tabindex', '0');
+			item.setAttribute('aria-label', slide.title || ('Video ' + (i + 1)));
+			item.setAttribute('aria-current', i === current ? 'true' : 'false');
+
+			const thumbSrc = slide.thumb || '';
+			const thumbHtml = thumbSrc
+				? '<img class="pv-rail__thumb" src="' + esc(thumbSrc) + '" alt="" loading="lazy">'
+				: '<div class="pv-rail__thumb pv-rail__thumb--placeholder"></div>';
+
+			const durHtml = slide.duration
+				? '<span class="pv-rail__dur">' + esc(slide.duration) + '</span>'
+				: '';
+
+			item.innerHTML = thumbHtml
+				+ '<div class="pv-rail__info">'
+				+ '<p class="pv-rail__title">' + esc(slide.title) + '</p>'
+				+ durHtml
+				+ '</div>';
+
+			item.addEventListener('click', (function (idx) {
+				return function () { navigateTo(idx); };
+			}(i)));
+
+			item.addEventListener('keydown', (function (idx) {
+				return function (e) {
+					if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigateTo(idx); }
+				};
+			}(i)));
+
+			railEl.appendChild(item);
+		});
+	}
+
+	function updateRail(index) {
+		if (!railEl || railEl.style.display === 'none') return;
+		railEl.querySelectorAll('.pv-rail__item').forEach(function (el, i) {
+			const active = (i === index);
+			el.classList.toggle('pv-rail__item--active', active);
+			el.setAttribute('aria-current', active ? 'true' : 'false');
+		});
+		const activeItem = railEl.querySelectorAll('.pv-rail__item')[index];
+		if (activeItem) activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 	}
 
 	if (document.readyState === 'loading') {

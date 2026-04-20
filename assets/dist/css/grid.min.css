@@ -111,13 +111,48 @@
 	overflow: hidden;
 }
 
+/* ── Category badge — top left, always visible ──────────────────────── */
+.pv-card__cat {
+	position: absolute;
+	top: 12px;
+	left: 12px;
+	padding: 3px 10px;
+	background: var(--pv-accent);
+	color: #fff;
+	font-size: 0.62rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	border-radius: 20px;
+	z-index: 3;
+	pointer-events: none;
+	line-height: 1.4;
+	backdrop-filter: blur(2px);
+	transition: opacity 0.2s ease;
+}
+
+/* ── Duration chip — bottom right, always visible ───────────────────── */
 .pv-card__duration {
-	display: block;
-	font-size: 0.7rem;
-	color: rgba(255,255,255,0.65);
-	font-weight: 500;
-	margin-top: 3px;
-	letter-spacing: 0.02em;
+	position: absolute;
+	bottom: 12px;
+	right: 12px;
+	padding: 2px 7px;
+	background: rgba(0,0,0,0.72);
+	color: #fff;
+	font-size: 0.68rem;
+	font-weight: 600;
+	border-radius: 4px;
+	z-index: 3;
+	pointer-events: none;
+	letter-spacing: 0.01em;
+	line-height: 1.5;
+	transition: opacity 0.2s ease;
+}
+
+/* Both chips fade out when hover content takes over */
+.pv-card:hover .pv-card__cat,
+.pv-card:hover .pv-card__duration {
+	opacity: 0;
 }
 
 /* ── Hover content — slides up, appears over the filled circle ───────── */
