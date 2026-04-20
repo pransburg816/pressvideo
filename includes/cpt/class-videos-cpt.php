@@ -11,6 +11,7 @@ class PV_Videos_CPT {
 		add_action( 'init', [ $this, 'register_cpt' ] );
 		add_filter( 'manage_pv_youtube_posts_columns',       [ $this, 'add_color_column' ] );
 		add_action( 'manage_pv_youtube_posts_custom_column', [ $this, 'render_color_column' ], 10, 2 );
+		add_action( 'pre_get_posts', [ $this, 'fix_archive_pagination' ], 99 );
 	}
 
 	public function register_cpt(): void {
@@ -41,6 +42,15 @@ class PV_Videos_CPT {
 			'menu_position'       => 20,
 			'capability_type'     => 'post',
 		] );
+	}
+
+	public function fix_archive_pagination( WP_Query $query ): void {
+		if ( is_admin() || ! $query->is_main_query() ) return;
+		if ( ! $query->is_post_type_archive( 'pv_youtube' ) ) return;
+		// IAC archive-pagination-filtering.php sets offset=0 on all CPT archives because
+		// WP_Query::get() returns '' for unset vars and null !== '' is true.
+		// An explicit offset=0 causes WP to ignore the paged calculation (always LIMIT 0,N).
+		unset( $query->query_vars['offset'] );
 	}
 
 	public function add_color_column( array $columns ): array {

@@ -36,6 +36,8 @@ const FILES = [
 	'includes/cpt/class-videos-cpt.php',
 	'includes/cpt/class-video-taxonomies.php',
 	'includes/cpt/class-video-meta.php',
+	// PHP — tier
+	'includes/class-tier.php',
 	// PHP — display
 	'includes/display/class-shortcodes.php',
 	'includes/display/class-offcanvas.php',
