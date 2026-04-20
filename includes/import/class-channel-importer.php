@@ -106,11 +106,21 @@ class PV_Channel_Importer {
 		update_post_meta( $post_id, '_pv_channel_id',   sanitize_text_field( $channel_id ) );
 		update_post_meta( $post_id, '_pv_imported_at',  time() );
 
-		// Fetch duration + view count as a second API call.
+		// Fetch duration, view count, tags, and YouTube category.
 		$details = $this->api->get_video_details( $youtube_id );
 		if ( ! is_wp_error( $details ) ) {
 			update_post_meta( $post_id, '_pv_duration',   $details['duration'] );
 			update_post_meta( $post_id, '_pv_view_count', $details['view_count'] );
+
+			// Auto-assign YouTube tags → pv_tag terms.
+			if ( ! empty( $details['tags'] ) ) {
+				wp_set_object_terms( $post_id, $details['tags'], 'pv_tag' );
+			}
+
+			// Auto-assign YouTube category → pv_category term.
+			if ( ! empty( $details['category_name'] ) ) {
+				wp_set_object_terms( $post_id, [ $details['category_name'] ], 'pv_category' );
+			}
 		}
 
 		// Sideload thumbnail as featured image.

@@ -59,6 +59,7 @@ const FILES = [
 	'includes/admin/class-import-ui.php',
 	'includes/admin/class-settings-page.php',
 	// PHP — import
+	'includes/import/class-youtube-api.php',
 	'includes/import/class-channel-importer.php',
 	// CSS
 	'assets/dist/css/admin.min.css',

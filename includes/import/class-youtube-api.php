@@ -87,13 +87,13 @@ class PV_YouTube_API {
 	}
 
 	/**
-	 * Get detailed info for a single video (duration, view count).
+	 * Get detailed info for a single video (duration, view count, tags, category).
 	 *
 	 * @return array|WP_Error
 	 */
 	public function get_video_details( string $video_id ): array|WP_Error {
 		$response = $this->request( 'videos', [
-			'part' => 'contentDetails,statistics',
+			'part' => 'snippet,contentDetails,statistics',
 			'id'   => $video_id,
 		] );
 
@@ -104,10 +104,40 @@ class PV_YouTube_API {
 			return new WP_Error( 'pv_video_not_found', __( 'Video not found.', 'pv-youtube-importer' ) );
 		}
 
+		$snippet     = $item['snippet'] ?? [];
+		$category_id = (string) ( $snippet['categoryId'] ?? '' );
+
 		return [
-			'duration'   => $this->parse_duration( $item['contentDetails']['duration'] ?? '' ),
-			'view_count' => absint( $item['statistics']['viewCount'] ?? 0 ),
+			'duration'      => $this->parse_duration( $item['contentDetails']['duration'] ?? '' ),
+			'view_count'    => absint( $item['statistics']['viewCount'] ?? 0 ),
+			'tags'          => array_values( array_filter( array_map(
+				'sanitize_text_field',
+				(array) ( $snippet['tags'] ?? [] )
+			) ) ),
+			'category_name' => self::youtube_category_name( $category_id ),
 		];
+	}
+
+	/** Map a YouTube categoryId to a human-readable category name. */
+	public static function youtube_category_name( string $id ): string {
+		$map = [
+			'1'  => 'Film & Animation',
+			'2'  => 'Autos & Vehicles',
+			'10' => 'Music',
+			'15' => 'Pets & Animals',
+			'17' => 'Sports',
+			'19' => 'Travel & Events',
+			'20' => 'Gaming',
+			'22' => 'People & Blogs',
+			'23' => 'Comedy',
+			'24' => 'Entertainment',
+			'25' => 'News & Politics',
+			'26' => 'Howto & Style',
+			'27' => 'Education',
+			'28' => 'Science & Technology',
+			'29' => 'Nonprofits & Activism',
+		];
+		return $map[ $id ] ?? '';
 	}
 
 	/**
