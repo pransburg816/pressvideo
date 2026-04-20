@@ -127,23 +127,6 @@ class PV_Dashboard_Page {
 	public function render_page(): void {
 		if ( ! current_user_can( 'manage_options' ) ) return;
 
-		// Temporary diagnostic — remove after debugging shortcode issue
-		$diag_settings = get_option( 'pv_settings', [] );
-		$diag_cpt      = post_type_exists( 'pv_youtube' );
-		$diag_sc       = shortcode_exists( 'pv_video_grid' );
-		$diag_query    = new WP_Query( [ 'post_type' => 'pv_youtube', 'posts_per_page' => 1, 'fields' => 'ids' ] );
-		$diag_count    = $diag_query->found_posts;
-		echo '<div class="notice notice-warning" style="padding:10px;margin:10px 0;font-family:monospace;">';
-		echo '<strong>PV Debug:</strong> ';
-		echo 'CPT registered: ' . ( $diag_cpt ? '✓ YES' : '✗ NO' ) . ' | ';
-		echo 'Shortcodes: ' . ( $diag_sc ? '✓ YES' : '✗ NO' ) . ' | ';
-		echo 'Videos found: ' . $diag_count . ' | ';
-		echo 'display_mode: ' . esc_html( $diag_settings['display_mode'] ?? 'NOT SET' ) . ' | ';
-		echo 'pv_settings type: ' . gettype( $diag_settings ) . ' | ';
-		echo 'PHP: ' . PHP_VERSION . ' | ';
-		echo 'PV_VERSION: ' . ( defined( 'PV_VERSION' ) ? PV_VERSION : 'UNDEFINED' );
-		echo '</div>';
-
 		$settings      = get_option( 'pv_settings', [] );
 		$tier          = PV_Tier::current();
 		$limit         = PV_Tier::get_video_limit();

@@ -31,9 +31,9 @@ const PLUGIN_LOCAL  = __dirname;
 const REMOTE_PLUGIN = '/devsite.iac-intl.com/public_html/wp-content/plugins/pv-youtube-importer';
 
 const SKIP = new Set([
-	'node_modules', '.git', '.env', '.gitignore',
-	'deploy.js', 'deploy-ui.js', 'package.json', 'package-lock.json',
-	'session-log', 'CLAUDE.md', 'Site-Resources',
+	'node_modules', '.git', '.gitattributes', '.gitignore',
+	'.env', 'deploy.js', 'deploy-ui.js', 'package.json', 'package-lock.json',
+	'session-log', 'CLAUDE.md', 'Site-Resources', 'languages',
 ]);
 
 async function deployDir(client, localDir, remoteDir) {
