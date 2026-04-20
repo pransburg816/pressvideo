@@ -1,0 +1,13 @@
+{
+  "name": "pressvideo",
+  "version": "1.0.1",
+  "description": "PressVideo WordPress plugin — auto-imports YouTube videos into a custom post type.",
+  "private": true,
+  "scripts": {
+    "deploy": "node deploy.js",
+    "deploy:ui": "node deploy-ui.js"
+  },
+  "devDependencies": {
+    "basic-ftp": "^5.0.5"
+  }
+}
