@@ -11,7 +11,7 @@ class PV_Tier {
 		// Phase 3: replace with actual Freemius check.
 		// e.g. if ( pv_fs()->is_plan('platinum') ) return 'platinum';
 		//      if ( pv_fs()->is_plan('gold') )     return 'gold';
-		return 'silver';
+		return 'gold'; // DEV: bumped for UI testing; revert before launch
 	}
 
 	public static function meets( string $required ): bool {

@@ -69,6 +69,7 @@ const FILES = [
 	'assets/dist/js/admin-color-picker.min.js',
 	'assets/dist/js/offcanvas.min.js',
 	'assets/dist/js/lazy-video.min.js',
+	'assets/dist/js/archive-filter.min.js',
 ];
 
 async function main() {

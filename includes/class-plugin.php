@@ -125,6 +125,16 @@ class PV_Plugin {
 			PV_VERSION,
 			true
 		);
+
+		if ( is_post_type_archive( 'pv_youtube' ) ) {
+			wp_enqueue_script(
+				'pv-archive-filter',
+				PV_PLUGIN_URL . 'assets/dist/js/archive-filter.min.js',
+				[],
+				PV_VERSION,
+				true
+			);
+		}
 	}
 
 	public function enqueue_admin_assets( string $hook ): void {

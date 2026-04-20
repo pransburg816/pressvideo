@@ -21,8 +21,43 @@ if ( 'offcanvas' === $pv_display ) {
 	do_action( 'pv_player_enqueued' );
 }
 
-// Renders a grid card for the current post in The Loop (IAC hero-box pattern).
-$render_card = function() use ( $pv_display ) {
+// Filter terms (pv_category pills — grid/compact only)
+$pv_filter_terms = [];
+if ( in_array( $pv_layout, [ 'grid', 'compact', 'featured' ], true ) ) {
+	$_terms = get_terms( [
+		'taxonomy'   => 'pv_category',
+		'hide_empty' => true,
+		'orderby'    => 'count',
+		'order'      => 'DESC',
+	] );
+	if ( $_terms && ! is_wp_error( $_terms ) ) {
+		$pv_filter_terms = $_terms;
+	}
+}
+
+// Build playlist JSON for offcanvas rail from the current page's posts.
+$pv_playlist_json = '[]';
+if ( 'offcanvas' === $pv_display && ! empty( $GLOBALS['wp_query']->posts ) ) {
+	$_pv_pl = [];
+	foreach ( (array) $GLOBALS['wp_query']->posts as $_p ) {
+		$_yt = get_post_meta( $_p->ID, '_pv_youtube_id', true );
+		if ( ! $_yt ) continue;
+		$_pv_pl[] = [
+			'id'       => $_p->ID,
+			'youtubeId'=> $_yt,
+			'embedUrl' => 'https://www.youtube.com/embed/' . $_yt,
+			'title'    => $_p->post_title,
+			'desc'     => wp_trim_words( $_p->post_excerpt ?: $_p->post_content, 20 ),
+			'accent'   => pv_resolve_accent_color( $_p->ID ),
+			'thumb'    => get_the_post_thumbnail_url( $_p->ID, 'medium' ) ?: '',
+			'duration' => get_post_meta( $_p->ID, '_pv_duration', true ) ?: '',
+		];
+	}
+	$pv_playlist_json = wp_json_encode( $_pv_pl );
+}
+
+// Renders a grid card for the current post in The Loop.
+$render_card = function() use ( $pv_display, $pv_playlist_json ) {
 	$youtube_id = get_post_meta( get_the_ID(), '_pv_youtube_id', true );
 	if ( ! $youtube_id && 'offcanvas' === $pv_display ) return;
 	$accent    = pv_resolve_accent_color( get_the_ID() );
@@ -32,17 +67,25 @@ $render_card = function() use ( $pv_display ) {
 	$duration  = get_post_meta( get_the_ID(), '_pv_duration', true );
 	$thumb_url = get_the_post_thumbnail_url( get_the_ID(), 'medium' ) ?: '';
 	$excerpt   = wp_trim_words( get_the_excerpt(), 18 );
+	$cats      = get_the_terms( get_the_ID(), 'pv_category' );
+	$cat       = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0] : null;
+	$cat_name  = $cat ? $cat->name : '';
+	$cat_slug  = $cat ? $cat->slug : '';
 	?>
 	<div class="pv-card <?php echo $thumb_url ? '' : 'pv-card--no-thumb'; ?>"
+	     data-category="<?php echo esc_attr( $cat_slug ); ?>"
 	     style="--pv-accent:<?php echo esc_attr( $accent ); ?>;<?php if ( $thumb_url ) : ?> background-image: linear-gradient(to top right,rgba(0,0,0,.75),rgba(0,0,0,.05)),url(<?php echo esc_url( $thumb_url ); ?>);<?php endif; ?>">
+		<?php if ( $cat_name ) : ?>
+			<span class="pv-card__cat"><?php echo esc_html( $cat_name ); ?></span>
+		<?php endif; ?>
 		<span class="pv-card__circle" aria-hidden="true">
 			<span class="pv-card__circle-icon">&#9654;</span>
 		</span>
+		<?php if ( $duration ) : ?>
+			<span class="pv-card__duration"><?php echo esc_html( $duration ); ?></span>
+		<?php endif; ?>
 		<div class="pv-card__footer">
 			<div class="pv-card__title"><?php the_title(); ?></div>
-			<?php if ( $duration ) : ?>
-				<span class="pv-card__duration"><?php echo esc_html( $duration ); ?></span>
-			<?php endif; ?>
 		</div>
 		<div class="pv-card__hover-content">
 			<?php if ( $excerpt ) : ?>
@@ -55,6 +98,7 @@ $render_card = function() use ( $pv_display ) {
 				        data-title="<?php echo esc_attr( get_the_title() ); ?>"
 				        data-description="<?php echo esc_attr( $excerpt ); ?>"
 				        data-accent="<?php echo esc_attr( $accent ); ?>"
+				        data-playlist="<?php echo esc_attr( $pv_playlist_json ); ?>"
 				        aria-label="<?php echo esc_attr( sprintf( __( 'Watch %s', 'pv-youtube-importer' ), get_the_title() ) ); ?>">
 					&#9654; <?php esc_html_e( 'Watch Now', 'pv-youtube-importer' ); ?>
 				</button>
@@ -96,6 +140,21 @@ get_header();
 
 		<?php if ( have_posts() ) : ?>
 
+			<?php if ( count( $pv_filter_terms ) > 1 ) : ?>
+			<div class="pv-filter-bar" role="navigation" aria-label="<?php esc_attr_e( 'Filter videos by category', 'pv-youtube-importer' ); ?>">
+				<button class="pv-filter-btn pv-filter-btn--active" data-filter="*">
+					<?php esc_html_e( 'All', 'pv-youtube-importer' ); ?>
+					<span class="pv-filter-btn__count"><?php echo esc_html( $total_videos ); ?></span>
+				</button>
+				<?php foreach ( $pv_filter_terms as $term ) : ?>
+					<button class="pv-filter-btn" data-filter="<?php echo esc_attr( $term->slug ); ?>">
+						<?php echo esc_html( $term->name ); ?>
+						<span class="pv-filter-btn__count"><?php echo esc_html( $term->count ); ?></span>
+					</button>
+				<?php endforeach; ?>
+			</div>
+			<?php endif; ?>
+
 			<?php if ( 'featured' === $pv_layout ) :
 				the_post();
 				$f_yt     = get_post_meta( get_the_ID(), '_pv_youtube_id', true );
@@ -118,7 +177,8 @@ get_header();
 							        data-embed-url="<?php echo esc_attr( $f_embed ); ?>"
 							        data-title="<?php echo esc_attr( get_the_title() ); ?>"
 							        data-description="<?php echo esc_attr( wp_trim_words( get_the_excerpt(), 20 ) ); ?>"
-							        data-accent="<?php echo esc_attr( $f_accent ); ?>">
+							        data-accent="<?php echo esc_attr( $f_accent ); ?>"
+							        data-playlist="<?php echo esc_attr( $pv_playlist_json ); ?>">
 								&#9654; <?php esc_html_e( 'Watch Now', 'pv-youtube-importer' ); ?>
 							</button>
 						<?php endif; ?>
@@ -163,7 +223,8 @@ get_header();
 										        data-embed-url="<?php echo esc_attr( $l_embed ); ?>"
 										        data-title="<?php echo esc_attr( get_the_title() ); ?>"
 										        data-description="<?php echo esc_attr( wp_trim_words( get_the_excerpt(), 20 ) ); ?>"
-										        data-accent="<?php echo esc_attr( $l_accent ); ?>">
+										        data-accent="<?php echo esc_attr( $l_accent ); ?>"
+										        data-playlist="<?php echo esc_attr( $pv_playlist_json ); ?>">
 											&#9654; <?php esc_html_e( 'Watch', 'pv-youtube-importer' ); ?>
 										</button>
 									</div>

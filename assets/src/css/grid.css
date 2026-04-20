@@ -233,6 +233,64 @@
 	align-self: flex-start;
 }
 
+/* ── Category filter bar ────────────────────────────────────────────── */
+.pv-filter-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 0 0 24px;
+}
+
+.pv-filter-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 16px;
+	background: transparent;
+	border: 1.5px solid rgba(0,0,0,0.13);
+	border-radius: 20px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #64748b;
+	cursor: pointer;
+	transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s;
+	line-height: 1.4;
+	font-family: inherit;
+	white-space: nowrap;
+}
+.pv-filter-btn:hover {
+	border-color: var(--pv-accent);
+	color: var(--pv-accent);
+	transform: translateY(-1px);
+}
+.pv-filter-btn--active {
+	background: var(--pv-accent);
+	border-color: var(--pv-accent);
+	color: #fff;
+}
+.pv-filter-btn--active:hover {
+	transform: none;
+}
+
+.pv-filter-btn__count {
+	font-size: 0.68rem;
+	font-weight: 700;
+	opacity: 0.65;
+	background: rgba(0,0,0,0.1);
+	padding: 1px 6px;
+	border-radius: 10px;
+	line-height: 1.4;
+}
+.pv-filter-btn--active .pv-filter-btn__count {
+	background: rgba(255,255,255,0.22);
+	opacity: 1;
+}
+
+/* Cards hidden by filter */
+.pv-card[hidden] {
+	display: none;
+}
+
 /* ── No-videos fallback ─────────────────────────────────────────────── */
 .pv-no-videos {
 	color: #64748b;
