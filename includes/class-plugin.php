@@ -30,9 +30,11 @@ class PV_Plugin {
 		require_once PV_PLUGIN_DIR . 'includes/display/class-shortcodes.php';
 		require_once PV_PLUGIN_DIR . 'includes/display/class-template-tags.php';
 
-		// Import — only needed in admin or WP-Cron.
+		// YouTube API class also needed on front end (broadcast layout playlist fetch).
+		require_once PV_PLUGIN_DIR . 'includes/import/class-youtube-api.php';
+
+		// Import — channel importer only needed in admin or WP-Cron.
 		if ( is_admin() || wp_doing_cron() ) {
-			require_once PV_PLUGIN_DIR . 'includes/import/class-youtube-api.php';
 			require_once PV_PLUGIN_DIR . 'includes/import/class-channel-importer.php';
 		}
 
