@@ -62,7 +62,7 @@ class PV_Video_Grid {
 		$thumb_url = get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '';
 		$duration  = get_post_meta( $post->ID, '_pv_duration', true );
 		$embed_url = 'https://www.youtube.com/embed/' . $youtube_id;
-		$desc      = wp_trim_words( get_the_excerpt( $post ) ?: $post->post_content, 18 );
+		$desc      = wp_trim_words( get_the_excerpt( $post ) ?: $post->post_content, 30 );
 
 		$cats     = get_the_terms( $post->ID, 'pv_category' );
 		$cat_name = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0]->name : '';
@@ -80,9 +80,6 @@ class PV_Video_Grid {
 			<?php if ( $cat_name ) : ?>
 				<span class="pv-card__cat"><?php echo esc_html( $cat_name ); ?></span>
 			<?php endif; ?>
-			<span class="pv-card__circle" aria-hidden="true">
-				<span class="pv-card__circle-icon">&#9654;</span>
-			</span>
 			<?php if ( $duration ) : ?>
 				<span class="pv-card__duration"><?php echo esc_html( $duration ); ?></span>
 			<?php endif; ?>
@@ -92,6 +89,7 @@ class PV_Video_Grid {
 			<div class="pv-card__hover-content">
 				<?php if ( $desc ) : ?>
 					<p class="pv-card__hover-excerpt"><?php echo esc_html( $desc ); ?></p>
+					<a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="pv-card__read-more">Read more &rarr;</a>
 				<?php endif; ?>
 				<?php if ( 'offcanvas' === $display ) : ?>
 					<button class="pv-trigger pv-card__watch-btn"
@@ -103,13 +101,13 @@ class PV_Video_Grid {
 					        data-description="<?php echo esc_attr( $desc ); ?>"
 					        data-accent="<?php echo esc_attr( $accent ); ?>"
 					        data-playlist="<?php echo esc_attr( $pl_json ); ?>">
-						&#9654; <?php esc_html_e( 'Watch Now', 'pv-youtube-importer' ); ?>
+						<svg class="pv-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> <?php esc_html_e( 'Watch Now', 'pv-youtube-importer' ); ?>
 					</button>
 				<?php else : ?>
 					<a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>"
 					   class="pv-card__watch-btn"
 					   aria-label="<?php echo esc_attr( sprintf( __( 'Watch %s', 'pv-youtube-importer' ), $post->post_title ) ); ?>">
-						&#9654; <?php esc_html_e( 'Watch Video', 'pv-youtube-importer' ); ?>
+						<svg class="pv-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> <?php esc_html_e( 'Watch Video', 'pv-youtube-importer' ); ?>
 					</a>
 				<?php endif; ?>
 			</div>

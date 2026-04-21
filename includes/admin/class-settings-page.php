@@ -32,24 +32,23 @@ class PV_Settings_Page {
 	}
 
 	public function sanitize_settings( array $input ): array {
-		$clean = [];
-		$clean['api_key']        = sanitize_text_field( $input['api_key'] ?? '' );
-		$clean['channel_id']     = sanitize_text_field( $input['channel_id'] ?? '' );
-		$clean['default_accent'] = sanitize_hex_color( $input['default_accent'] ?? '' ) ?: '#4f46e5';
-		$clean['display_mode']      = in_array( $input['display_mode'] ?? '', [ 'offcanvas', 'page' ], true )
-			? $input['display_mode'] : 'offcanvas';
-		$clean['watch_page_layout'] = in_array( $input['watch_page_layout'] ?? '', [ 'hero-top', 'hero-split', 'theater' ], true )
-			? $input['watch_page_layout'] : 'hero-top';
-
-		// Dashboard-only settings — preserve current DB value when not present in input
-		// (sanitize_settings fires on every update_option call, including Dashboard AJAX saves).
 		$existing = get_option( 'pv_settings', [] );
-		$clean['archive_layout'] = in_array( $input['archive_layout'] ?? '', [ 'grid', 'list', 'featured', 'compact' ], true )
-			? $input['archive_layout']
-			: ( $existing['archive_layout'] ?? 'grid' );
-		$clean['content_width'] = in_array( $input['content_width'] ?? '', [ 'full', 'wide', 'medium', 'narrow' ], true )
-			? $input['content_width']
-			: ( $existing['content_width'] ?? 'full' );
+		// Start from existing so customizer-managed keys (hero, aside, etc.) are never wiped by this form.
+		$clean = is_array( $existing ) ? $existing : [];
+
+		$clean['api_key']    = sanitize_text_field( $input['api_key']    ?? '' );
+		$clean['channel_id'] = sanitize_text_field( $input['channel_id'] ?? '' );
+
+		// Overwrite only the keys that this settings page owns (sent via hidden inputs).
+		$clean['default_accent']    = sanitize_hex_color( $input['default_accent'] ?? '' ) ?: ( $existing['default_accent'] ?? '#4f46e5' );
+		$clean['display_mode']      = in_array( $input['display_mode'] ?? '', [ 'offcanvas', 'page' ], true )
+			? $input['display_mode'] : ( $existing['display_mode'] ?? 'offcanvas' );
+		$clean['watch_page_layout'] = in_array( $input['watch_page_layout'] ?? '', [ 'hero-top', 'hero-split', 'theater' ], true )
+			? $input['watch_page_layout'] : ( $existing['watch_page_layout'] ?? 'hero-top' );
+		$clean['archive_layout']    = in_array( $input['archive_layout'] ?? '', [ 'grid', 'list', 'featured', 'compact', 'wall', 'spotlight', 'broadcast' ], true )
+			? $input['archive_layout'] : ( $existing['archive_layout'] ?? 'grid' );
+		$clean['content_width']     = in_array( $input['content_width'] ?? '', [ 'full', 'wide', 'medium', 'narrow' ], true )
+			? $input['content_width'] : ( $existing['content_width'] ?? 'full' );
 
 		return $clean;
 	}
@@ -82,22 +81,49 @@ class PV_Settings_Page {
 
 			<form method="post" action="options.php">
 				<?php settings_fields( 'pv_settings_group' ); ?>
-				<!-- Preserve display_mode and watch_page_layout so they survive a settings save -->
-				<input type="hidden" name="pv_settings[display_mode]"      value="<?php echo esc_attr( $settings['display_mode'] ?? 'offcanvas' ); ?>">
+				<!-- Preserve values managed by Dashboard / Live Preview so a settings save doesn't wipe them -->
+				<input type="hidden" name="pv_settings[display_mode]"      value="<?php echo esc_attr( $settings['display_mode']      ?? 'offcanvas' ); ?>">
 				<input type="hidden" name="pv_settings[watch_page_layout]" value="<?php echo esc_attr( $settings['watch_page_layout'] ?? 'hero-top' ); ?>">
+				<input type="hidden" name="pv_settings[default_accent]"    value="<?php echo esc_attr( $settings['default_accent']    ?? '#4f46e5' ); ?>">
+				<input type="hidden" name="pv_settings[archive_layout]"    value="<?php echo esc_attr( $settings['archive_layout']    ?? 'grid' ); ?>">
+				<input type="hidden" name="pv_settings[content_width]"     value="<?php echo esc_attr( $settings['content_width']     ?? '' ); ?>">
 
 				<!-- YouTube Connection -->
 				<div class="pv-card">
 					<div class="pv-card__head">
-						<div class="pv-card__icon">
-							<span class="dashicons dashicons-admin-network"></span>
-						</div>
+						<div class="pv-card__icon"><span class="dashicons dashicons-admin-network"></span></div>
 						<div class="pv-card__head-text">
 							<h2><?php esc_html_e( 'YouTube Connection', 'pv-youtube-importer' ); ?></h2>
 							<p><?php esc_html_e( 'API credentials used for importing and fetching video data.', 'pv-youtube-importer' ); ?></p>
 						</div>
 					</div>
 					<div class="pv-card__body">
+
+						<!-- API Key instructions -->
+						<div class="pv-api-instructions">
+							<div class="pv-api-instructions__head">
+								<span class="dashicons dashicons-info-outline"></span>
+								<strong><?php esc_html_e( 'How to get your YouTube API Key', 'pv-youtube-importer' ); ?></strong>
+							</div>
+							<ol class="pv-api-instructions__steps">
+								<li><?php printf(
+									/* translators: link to Google Cloud Console */
+									wp_kses( __( 'Go to the <a href="%s" target="_blank" rel="noopener">Google Cloud Console</a> and sign in with your Google account.', 'pv-youtube-importer' ), [ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ] ] ),
+									'https://console.cloud.google.com/'
+								); ?></li>
+								<li><?php esc_html_e( 'Create a new project (or select an existing one) from the top navigation bar.', 'pv-youtube-importer' ); ?></li>
+								<li><?php printf(
+									wp_kses( __( 'Open the <a href="%s" target="_blank" rel="noopener">API Library</a>, search for <strong>YouTube Data API v3</strong>, and click <strong>Enable</strong>.', 'pv-youtube-importer' ), [ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ], 'strong' => [] ] ),
+									'https://console.cloud.google.com/apis/library'
+								); ?></li>
+								<li><?php printf(
+									wp_kses( __( 'Go to <a href="%s" target="_blank" rel="noopener">Credentials</a>, click <strong>Create Credentials → API key</strong>, and copy the generated key.', 'pv-youtube-importer' ), [ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ], 'strong' => [] ] ),
+									'https://console.cloud.google.com/apis/credentials'
+								); ?></li>
+								<li><?php esc_html_e( 'Paste the key into the field below and save. It\'s recommended to restrict the key to the YouTube Data API v3 only.', 'pv-youtube-importer' ); ?></li>
+							</ol>
+						</div>
+
 						<div class="pv-field-rows">
 
 							<div class="pv-field-row">
@@ -126,42 +152,14 @@ class PV_Settings_Page {
 									       class="regular-text"
 									       placeholder="UCxxxxxxxxxxxxxxxxxxxxxxxxx" />
 									<p class="pv-field-row__desc">
-										<?php esc_html_e( 'Your YouTube Channel ID (starts with UC) or full channel URL.', 'pv-youtube-importer' ); ?>
+										<?php printf(
+											wp_kses( __( 'Your YouTube Channel ID (starts with <code>UC</code>). Find it at <a href="%s" target="_blank" rel="noopener">youtube.com/account_advanced</a>.', 'pv-youtube-importer' ), [ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ], 'code' => [] ] ),
+											'https://www.youtube.com/account_advanced'
+										); ?>
 									</p>
 								</div>
 							</div>
 
-						</div>
-					</div>
-				</div>
-
-				<!-- Appearance -->
-				<div class="pv-card">
-					<div class="pv-card__head">
-						<div class="pv-card__icon">
-							<span class="dashicons dashicons-art"></span>
-						</div>
-						<div class="pv-card__head-text">
-							<h2><?php esc_html_e( 'Appearance', 'pv-youtube-importer' ); ?></h2>
-							<p><?php esc_html_e( 'Default accent color for the player, grid, and tag pills.', 'pv-youtube-importer' ); ?></p>
-						</div>
-					</div>
-					<div class="pv-card__body">
-						<div class="pv-field-rows">
-							<div class="pv-field-row">
-								<div class="pv-field-row__label">
-									<label for="pv_default_accent"><?php esc_html_e( 'Accent Color', 'pv-youtube-importer' ); ?></label>
-								</div>
-								<div class="pv-field-row__control">
-									<input type="text" name="pv_settings[default_accent]"
-									       id="pv_default_accent"
-									       value="<?php echo esc_attr( $settings['default_accent'] ?? '#4f46e5' ); ?>"
-									       class="pv-color-picker" />
-									<p class="pv-field-row__desc">
-										<?php esc_html_e( 'Fallback accent used when no per-video or taxonomy color is set.', 'pv-youtube-importer' ); ?>
-									</p>
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>

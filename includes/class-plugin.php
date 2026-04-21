@@ -41,6 +41,7 @@ class PV_Plugin {
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-settings-page.php';
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-import-ui.php';
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-dashboard-page.php';
+			require_once PV_PLUGIN_DIR . 'includes/admin/class-customizer-page.php';
 		}
 	}
 
@@ -62,6 +63,7 @@ class PV_Plugin {
 			( new PV_Settings_Page() )->register();
 			( new PV_Import_UI() )->register();
 			( new PV_Dashboard_Page() )->register();
+			( new PV_Customizer_Page() )->register();
 		}
 
 		add_action( 'wp_enqueue_scripts',    [ $this, 'enqueue_frontend_assets' ] );
@@ -118,6 +120,9 @@ class PV_Plugin {
 			PV_VERSION,
 			true
 		);
+		wp_localize_script( 'pv-offcanvas', 'pvOffcanvas', [
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+		] );
 		wp_enqueue_script(
 			'pv-lazy-video',
 			PV_PLUGIN_URL . 'assets/dist/js/lazy-video.min.js',

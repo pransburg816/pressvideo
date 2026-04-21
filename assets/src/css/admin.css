@@ -519,3 +519,234 @@
 	.pv-field-row { flex-direction: column; gap: 6px; }
 	.pv-field-row__label { flex: none; padding-top: 0; }
 }
+
+/* ── Dashboard: 6-stat row ──────────────────────────────────────── */
+.pv-stats-row--6 {
+	grid-template-columns: repeat(6, 1fr);
+}
+.pv-stat-card__cap {
+	font-size: 0.65em;
+	opacity: 0.55;
+	font-weight: 500;
+}
+.pv-stat-card__sub {
+	font-size: 0.67rem;
+	color: #6b7280;
+	margin-top: 3px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* ── Page header actions ────────────────────────────────────────── */
+.pv-page-header__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.pv-page-header__actions .button .dashicons {
+	font-size: 14px;
+	width: 14px;
+	height: 14px;
+	margin-right: 3px;
+}
+
+/* ── Card head action slot ──────────────────────────────────────── */
+.pv-card__head-action {
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+/* ── Flush card body (no padding) ───────────────────────────────── */
+.pv-card__body--flush {
+	padding: 0 !important;
+}
+
+/* ── Recent Videos list ─────────────────────────────────────────── */
+.pv-recent-videos {
+	display: flex;
+	flex-direction: column;
+}
+
+.pv-rv-row {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 10px 20px;
+	border-bottom: 1px solid #f0f0f1;
+	transition: background 0.15s;
+}
+.pv-rv-row:last-child { border-bottom: none; }
+.pv-rv-row:hover { background: #f9fafb; }
+
+.pv-rv-thumb {
+	position: relative;
+	flex-shrink: 0;
+	width: 80px;
+	height: 45px;
+	border-radius: 5px;
+	overflow: hidden;
+	background: #f1f5f9;
+}
+.pv-rv-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+.pv-rv-thumb__placeholder {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #cbd5e1;
+}
+.pv-rv-dur {
+	position: absolute;
+	bottom: 3px;
+	right: 3px;
+	background: rgba(0,0,0,0.72);
+	color: #fff;
+	font-size: 0.6rem;
+	font-weight: 600;
+	padding: 1px 4px;
+	border-radius: 3px;
+	line-height: 1.4;
+}
+
+.pv-rv-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.pv-rv-title {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #1e293b;
+	text-decoration: none;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+}
+.pv-rv-title:hover { color: #4f46e5; }
+
+.pv-rv-meta {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.72rem;
+}
+.pv-rv-cat {
+	background: color-mix(in srgb, var(--pv-accent, #4f46e5) 12%, transparent);
+	color: var(--pv-accent, #4f46e5);
+	padding: 1px 8px;
+	border-radius: 10px;
+	font-weight: 700;
+	font-size: 0.66rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.pv-rv-date { color: #94a3b8; }
+
+.pv-rv-actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-shrink: 0;
+}
+.pv-rv-yt-link,
+.pv-rv-view-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 6px;
+	text-decoration: none;
+	color: #94a3b8;
+	transition: background 0.15s, color 0.15s;
+}
+.pv-rv-yt-link:hover  { background: #fee2e2; color: #ef4444; }
+.pv-rv-view-link:hover { background: #ede9fe; color: #4f46e5; }
+
+/* ── Quick links row ────────────────────────────────────────────── */
+.pv-quick-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 20px;
+}
+.pv-quick-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #475569;
+	text-decoration: none;
+	transition: border-color 0.18s, color 0.18s, background 0.18s;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.pv-quick-link:hover {
+	border-color: #4f46e5;
+	color: #4f46e5;
+	background: #f5f3ff;
+	box-shadow: 0 2px 8px rgba(79,70,229,0.1);
+}
+.pv-quick-link .dashicons {
+	font-size: 15px;
+	width: 15px;
+	height: 15px;
+}
+
+/* ── API Instructions box ───────────────────────────────────────── */
+.pv-api-instructions {
+	background: #f0f9ff;
+	border: 1px solid #bae6fd;
+	border-radius: 8px;
+	padding: 14px 18px;
+	margin-bottom: 20px;
+}
+.pv-api-instructions__head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.85rem;
+	color: #0369a1;
+	margin-bottom: 10px;
+}
+.pv-api-instructions__head .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	color: #0ea5e9;
+}
+.pv-api-instructions__steps {
+	margin: 0;
+	padding-left: 20px;
+	color: #0c4a6e;
+	font-size: 0.8rem;
+	line-height: 1.7;
+}
+.pv-api-instructions__steps li { margin-bottom: 3px; }
+.pv-api-instructions__steps a { color: #0284c7; }
+.pv-api-instructions__steps a:hover { color: #0369a1; }
+
+/* ── Responsive additions ───────────────────────────────────────── */
+@media (max-width: 1100px) {
+	.pv-stats-row--6 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 782px) {
+	.pv-stats-row--6 { grid-template-columns: repeat(2, 1fr); }
+	.pv-rv-row { padding: 10px 14px; }
+	.pv-page-header__actions { margin-top: 8px; }
+}

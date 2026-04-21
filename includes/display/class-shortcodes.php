@@ -148,7 +148,7 @@ class PV_Shortcodes {
 			         data-description="%s"
 			         data-accent="%s"
 			         data-playlist="%s"
-			         aria-label="%s">&#9654; %s</button>',
+			         aria-label="%s"><svg class="pv-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> %s</button>',
 			esc_attr( $extra_class ),
 			esc_attr( $accent ),
 			esc_attr( $first['id'] ),

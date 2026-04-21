@@ -58,6 +58,9 @@ const FILES = [
 	'includes/admin/class-dashboard-page.php',
 	'includes/admin/class-import-ui.php',
 	'includes/admin/class-settings-page.php',
+	'includes/admin/class-customizer-page.php',
+	// Admin template
+	'templates/admin/customizer.php',
 	// PHP — import
 	'includes/import/class-youtube-api.php',
 	'includes/import/class-channel-importer.php',
@@ -66,11 +69,13 @@ const FILES = [
 	'assets/dist/css/offcanvas.min.css',
 	'assets/dist/css/grid.min.css',
 	'assets/dist/css/watch-page.min.css',
+	'assets/dist/css/admin-customizer.min.css',
 	// JS
 	'assets/dist/js/admin-color-picker.min.js',
 	'assets/dist/js/offcanvas.min.js',
 	'assets/dist/js/lazy-video.min.js',
 	'assets/dist/js/archive-filter.min.js',
+	'assets/dist/js/admin-customizer.min.js',
 ];
 
 async function main() {

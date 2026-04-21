@@ -1,6 +1,6 @@
 <?php
 /**
- * Videos > Dashboard — stats, playback mode, archive layout, shortcode reference.
+ * Videos > Dashboard — content creator stats + import + playback mode.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -8,12 +8,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class PV_Dashboard_Page {
 
 	public function register(): void {
-		add_action( 'admin_menu',                     [ $this, 'add_menu' ] );
-		add_action( 'wp_ajax_pv_save_display_mode',    [ $this, 'ajax_save_mode' ] );
-		add_action( 'wp_ajax_pv_save_archive_layout',  [ $this, 'ajax_save_layout' ] );
-		add_action( 'wp_ajax_pv_save_content_width',   [ $this, 'ajax_save_content_width' ] );
-		add_action( 'manage_posts_extra_tablenav',    [ $this, 'list_info_bar' ] );
-		add_action( 'admin_footer',                   [ $this, 'print_js' ] );
+		add_action( 'admin_menu',                  [ $this, 'add_menu' ] );
+		add_action( 'manage_posts_extra_tablenav', [ $this, 'list_info_bar' ] );
+		add_action( 'admin_footer',                [ $this, 'print_js' ] );
 	}
 
 	public function add_menu(): void {
@@ -34,10 +31,10 @@ class PV_Dashboard_Page {
 		$screen = get_current_screen();
 		if ( ! $screen || 'pv_youtube' !== ( $screen->post_type ?? '' ) ) return;
 
-		$last   = get_option( 'pv_last_import', null );
-		$count  = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
-		$limit  = PV_Tier::get_video_limit();
-		$dash   = admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' );
+		$last  = get_option( 'pv_last_import', null );
+		$count = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
+		$limit = PV_Tier::get_video_limit();
+		$dash  = admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' );
 		?>
 		<div class="pv-list-infobar">
 			<span class="pv-list-stat">
@@ -53,16 +50,13 @@ class PV_Dashboard_Page {
 					<?php esc_html_e( 'Last import:', 'pv-youtube-importer' ); ?>
 					<strong><?php echo esc_html( human_time_diff( $last['time'], time() ) . ' ' . __( 'ago', 'pv-youtube-importer' ) ); ?></strong>
 					&mdash; <?php echo esc_html( sprintf(
-						/* translators: 1: imported count, 2: skipped count */
 						__( '%1$d imported, %2$d skipped', 'pv-youtube-importer' ),
 						$last['imported'],
 						$last['skipped']
 					) ); ?>
 				</span>
 			<?php else : ?>
-				<span class="pv-list-stat pv-list-stat--muted">
-					<?php esc_html_e( 'No imports yet', 'pv-youtube-importer' ); ?>
-				</span>
+				<span class="pv-list-stat pv-list-stat--muted"><?php esc_html_e( 'No imports yet', 'pv-youtube-importer' ); ?></span>
 			<?php endif; ?>
 			<a href="<?php echo esc_url( $dash ); ?>" class="button button-small pv-list-dash-link">
 				<?php esc_html_e( 'Dashboard', 'pv-youtube-importer' ); ?>
@@ -71,70 +65,60 @@ class PV_Dashboard_Page {
 		<?php
 	}
 
-	// ── AJAX: save display_mode (offcanvas / page) ───────────────────
-
-	public function ajax_save_mode(): void {
-		check_ajax_referer( 'pv_save_mode_nonce', 'nonce' );
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( 'Unauthorized', 403 );
-		}
-		$mode = sanitize_key( $_POST['mode'] ?? '' );
-		if ( ! in_array( $mode, [ 'offcanvas', 'page' ], true ) ) {
-			wp_send_json_error( 'Invalid mode' );
-		}
-		$settings                 = get_option( 'pv_settings', [] );
-		$settings['display_mode'] = $mode;
-		update_option( 'pv_settings', $settings );
-		wp_send_json_success( [ 'mode' => $mode ] );
-	}
-
-	// ── AJAX: save archive_layout (grid / list / featured / compact) ──
-
-	public function ajax_save_layout(): void {
-		check_ajax_referer( 'pv_save_mode_nonce', 'nonce' );
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( 'Unauthorized', 403 );
-		}
-		$layout = sanitize_key( $_POST['layout'] ?? '' );
-		if ( ! in_array( $layout, [ 'grid', 'list', 'featured', 'compact' ], true ) ) {
-			wp_send_json_error( 'Invalid layout' );
-		}
-		$settings                    = get_option( 'pv_settings', [] );
-		$settings['archive_layout']  = $layout;
-		update_option( 'pv_settings', $settings );
-		wp_send_json_success( [ 'layout' => $layout ] );
-	}
-
-	// ── AJAX: save content_width (full / wide / medium / narrow) ─────
-
-	public function ajax_save_content_width(): void {
-		check_ajax_referer( 'pv_save_mode_nonce', 'nonce' );
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( 'Unauthorized', 403 );
-		}
-		$width = sanitize_key( $_POST['width'] ?? '' );
-		if ( ! in_array( $width, [ 'full', 'wide', 'medium', 'narrow' ], true ) ) {
-			wp_send_json_error( 'Invalid width' );
-		}
-		$settings                    = get_option( 'pv_settings', [] );
-		$settings['content_width']   = $width;
-		update_option( 'pv_settings', $settings );
-		wp_send_json_success( [ 'width' => $width ] );
-	}
-
 	// ── Page render ──────────────────────────────────────────────────
 
 	public function render_page(): void {
 		if ( ! current_user_can( 'manage_options' ) ) return;
 
-		$settings      = get_option( 'pv_settings', [] );
-		$tier          = PV_Tier::current();
-		$limit         = PV_Tier::get_video_limit();
-		$video_count   = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
-		$last          = get_option( 'pv_last_import', null );
-		$mode          = $settings['display_mode']   ?? 'offcanvas';
-		$layout        = $settings['archive_layout'] ?? 'grid';
-		$cwidth        = $settings['content_width']  ?? 'full';
+		$settings    = get_option( 'pv_settings', [] );
+		$tier        = PV_Tier::current();
+		$limit       = PV_Tier::get_video_limit();
+		$last        = get_option( 'pv_last_import', null );
+		$mode        = $settings['display_mode'] ?? 'offcanvas';
+		$archive_url = get_post_type_archive_link( 'pv_youtube' ) ?: '';
+		$preview_url = admin_url( 'edit.php?post_type=pv_youtube&page=pv-customizer' );
+
+		// ── Stats ──────────────────────────────────────────────────
+		$total_published = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
+
+		// Published this month
+		$month_posts = get_posts( [
+			'post_type'      => 'pv_youtube',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'date_query'     => [ [ 'after' => 'first day of this month', 'inclusive' => true ] ],
+		] );
+		$this_month = count( $month_posts );
+
+		// Published this week
+		$week_posts = get_posts( [
+			'post_type'      => 'pv_youtube',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'date_query'     => [ [ 'after' => '7 days ago', 'inclusive' => true ] ],
+		] );
+		$this_week = count( $week_posts );
+
+		// Category + tag counts
+		$cat_count = wp_count_terms( [ 'taxonomy' => 'pv_category', 'hide_empty' => true ] );
+		$tag_count = wp_count_terms( [ 'taxonomy' => 'pv_tag',      'hide_empty' => true ] );
+		$cat_count = is_wp_error( $cat_count ) ? 0 : (int) $cat_count;
+		$tag_count = is_wp_error( $tag_count ) ? 0 : (int) $tag_count;
+
+		// Most-used category
+		$top_cats = get_terms( [ 'taxonomy' => 'pv_category', 'hide_empty' => true, 'orderby' => 'count', 'order' => 'DESC', 'number' => 1 ] );
+		$top_cat  = ( $top_cats && ! is_wp_error( $top_cats ) ) ? $top_cats[0] : null;
+
+		// Recent 6 videos for activity feed
+		$recent_videos = get_posts( [
+			'post_type'      => 'pv_youtube',
+			'post_status'    => 'publish',
+			'posts_per_page' => 6,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		] );
 		?>
 		<div class="wrap pv-settings-wrap">
 
@@ -144,209 +128,181 @@ class PV_Dashboard_Page {
 					<span class="dashicons dashicons-video-alt3"></span>
 					<?php esc_html_e( 'PressVideo', 'pv-youtube-importer' ); ?>
 				</h1>
-				<span class="pv-tier-badge">
-					<?php echo esc_html( ucfirst( $tier ) ); ?> <?php esc_html_e( 'Plan', 'pv-youtube-importer' ); ?>
-					<?php if ( ! PV_Tier::is_gold() ) : ?>
-						&nbsp;&middot;&nbsp;
-						<a href="https://pressvideo.com" target="_blank" rel="noopener">
-							<?php esc_html_e( 'Upgrade →', 'pv-youtube-importer' ); ?>
+				<div class="pv-page-header__actions">
+					<?php if ( $archive_url ) : ?>
+						<a href="<?php echo esc_url( $archive_url ); ?>" target="_blank" rel="noopener" class="button">
+							<span class="dashicons dashicons-external" style="margin-top:3px;"></span>
+							<?php esc_html_e( 'View Archive', 'pv-youtube-importer' ); ?>
 						</a>
 					<?php endif; ?>
-				</span>
+					<a href="<?php echo esc_url( $preview_url ); ?>" class="button button-primary">
+						<span class="dashicons dashicons-visibility" style="margin-top:3px;"></span>
+						<?php esc_html_e( 'Live Preview', 'pv-youtube-importer' ); ?>
+					</a>
+					<span class="pv-tier-badge">
+						<?php echo esc_html( ucfirst( $tier ) ); ?> <?php esc_html_e( 'Plan', 'pv-youtube-importer' ); ?>
+						<?php if ( ! PV_Tier::is_gold() ) : ?>
+							&nbsp;&middot;&nbsp;<a href="https://pressvideo.com" target="_blank" rel="noopener"><?php esc_html_e( 'Upgrade →', 'pv-youtube-importer' ); ?></a>
+						<?php endif; ?>
+					</span>
+				</div>
 			</div>
 
-			<!-- Stats row -->
-			<div class="pv-stats-row">
+			<!-- ── Stats row ──────────────────────────────────────── -->
+			<div class="pv-stats-row pv-stats-row--6">
 
 				<div class="pv-stat-card">
-					<span class="pv-stat-card__value"><?php echo esc_html( $video_count ); ?></span>
-					<span class="pv-stat-card__label">
-						<?php echo $limit === PHP_INT_MAX
-							? esc_html__( 'Total Videos', 'pv-youtube-importer' )
-							: esc_html( sprintf( __( 'of %d Video Limit', 'pv-youtube-importer' ), $limit ) ); ?>
-					</span>
+					<span class="pv-stat-card__value"><?php echo esc_html( $total_published ); ?><?php if ( $limit !== PHP_INT_MAX ) : ?><span class="pv-stat-card__cap"> / <?php echo esc_html( $limit ); ?></span><?php endif; ?></span>
+					<span class="pv-stat-card__label"><?php esc_html_e( 'Total Videos', 'pv-youtube-importer' ); ?></span>
+				</div>
+
+				<div class="pv-stat-card">
+					<span class="pv-stat-card__value"><?php echo esc_html( $this_month ); ?></span>
+					<span class="pv-stat-card__label"><?php esc_html_e( 'Published This Month', 'pv-youtube-importer' ); ?></span>
+				</div>
+
+				<div class="pv-stat-card">
+					<span class="pv-stat-card__value"><?php echo esc_html( $this_week ); ?></span>
+					<span class="pv-stat-card__label"><?php esc_html_e( 'Added This Week', 'pv-youtube-importer' ); ?></span>
+				</div>
+
+				<div class="pv-stat-card">
+					<span class="pv-stat-card__value"><?php echo esc_html( $cat_count ); ?></span>
+					<span class="pv-stat-card__label"><?php esc_html_e( 'Categories', 'pv-youtube-importer' ); ?></span>
+					<?php if ( $top_cat ) : ?>
+						<span class="pv-stat-card__sub"><?php echo esc_html( sprintf( __( 'Top: %s (%d)', 'pv-youtube-importer' ), $top_cat->name, $top_cat->count ) ); ?></span>
+					<?php endif; ?>
+				</div>
+
+				<div class="pv-stat-card">
+					<span class="pv-stat-card__value"><?php echo esc_html( $tag_count ); ?></span>
+					<span class="pv-stat-card__label"><?php esc_html_e( 'Tags', 'pv-youtube-importer' ); ?></span>
 				</div>
 
 				<div class="pv-stat-card">
 					<?php if ( $last ) : ?>
-						<span class="pv-stat-card__value pv-stat-card__value--sm">
-							<?php echo esc_html( human_time_diff( $last['time'], time() ) ); ?> <?php esc_html_e( 'ago', 'pv-youtube-importer' ); ?>
-						</span>
-						<span class="pv-stat-card__label">
-							<?php echo esc_html( sprintf(
-								/* translators: count of imported videos */
-								__( 'Last Import · %d added', 'pv-youtube-importer' ),
-								$last['imported']
-							) ); ?>
-						</span>
+						<span class="pv-stat-card__value pv-stat-card__value--sm"><?php echo esc_html( human_time_diff( $last['time'], time() ) ); ?> <?php esc_html_e( 'ago', 'pv-youtube-importer' ); ?></span>
+						<span class="pv-stat-card__label"><?php echo esc_html( sprintf( __( 'Last Import · %d added', 'pv-youtube-importer' ), $last['imported'] ) ); ?></span>
 					<?php else : ?>
 						<span class="pv-stat-card__value pv-stat-card__value--dash">&mdash;</span>
 						<span class="pv-stat-card__label"><?php esc_html_e( 'No Imports Yet', 'pv-youtube-importer' ); ?></span>
 					<?php endif; ?>
 				</div>
 
-				<div class="pv-stat-card">
-					<span class="pv-stat-card__value pv-stat-card__value--sm" id="pv-active-mode-label">
-						<?php echo esc_html( $mode === 'offcanvas' ? __( 'Offcanvas', 'pv-youtube-importer' ) : __( 'Watch Page', 'pv-youtube-importer' ) ); ?>
-					</span>
-					<span class="pv-stat-card__label"><?php esc_html_e( 'Active Playback Mode', 'pv-youtube-importer' ); ?></span>
-				</div>
-
 			</div>
 
-			<!-- Two-column: Import + Playback Mode -->
-			<div class="pv-dash-cols">
-
-				<!-- Import -->
-				<div class="pv-card pv-card--narrow">
-					<div class="pv-card__head">
-						<div class="pv-card__icon"><span class="dashicons dashicons-download"></span></div>
-						<div class="pv-card__head-text">
-							<h2><?php esc_html_e( 'Import', 'pv-youtube-importer' ); ?></h2>
-							<p><?php esc_html_e( 'Fetch the latest videos from your channel.', 'pv-youtube-importer' ); ?></p>
-						</div>
-					</div>
-					<div class="pv-card__body">
-						<button id="pv-run-import" class="button button-primary" type="button">
-							<?php esc_html_e( 'Run Import Now', 'pv-youtube-importer' ); ?>
-						</button>
-						<span id="pv-import-spinner" class="spinner" style="float:none;margin:0 6px;vertical-align:middle;"></span>
-						<?php wp_nonce_field( 'pv_manual_import_nonce', 'pv_import_nonce' ); ?>
-						<div id="pv-import-result"></div>
-					</div>
-				</div>
-
-				<!-- Playback Mode -->
-				<div class="pv-card pv-card--grow">
-					<div class="pv-card__head">
-						<div class="pv-card__icon"><span class="dashicons dashicons-layout"></span></div>
-						<div class="pv-card__head-text">
-							<h2><?php esc_html_e( 'Playback Mode', 'pv-youtube-importer' ); ?></h2>
-							<p><?php esc_html_e( 'How visitors watch videos when clicking a card in the [pv_video_grid] shortcode.', 'pv-youtube-importer' ); ?></p>
-						</div>
-					</div>
-					<div class="pv-card__body">
-						<div class="pv-visual-picker" data-controls="display-mode" data-ajax="1">
-
-							<label class="pv-pick-card <?php echo $mode === 'offcanvas' ? 'is-selected' : ''; ?>">
-								<input type="radio" name="pv_dash_display_mode" value="offcanvas" <?php checked( $mode, 'offcanvas' ); ?>>
-								<span class="pv-pick-card__check"></span>
-								<span class="pv-pick-card__preview"><?php echo PV_Settings_Page::svg_offcanvas(); // phpcs:ignore ?></span>
-								<span class="pv-pick-card__body">
-									<span class="pv-pick-card__label"><?php esc_html_e( 'Offcanvas Drawer', 'pv-youtube-importer' ); ?></span>
-									<span class="pv-pick-card__desc"><?php esc_html_e( 'Slides in without leaving the page', 'pv-youtube-importer' ); ?></span>
-								</span>
-							</label>
-
-							<label class="pv-pick-card <?php echo $mode === 'page' ? 'is-selected' : ''; ?>">
-								<input type="radio" name="pv_dash_display_mode" value="page" <?php checked( $mode, 'page' ); ?>>
-								<span class="pv-pick-card__check"></span>
-								<span class="pv-pick-card__preview"><?php echo PV_Settings_Page::svg_watch_page(); // phpcs:ignore ?></span>
-								<span class="pv-pick-card__body">
-									<span class="pv-pick-card__label"><?php esc_html_e( 'Watch Page', 'pv-youtube-importer' ); ?></span>
-									<span class="pv-pick-card__desc"><?php esc_html_e( 'Navigates to a dedicated page per video', 'pv-youtube-importer' ); ?></span>
-								</span>
-							</label>
-
-						</div>
-						<div class="pv-mode-status" id="pv-mode-status"></div>
-						<?php wp_nonce_field( 'pv_save_mode_nonce', 'pv_mode_nonce' ); ?>
-					</div>
-				</div>
-
-			</div>
-
-			<!-- Archive Layout -->
+			<!-- ── Import ────────────────────────────────────────── -->
 			<div class="pv-card">
 				<div class="pv-card__head">
-					<div class="pv-card__icon"><span class="dashicons dashicons-grid-view"></span></div>
+					<div class="pv-card__icon"><span class="dashicons dashicons-download"></span></div>
 					<div class="pv-card__head-text">
-						<h2><?php esc_html_e( 'Archive Layout', 'pv-youtube-importer' ); ?></h2>
-						<p><?php esc_html_e( 'How your video archive page (/pv-videos/) displays the video collection.', 'pv-youtube-importer' ); ?></p>
+						<h2><?php esc_html_e( 'Import', 'pv-youtube-importer' ); ?></h2>
+						<p><?php esc_html_e( 'Fetch the latest videos from your YouTube channel.', 'pv-youtube-importer' ); ?></p>
 					</div>
 				</div>
 				<div class="pv-card__body">
-					<div class="pv-visual-picker pv-visual-picker--text" data-controls="archive-layout" data-ajax="1">
-
-						<label class="pv-pick-card pv-pick-card--text <?php echo $layout === 'grid' ? 'is-selected' : ''; ?>">
-							<input type="radio" name="pv_archive_layout" value="grid" <?php checked( $layout, 'grid' ); ?>>
-							<span class="pv-pick-card__check"></span>
-							<span class="pv-pick-card__body">
-								<span class="pv-pick-card__label"><?php esc_html_e( 'Grid', 'pv-youtube-importer' ); ?></span>
-								<span class="pv-pick-card__desc"><?php esc_html_e( '3-column responsive card grid', 'pv-youtube-importer' ); ?></span>
-							</span>
-						</label>
-
-						<label class="pv-pick-card pv-pick-card--text <?php echo $layout === 'list' ? 'is-selected' : ''; ?>">
-							<input type="radio" name="pv_archive_layout" value="list" <?php checked( $layout, 'list' ); ?>>
-							<span class="pv-pick-card__check"></span>
-							<span class="pv-pick-card__body">
-								<span class="pv-pick-card__label"><?php esc_html_e( 'List', 'pv-youtube-importer' ); ?></span>
-								<span class="pv-pick-card__desc"><?php esc_html_e( 'Horizontal rows with thumbnail and excerpt', 'pv-youtube-importer' ); ?></span>
-							</span>
-						</label>
-
-						<label class="pv-pick-card pv-pick-card--text <?php echo $layout === 'featured' ? 'is-selected' : ''; ?>">
-							<input type="radio" name="pv_archive_layout" value="featured" <?php checked( $layout, 'featured' ); ?>>
-							<span class="pv-pick-card__check"></span>
-							<span class="pv-pick-card__body">
-								<span class="pv-pick-card__label"><?php esc_html_e( 'Featured', 'pv-youtube-importer' ); ?></span>
-								<span class="pv-pick-card__desc"><?php esc_html_e( 'First video hero-style, rest in a grid', 'pv-youtube-importer' ); ?></span>
-							</span>
-						</label>
-
-						<label class="pv-pick-card pv-pick-card--text <?php echo $layout === 'compact' ? 'is-selected' : ''; ?>">
-							<input type="radio" name="pv_archive_layout" value="compact" <?php checked( $layout, 'compact' ); ?>>
-							<span class="pv-pick-card__check"></span>
-							<span class="pv-pick-card__body">
-								<span class="pv-pick-card__label"><?php esc_html_e( 'Compact', 'pv-youtube-importer' ); ?></span>
-								<span class="pv-pick-card__desc"><?php esc_html_e( '4-column dense grid', 'pv-youtube-importer' ); ?></span>
-							</span>
-						</label>
-
-					</div>
-					<div class="pv-mode-status" id="pv-layout-status"></div>
+					<button id="pv-run-import" class="button button-primary" type="button">
+						<?php esc_html_e( 'Run Import Now', 'pv-youtube-importer' ); ?>
+					</button>
+					<span id="pv-import-spinner" class="spinner" style="float:none;margin:0 6px;vertical-align:middle;"></span>
+					<?php wp_nonce_field( 'pv_manual_import_nonce', 'pv_import_nonce' ); ?>
+					<div id="pv-import-result"></div>
 				</div>
 			</div>
 
-			<!-- Content Width -->
+			<!-- ── Recent Videos ──────────────────────────────────── -->
+			<?php if ( ! empty( $recent_videos ) ) : ?>
 			<div class="pv-card">
 				<div class="pv-card__head">
-					<div class="pv-card__icon"><span class="dashicons dashicons-editor-expand"></span></div>
+					<div class="pv-card__icon"><span class="dashicons dashicons-clock"></span></div>
 					<div class="pv-card__head-text">
-						<h2><?php esc_html_e( 'Content Width', 'pv-youtube-importer' ); ?></h2>
-						<p><?php esc_html_e( 'Max width for the archive page and single video page. "Full Width" fills the theme container.', 'pv-youtube-importer' ); ?></p>
+						<h2><?php esc_html_e( 'Recently Published', 'pv-youtube-importer' ); ?></h2>
+						<p><?php esc_html_e( 'Your latest imported videos at a glance.', 'pv-youtube-importer' ); ?></p>
+					</div>
+					<div class="pv-card__head-action">
+						<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="button button-small"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?></a>
 					</div>
 				</div>
-				<div class="pv-card__body">
-					<div class="pv-visual-picker pv-visual-picker--text" data-controls="content-width" data-ajax="1">
-						<?php
-						$widths = [
-							'full'   => [ 'label' => __( 'Full Width', 'pv-youtube-importer' ), 'desc' => __( 'Fills the theme container', 'pv-youtube-importer' ) ],
-							'wide'   => [ 'label' => __( 'Wide',       'pv-youtube-importer' ), 'desc' => '1400px' ],
-							'medium' => [ 'label' => __( 'Medium',     'pv-youtube-importer' ), 'desc' => '1200px' ],
-							'narrow' => [ 'label' => __( 'Narrow',     'pv-youtube-importer' ), 'desc' => '960px' ],
-						];
-						foreach ( $widths as $val => $info ) : ?>
-							<label class="pv-pick-card pv-pick-card--text <?php echo $cwidth === $val ? 'is-selected' : ''; ?>">
-								<input type="radio" name="pv_content_width" value="<?php echo esc_attr( $val ); ?>" <?php checked( $cwidth, $val ); ?>>
-								<span class="pv-pick-card__check"></span>
-								<span class="pv-pick-card__body">
-									<span class="pv-pick-card__label"><?php echo esc_html( $info['label'] ); ?></span>
-									<span class="pv-pick-card__desc"><?php echo esc_html( $info['desc'] ); ?></span>
+				<div class="pv-card__body pv-card__body--flush">
+					<div class="pv-recent-videos">
+						<?php foreach ( $recent_videos as $rv ) :
+							$rv_thumb = get_the_post_thumbnail_url( $rv->ID, 'thumbnail' ) ?: '';
+							$rv_cats  = get_the_terms( $rv->ID, 'pv_category' );
+							$rv_cat   = ( $rv_cats && ! is_wp_error( $rv_cats ) ) ? $rv_cats[0]->name : '—';
+							$rv_dur   = get_post_meta( $rv->ID, '_pv_duration', true );
+							$rv_yt    = get_post_meta( $rv->ID, '_pv_youtube_id', true );
+							$rv_accent = pv_resolve_accent_color( $rv->ID );
+						?>
+						<div class="pv-rv-row">
+							<div class="pv-rv-thumb">
+								<?php if ( $rv_thumb ) : ?>
+									<img src="<?php echo esc_url( $rv_thumb ); ?>" alt="" loading="lazy" width="80" height="45">
+								<?php else : ?>
+									<div class="pv-rv-thumb__placeholder"><span class="dashicons dashicons-video-alt3"></span></div>
+								<?php endif; ?>
+								<?php if ( $rv_dur ) : ?>
+									<span class="pv-rv-dur"><?php echo esc_html( $rv_dur ); ?></span>
+								<?php endif; ?>
+							</div>
+							<div class="pv-rv-info">
+								<a href="<?php echo esc_url( get_edit_post_link( $rv->ID ) ); ?>" class="pv-rv-title"><?php echo esc_html( $rv->post_title ); ?></a>
+								<span class="pv-rv-meta">
+									<span class="pv-rv-cat" style="--pv-accent:<?php echo esc_attr( $rv_accent ); ?>;"><?php echo esc_html( $rv_cat ); ?></span>
+									<span class="pv-rv-date"><?php echo esc_html( get_the_date( 'M j, Y', $rv->ID ) ); ?></span>
 								</span>
-							</label>
+							</div>
+							<div class="pv-rv-actions">
+								<?php if ( $rv_yt ) : ?>
+									<a href="<?php echo esc_url( 'https://www.youtube.com/watch?v=' . $rv_yt ); ?>" target="_blank" rel="noopener" title="<?php esc_attr_e( 'View on YouTube', 'pv-youtube-importer' ); ?>" class="pv-rv-yt-link">
+										<span class="dashicons dashicons-external"></span>
+									</a>
+								<?php endif; ?>
+								<a href="<?php echo esc_url( get_permalink( $rv->ID ) ); ?>" target="_blank" rel="noopener" title="<?php esc_attr_e( 'View post', 'pv-youtube-importer' ); ?>" class="pv-rv-view-link">
+									<span class="dashicons dashicons-visibility"></span>
+								</a>
+							</div>
+						</div>
 						<?php endforeach; ?>
 					</div>
-					<div class="pv-mode-status" id="pv-width-status"></div>
 				</div>
+			</div>
+			<?php endif; ?>
+
+			<!-- ── Quick Links ────────────────────────────────────── -->
+			<div class="pv-quick-links">
+				<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pv_youtube' ) ); ?>" class="pv-quick-link">
+					<span class="dashicons dashicons-plus-alt"></span>
+					<?php esc_html_e( 'Add Video', 'pv-youtube-importer' ); ?>
+				</a>
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ); ?>" class="pv-quick-link">
+					<span class="dashicons dashicons-admin-settings"></span>
+					<?php esc_html_e( 'Settings', 'pv-youtube-importer' ); ?>
+				</a>
+				<a href="<?php echo esc_url( $preview_url ); ?>" class="pv-quick-link">
+					<span class="dashicons dashicons-admin-customizer"></span>
+					<?php esc_html_e( 'Live Preview', 'pv-youtube-importer' ); ?>
+				</a>
+				<?php if ( $archive_url ) : ?>
+				<a href="<?php echo esc_url( $archive_url ); ?>" target="_blank" rel="noopener" class="pv-quick-link">
+					<span class="dashicons dashicons-video-alt3"></span>
+					<?php esc_html_e( 'View Archive', 'pv-youtube-importer' ); ?>
+				</a>
+				<?php endif; ?>
+				<a href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ) ); ?>" class="pv-quick-link">
+					<span class="dashicons dashicons-category"></span>
+					<?php esc_html_e( 'Categories', 'pv-youtube-importer' ); ?>
+				</a>
+				<a href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=pv_tag&post_type=pv_youtube' ) ); ?>" class="pv-quick-link">
+					<span class="dashicons dashicons-tag"></span>
+					<?php esc_html_e( 'Tags', 'pv-youtube-importer' ); ?>
+				</a>
 			</div>
 
 		</div>
 		<?php
 	}
 
-	// ── Inline JS for dashboard page ─────────────────────────────────
+	// ── Inline JS ────────────────────────────────────────────────────
 
 	public function print_js(): void {
 		$screen = get_current_screen();
@@ -396,20 +352,15 @@ class PV_Dashboard_Page {
 				});
 			}
 
-			// Shared nonce for mode + layout AJAX
-			var mNonce = document.getElementById('pv_mode_nonce');
-
 			// Playback mode AJAX save
+			var mNonce    = document.getElementById('pv_mode_nonce');
 			var modePicker = document.querySelector('.pv-visual-picker[data-controls="display-mode"]');
 			var mStatus    = document.getElementById('pv-mode-status');
-			var modeLabel  = document.getElementById('pv-active-mode-label');
-			var modeNames  = { offcanvas: pvDash.offcanvas, page: pvDash.watchPage };
 
 			if (modePicker && mNonce) {
 				modePicker.addEventListener('change', function (e) {
 					var radio = e.target;
 					if (radio.type !== 'radio') return;
-					// Update visual selection
 					modePicker.querySelectorAll('.pv-pick-card').forEach(function(c) {
 						c.classList.toggle('is-selected', c.querySelector('input') === radio);
 					});
@@ -420,86 +371,9 @@ class PV_Dashboard_Page {
 					fetch(ajaxurl, { method: 'POST', body: data })
 						.then(function(r){ return r.json(); })
 						.then(function(json){
-							if (json.success) {
-								mStatus.textContent = pvDash.saved;
-								mStatus.className = 'pv-mode-status pv-mode-status--ok';
-								if (modeLabel) modeLabel.textContent = modeNames[radio.value] || radio.value;
-							} else {
-								mStatus.textContent = pvDash.saveFailed;
-								mStatus.className = 'pv-mode-status pv-mode-status--err';
-							}
-							setTimeout(function(){
-								mStatus.textContent = '';
-								mStatus.className = 'pv-mode-status';
-							}, 2500);
-						});
-				});
-			}
-
-			// Archive layout AJAX save
-			var layoutPicker = document.querySelector('.pv-visual-picker[data-controls="archive-layout"]');
-			var lStatus      = document.getElementById('pv-layout-status');
-
-			if (layoutPicker && mNonce) {
-				layoutPicker.addEventListener('change', function (e) {
-					var radio = e.target;
-					if (radio.type !== 'radio') return;
-					// Update visual selection
-					layoutPicker.querySelectorAll('.pv-pick-card').forEach(function(c) {
-						c.classList.toggle('is-selected', c.querySelector('input') === radio);
-					});
-					var data = new FormData();
-					data.append('action', 'pv_save_archive_layout');
-					data.append('nonce', mNonce.value);
-					data.append('layout', radio.value);
-					fetch(ajaxurl, { method: 'POST', body: data })
-						.then(function(r){ return r.json(); })
-						.then(function(json){
-							if (json.success) {
-								lStatus.textContent = pvDash.saved;
-								lStatus.className = 'pv-mode-status pv-mode-status--ok';
-							} else {
-								lStatus.textContent = pvDash.saveFailed;
-								lStatus.className = 'pv-mode-status pv-mode-status--err';
-							}
-							setTimeout(function(){
-								lStatus.textContent = '';
-								lStatus.className = 'pv-mode-status';
-							}, 2500);
-						});
-				});
-			}
-
-			// Content width AJAX save
-			var widthPicker = document.querySelector('.pv-visual-picker[data-controls="content-width"]');
-			var wStatus     = document.getElementById('pv-width-status');
-
-			if (widthPicker && mNonce) {
-				widthPicker.addEventListener('change', function (e) {
-					var radio = e.target;
-					if (radio.type !== 'radio') return;
-					// Update visual selection
-					widthPicker.querySelectorAll('.pv-pick-card').forEach(function(c) {
-						c.classList.toggle('is-selected', c.querySelector('input') === radio);
-					});
-					var data = new FormData();
-					data.append('action', 'pv_save_content_width');
-					data.append('nonce', mNonce.value);
-					data.append('width', radio.value);
-					fetch(ajaxurl, { method: 'POST', body: data })
-						.then(function(r){ return r.json(); })
-						.then(function(json){
-							if (json.success) {
-								wStatus.textContent = pvDash.saved;
-								wStatus.className = 'pv-mode-status pv-mode-status--ok';
-							} else {
-								wStatus.textContent = pvDash.saveFailed;
-								wStatus.className = 'pv-mode-status pv-mode-status--err';
-							}
-							setTimeout(function(){
-								wStatus.textContent = '';
-								wStatus.className = 'pv-mode-status';
-							}, 2500);
+							mStatus.textContent = json.success ? pvDash.saved : pvDash.saveFailed;
+							mStatus.className = 'pv-mode-status ' + (json.success ? 'pv-mode-status--ok' : 'pv-mode-status--err');
+							setTimeout(function(){ mStatus.textContent = ''; mStatus.className = 'pv-mode-status'; }, 2500);
 						});
 				});
 			}
