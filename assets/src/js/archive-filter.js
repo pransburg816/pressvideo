@@ -315,6 +315,14 @@
 			tab.addEventListener('click', function () { activateBcTab(this); });
 		});
 
+		// "View All" buttons on Home sections switch to the target tab
+		bc.addEventListener('click', function (e) {
+			var switchBtn = e.target.closest('.pv-bc-tab-switch');
+			if (!switchBtn) return;
+			var targetTab = bc.querySelector('.pv-bc-tab[data-bc-tab="' + switchBtn.dataset.targetTab + '"]');
+			if (targetTab) activateBcTab(targetTab);
+		});
+
 		var activeTab = bc.querySelector('.pv-bc-tab--active');
 		if (activeTab) { requestAnimationFrame(function () { activateBcTab(activeTab); }); }
 

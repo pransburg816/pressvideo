@@ -175,11 +175,18 @@ body.pv-customizer-fullscreen .wrap {
 .pvc-layout-cards {
 	display: flex;
 	flex-direction: column;
-	gap: 5px;
+	border: 1px solid rgba(255,255,255,0.1);
+	border-radius: 8px;
+	overflow-x: hidden;
+	overflow-y: auto;
+	max-height: 214px;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255,255,255,0.12) transparent;
 }
 
 .pvc-layout-card {
 	position: relative;
+	flex-shrink: 0;
 }
 .pvc-layout-card input[type="radio"] {
 	position: absolute;
@@ -191,21 +198,23 @@ body.pv-customizer-fullscreen .wrap {
 	flex-direction: row;
 	align-items: center;
 	gap: 10px;
-	padding: 8px 10px;
-	background: rgba(255,255,255,0.04);
-	border: 1.5px solid rgba(255,255,255,0.08);
-	border-radius: 7px;
+	padding: 9px 10px;
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid rgba(255,255,255,0.07);
+	border-radius: 0;
 	cursor: pointer;
-	transition: background 0.18s, border-color 0.18s;
+	transition: background 0.15s;
 	text-align: left;
+}
+.pvc-layout-card:last-child .pvc-layout-card__label {
+	border-bottom: none;
 }
 .pvc-layout-card__label:hover {
 	background: rgba(79,70,229,0.1);
-	border-color: rgba(79,70,229,0.35);
 }
 .pvc-layout-card input:checked + .pvc-layout-card__label {
 	background: rgba(79,70,229,0.16);
-	border-color: #4f46e5;
 }
 .pvc-layout-card__icon {
 	width: 38px;
@@ -214,7 +223,7 @@ body.pv-customizer-fullscreen .wrap {
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	color: rgba(255,255,255,0.3);
+	color: rgba(255,255,255,0.28);
 }
 .pvc-layout-card input:checked + .pvc-layout-card__label .pvc-layout-card__icon {
 	color: #818cf8;
@@ -224,7 +233,7 @@ body.pv-customizer-fullscreen .wrap {
 	flex: 1;
 	font-size: 0.8rem;
 	font-weight: 600;
-	color: rgba(255,255,255,0.55);
+	color: rgba(255,255,255,0.5);
 	letter-spacing: 0.02em;
 }
 .pvc-layout-card input:checked + .pvc-layout-card__label .pvc-layout-card__name {
@@ -232,12 +241,12 @@ body.pv-customizer-fullscreen .wrap {
 }
 .pvc-layout-card__label::after {
 	content: '';
-	width: 14px;
-	height: 14px;
+	width: 13px;
+	height: 13px;
 	border-radius: 50%;
-	border: 1.5px solid rgba(255,255,255,0.18);
+	border: 1.5px solid rgba(255,255,255,0.16);
 	flex-shrink: 0;
-	transition: background 0.18s, border-color 0.18s;
+	transition: background 0.15s, border-color 0.15s;
 }
 .pvc-layout-card input:checked + .pvc-layout-card__label::after {
 	background: #4f46e5;

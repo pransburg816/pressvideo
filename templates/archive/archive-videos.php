@@ -485,9 +485,9 @@ get_header();
 						}
 					}
 
-					// Fallback: all series when nothing selected
+					// Fallback: top 4 series when nothing selected (auto-fills the Home tab)
 					if ( empty( $bc_series ) && empty( $bc_yt_sections ) ) {
-						$_all_s = get_terms( [ 'taxonomy' => 'pv_series', 'hide_empty' => true, 'number' => 8, 'orderby' => 'count', 'order' => 'DESC' ] );
+						$_all_s = get_terms( [ 'taxonomy' => 'pv_series', 'hide_empty' => true, 'number' => 4, 'orderby' => 'count', 'order' => 'DESC' ] );
 						if ( $_all_s && ! is_wp_error( $_all_s ) ) $bc_series = $_all_s;
 					}
 
@@ -583,7 +583,7 @@ get_header();
 							<div class="pv-bc-section">
 								<div class="pv-bc-section__head">
 									<h2 class="pv-bc-section__title"><?php echo esc_html( $_yts['title'] ); ?></h2>
-									<a href="<?php echo esc_url( 'https://www.youtube.com/playlist?list=' . $_yts['id'] ); ?>" class="pv-bc-section__view-all" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?> &rarr;</a>
+									<button type="button" class="pv-bc-section__view-all pv-bc-tab-switch" data-target-tab="videos"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?> &rarr;</button>
 								</div>
 								<div class="pv-bc-row">
 									<?php foreach ( $_yts['posts'] as $_yts_p ) : $render_bc_card( $_yts_p ); endforeach; ?>
@@ -663,18 +663,20 @@ get_header();
 							<?php if ( ! empty( $bc_all_series ) ) : ?>
 							<div class="pv-bc-playlist-list">
 								<?php foreach ( $bc_all_series as $_pls ) :
-									// Get first video for cover image + total count
-									$_pls_first = get_posts( [
+									// One query gives both the cover image and an accurate published post count
+									$_pls_q = new WP_Query( [
 										'post_type'      => 'pv_youtube',
 										'posts_per_page' => 1,
 										'post_status'    => 'publish',
 										'orderby'        => 'date',
 										'order'          => 'DESC',
+										'no_found_rows'  => false,
 										'tax_query'      => [ [ 'taxonomy' => 'pv_series', 'field' => 'term_id', 'terms' => $_pls->term_id ] ], // phpcs:ignore
 									] );
-									$_pls_thumb = ! empty( $_pls_first ) ? get_the_post_thumbnail_url( $_pls_first[0]->ID, 'medium' ) : '';
+									$_pls_count = (int) $_pls_q->found_posts;
+									if ( $_pls_count === 0 ) continue; // hide empty playlists
+									$_pls_thumb = ! empty( $_pls_q->posts ) ? get_the_post_thumbnail_url( $_pls_q->posts[0]->ID, 'medium' ) : '';
 									$_pls_link  = get_term_link( $_pls );
-									$_pls_count = (int) $_pls->count;
 								?>
 								<div class="pv-bc-pl-list-card">
 									<div class="pv-bc-pl-list-card__thumb">
