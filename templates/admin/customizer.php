@@ -10,6 +10,13 @@ $width         = $s['content_width']       ?? '';
 $mode          = $s['display_mode']        ?? 'offcanvas';
 $watch_layout  = $s['watch_page_layout']   ?? 'hero-top';
 $accent        = $s['default_accent']      ?? '#4f46e5';
+$page_bg       = $s['page_bg_color']       ?? '';
+$sidebar_bg    = $s['sidebar_bg_color']    ?? '';
+$h_show        = isset( $s['hero_show'] ) ? (bool) $s['hero_show'] : true;
+$h_align       = $s['hero_text_align']    ?? 'center';
+$h_inner_w     = $s['hero_inner_width']   ?? 'full';
+$h_height_desk = max( 100, min( 800, (int) ( $s['hero_height_desktop'] ?? 440 ) ) );
+$h_height_mob  = max( 80,  min( 500, (int) ( $s['hero_height_mobile']  ?? 280 ) ) );
 $h_title       = $s['hero_title']          ?? '';
 $h_sub         = $s['hero_subtitle']       ?? '';
 $h_bg          = $s['hero_bg_image']       ?? '';
@@ -36,8 +43,9 @@ $tag_label = $s['aside_tag_label']       ?? 'Staff Picks';
 $tag_term  = $s['aside_tag_term']        ?? '';
 $tag_count = (int) ( $s['aside_tag_count'] ?? 5 );
 
-$cards_excerpt = isset( $s['cards_show_excerpt'] )  ? (bool) $s['cards_show_excerpt']  : true;
-$cards_cat     = isset( $s['cards_show_category'] ) ? (bool) $s['cards_show_category'] : true;
+$cards_excerpt  = isset( $s['cards_show_excerpt'] )  ? (bool) $s['cards_show_excerpt']  : true;
+$cards_cat      = isset( $s['cards_show_category'] ) ? (bool) $s['cards_show_category'] : true;
+$search_align   = $s['search_bar_align'] ?? 'center';
 
 // Broadcast playlist settings
 $bc_playlists_raw = $s['bc_playlists'] ?? '[]';
@@ -70,11 +78,39 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 			</div>
 		</div>
 
-		<nav class="pvc-tabs">
-			<button class="pvc-tab pvc-tab--active" data-tab="layout">Layout</button>
-			<button class="pvc-tab" data-tab="hero">Hero</button>
-			<button class="pvc-tab" data-tab="sidebar">Sidebar</button>
-			<button class="pvc-tab" data-tab="style">Style</button>
+		<!-- Test mode indicator bar -->
+		<div class="pvc-test-mode-indicator" id="pvc-test-mode-indicator">
+			<span class="pvc-test-mode-indicator__dot"></span>
+			Test Mode Active &mdash; Preview only
+		</div>
+
+		<div class="pvc-body">
+
+		<nav class="pvc-nav-rail" id="pvc-nav-rail" aria-label="Settings sections">
+			<button class="pvc-nav-toggle" id="pvc-nav-toggle" aria-label="Toggle navigation">
+				<svg class="pvc-nav-toggle__open" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+				<svg class="pvc-nav-toggle__close" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+			</button>
+			<button class="pvc-nav-btn pvc-nav-btn--active" data-tab="layout" aria-label="Layout">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/></svg>
+				<span class="pvc-nav-label">Layout</span>
+			</button>
+			<button class="pvc-nav-btn" data-tab="hero" aria-label="Hero">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-5-7l-3 3.72L10 13l-4 5h12l-4-5z"/></svg>
+				<span class="pvc-nav-label">Hero</span>
+			</button>
+			<button class="pvc-nav-btn" data-tab="sidebar" aria-label="Sidebar">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 7h3v10H7z"/></svg>
+				<span class="pvc-nav-label">Sidebar</span>
+			</button>
+			<button class="pvc-nav-btn" data-tab="style" aria-label="Style">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+				<span class="pvc-nav-label">Style</span>
+			</button>
+			<button class="pvc-nav-btn" data-tab="notifications" aria-label="Alerts">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+				<span class="pvc-nav-label">Alerts</span>
+			</button>
 		</nav>
 
 		<div class="pvc-settings">
@@ -154,7 +190,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					<span class="pvc-hint" style="display:block;margin:4px 0 14px;">Choose which playlists and series appear in the Broadcast layout.</span>
 
 					<!-- YouTube playlists (fetched dynamically) -->
-					<span class="pvc-bc-source-label">From YouTube</span>
+					<span class="pvc-bc-source-label">Playlists From YouTube</span>
 					<div id="pvc-yt-playlists" class="pvc-bc-playlists">
 						<span class="pvc-bc-loading">Loading playlists&hellip;</span>
 					</div>
@@ -245,21 +281,82 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					</div>
 				</div>
 
+				<div class="pvc-divider"></div>
+
+				<div class="pvc-field">
+					<span class="pvc-label">Search Bar Alignment</span>
+					<div class="pvc-segment" data-for="pvc-search-align-val">
+						<button class="pvc-seg-btn <?php echo 'left'   === $search_align ? 'pvc-seg-btn--active' : ''; ?>" data-value="left">Left</button>
+						<button class="pvc-seg-btn <?php echo 'center' === $search_align ? 'pvc-seg-btn--active' : ''; ?>" data-value="center">Center</button>
+						<button class="pvc-seg-btn <?php echo 'right'  === $search_align ? 'pvc-seg-btn--active' : ''; ?>" data-value="right">Right</button>
+					</div>
+					<input type="hidden" data-setting="search_bar_align" id="pvc-search-align-val" value="<?php echo esc_attr( $search_align ); ?>">
+				</div>
+
 			</div><!-- /#pvc-panel-layout -->
 
 			<!-- ── Hero ── -->
 			<div class="pvc-panel" id="pvc-panel-hero">
 
-				<div class="pvc-field">
-					<label class="pvc-label" for="pvc-hero-title">Archive Title</label>
-					<input type="text" id="pvc-hero-title" class="pvc-input" data-setting="hero_title" value="<?php echo esc_attr( $h_title ); ?>" placeholder="Video Library">
-					<span class="pvc-hint">Leave blank to use the default post type archive label.</span>
-				</div>
+				<div class="pvc-aside-section">
+					<div class="pvc-aside-section__head">
+						<div><span style="font-size:.78rem;color:rgba(255,255,255,.65);font-weight:600;display:block;">Show Hero</span><span class="pvc-hint" style="margin:2px 0 0;">Display the hero banner on the archive page</span></div>
+						<label class="pvc-toggle"><input type="checkbox" data-setting="hero_show" <?php checked( $h_show ); ?>><span class="pvc-toggle__track"></span></label>
+					</div>
+					<div class="pvc-sub-fields <?php echo $h_show ? '' : 'pvc-collapsed'; ?>">
 
-				<div class="pvc-field">
-					<label class="pvc-label" for="pvc-hero-sub">Subtitle</label>
-					<input type="text" id="pvc-hero-sub" class="pvc-input" data-setting="hero_subtitle" value="<?php echo esc_attr( $h_sub ); ?>" placeholder="e.g. Explore our full video collection">
-					<span class="pvc-hint">Leave blank to auto-display the video count.</span>
+						<div class="pvc-field" style="margin:0 0 12px;">
+							<label class="pvc-sub-label" for="pvc-hero-title">Archive Title</label>
+							<input type="text" id="pvc-hero-title" class="pvc-input pvc-input--sm" data-setting="hero_title" value="<?php echo esc_attr( $h_title ); ?>" placeholder="Video Library">
+							<span class="pvc-hint">Leave blank to use the default post type archive label.</span>
+						</div>
+
+						<div class="pvc-field" style="margin:0 0 12px;">
+							<label class="pvc-sub-label" for="pvc-hero-sub">Subtitle</label>
+							<input type="text" id="pvc-hero-sub" class="pvc-input pvc-input--sm" data-setting="hero_subtitle" value="<?php echo esc_attr( $h_sub ); ?>" placeholder="e.g. Explore our full video collection">
+							<span class="pvc-hint">Leave blank to auto-display the video count.</span>
+						</div>
+
+						<div style="display:flex;gap:12px;margin:0 0 12px;">
+							<div style="flex:1;">
+								<span class="pvc-sub-label">Desktop height (px)</span>
+								<div class="pvc-stepper">
+									<button class="pvc-step-btn" data-direction="-20" data-target="hero_height_desktop">&#8722;</button>
+									<input type="number" class="pvc-step-input" data-setting="hero_height_desktop" min="100" max="800" step="20" value="<?php echo esc_attr( $h_height_desk ); ?>">
+									<button class="pvc-step-btn" data-direction="20" data-target="hero_height_desktop">+</button>
+								</div>
+							</div>
+							<div style="flex:1;">
+								<span class="pvc-sub-label">Mobile height (px)</span>
+								<div class="pvc-stepper">
+									<button class="pvc-step-btn" data-direction="-20" data-target="hero_height_mobile">&#8722;</button>
+									<input type="number" class="pvc-step-input" data-setting="hero_height_mobile" min="80" max="500" step="20" value="<?php echo esc_attr( $h_height_mob ); ?>">
+									<button class="pvc-step-btn" data-direction="20" data-target="hero_height_mobile">+</button>
+								</div>
+							</div>
+						</div>
+
+						<div style="margin:0 0 10px;">
+							<span class="pvc-sub-label">Text Alignment</span>
+							<div class="pvc-segment" data-for="pvc-hero-align-val">
+								<button class="pvc-seg-btn <?php echo 'left'   === $h_align ? 'pvc-seg-btn--active' : ''; ?>" data-value="left">Left</button>
+								<button class="pvc-seg-btn <?php echo 'center' === $h_align ? 'pvc-seg-btn--active' : ''; ?>" data-value="center">Center</button>
+								<button class="pvc-seg-btn <?php echo 'right'  === $h_align ? 'pvc-seg-btn--active' : ''; ?>" data-value="right">Right</button>
+							</div>
+							<input type="hidden" data-setting="hero_text_align" id="pvc-hero-align-val" value="<?php echo esc_attr( $h_align ); ?>">
+						</div>
+
+						<div>
+							<span class="pvc-sub-label">Text Container</span>
+							<div class="pvc-segment" data-for="pvc-hero-inner-w-val">
+								<button class="pvc-seg-btn <?php echo 'full'      === $h_inner_w ? 'pvc-seg-btn--active' : ''; ?>" data-value="full">Full Width</button>
+								<button class="pvc-seg-btn <?php echo 'contained' === $h_inner_w ? 'pvc-seg-btn--active' : ''; ?>" data-value="contained">Contained</button>
+							</div>
+							<input type="hidden" data-setting="hero_inner_width" id="pvc-hero-inner-w-val" value="<?php echo esc_attr( $h_inner_w ); ?>">
+							<span class="pvc-hint" style="margin-top:4px;">Contained aligns text with the content grid below.</span>
+						</div>
+
+					</div>
 				</div>
 
 				<div class="pvc-divider"></div>
@@ -440,9 +537,104 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					<input type="text" class="pvc-color-picker" data-setting="default_accent" value="<?php echo esc_attr( $accent ); ?>">
 					<span class="pvc-hint">Used for buttons, highlights, and the sidebar border.</span>
 				</div>
+				<div class="pvc-divider"></div>
+				<div class="pvc-field">
+					<span class="pvc-label">Page Background Color</span>
+					<input type="text" class="pvc-color-picker" data-setting="page_bg_color" value="<?php echo esc_attr( $page_bg ?: '#0c0c18' ); ?>">
+					<span class="pvc-hint">Default is <code style="color:rgba(255,255,255,.55);font-size:.78rem;">#0c0c18</code>. Type a hex value for instant preview, or click the refresh button after choosing a swatch.</span>
+				</div>
+				<div class="pvc-divider"></div>
+				<div class="pvc-field">
+					<span class="pvc-label">Sidebar Panel Background</span>
+					<input type="text" class="pvc-color-picker" data-setting="sidebar_bg_color" value="<?php echo esc_attr( $sidebar_bg ?: '#0f0f1e' ); ?>">
+					<span class="pvc-hint">Background color for the New Releases, Browse Topics, and Explore Tags panels. Default is <code style="color:rgba(255,255,255,.55);font-size:.78rem;">#0f0f1e</code>. Type a hex value for instant preview, or click the refresh button after choosing a swatch.</span>
+				</div>
 			</div><!-- /#pvc-panel-style -->
 
+			<!-- ── Notifications ── -->
+			<?php
+			$live_feed_on   = isset( $s['live_feed_enabled'] )   ? (bool) $s['live_feed_enabled']   : false;
+			$live_banner_on = isset( $s['live_banner_enabled'] )  ? (bool) $s['live_banner_enabled']  : false;
+			$nv_on          = isset( $s['new_video_notify'] )     ? (bool) $s['new_video_notify']     : false;
+			$nv_msg         = $s['new_video_notify_msg'] ?? '';
+			?>
+			<div class="pvc-panel" id="pvc-panel-notifications">
+
+				<!-- Live status indicator -->
+				<div class="pvc-live-status" id="pvc-live-status">
+					<span class="pvc-live-status__dot" id="pvc-live-dot"></span>
+					<span class="pvc-live-status__text" id="pvc-live-text">Checking live status&hellip;</span>
+					<button class="pvc-live-status__refresh" id="pvc-live-check-btn" title="Check now">
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+					</button>
+				</div>
+				<button class="pvc-test-mode-btn" id="pvc-test-mode-btn" data-active="0">
+					<span class="pvc-test-mode-btn__dot"></span>
+					<span class="pvc-test-mode-btn__label">Enable Test Mode</span>
+				</button>
+
+				<div class="pvc-test-video-field" id="pvc-test-video-field">
+					<span class="pvc-sub-label">Test Video ID <span class="pvc-sub-label-opt">(optional)</span></span>
+					<input type="text" class="pvc-input pvc-input--sm" id="pvc-test-video-id"
+						placeholder="e.g. dQw4w9WgXcQ" maxlength="11" autocomplete="off" spellcheck="false">
+					<span class="pvc-hint">Paste a live YouTube video ID to load the real chat. Leave blank to use the layout placeholder.</span>
+				</div>
+
+				<div class="pvc-divider"></div>
+
+				<div class="pvc-aside-section" id="pvc-section-live-feed">
+					<label class="pvc-aside-toggle">
+						<input type="checkbox" data-setting="live_feed_enabled" <?php checked( $live_feed_on ); ?>>
+						<span class="pvc-aside-toggle__label">Enable Live Feed</span>
+					</label>
+					<span class="pvc-hint">Automatically shows a live stream embed at the top of your archive page when your YouTube channel is broadcasting live. Checked every 2 minutes.</span>
+					<div class="pvc-sub-fields<?php echo $live_feed_on ? '' : ' pvc-collapsed'; ?>" style="margin-top:10px;">
+						<label class="pvc-aside-toggle pvc-aside-toggle--sub">
+							<input type="checkbox" data-setting="live_chat_enabled" <?php checked( ! empty( $pv_settings['live_chat_enabled'] ) ); ?>>
+							<span class="pvc-aside-toggle__label">Show Live Chat</span>
+						</label>
+						<span class="pvc-hint">Embeds YouTube&rsquo;s live chat panel alongside the video, sized to the container. Visitors can participate without leaving your site.</span>
+					</div>
+				</div>
+
+				<div class="pvc-divider"></div>
+
+				<div class="pvc-aside-section" id="pvc-section-live-banner">
+					<label class="pvc-aside-toggle">
+						<input type="checkbox" data-setting="live_banner_enabled" <?php checked( $live_banner_on ); ?>>
+						<span class="pvc-aside-toggle__label">Sitewide Live Banner</span>
+					</label>
+					<span class="pvc-hint">Shows a dismissable banner at the top of every page on your site when your channel is live. Visitors can close it and it won&rsquo;t reappear for that stream.</span>
+				</div>
+
+				<div class="pvc-divider"></div>
+
+				<div class="pvc-aside-section" id="pvc-section-new-video">
+					<label class="pvc-aside-toggle">
+						<input type="checkbox" data-setting="new_video_notify" <?php checked( $nv_on ); ?>>
+						<span class="pvc-aside-toggle__label">New Video Notification</span>
+					</label>
+					<div class="pvc-sub-fields<?php echo $nv_on ? '' : ' pvc-collapsed'; ?>">
+						<div class="pvc-field" style="margin-top:12px;">
+							<span class="pvc-label">Notification Message</span>
+							<input type="text" class="pvc-text-input" data-setting="new_video_notify_msg"
+								value="<?php echo esc_attr( $nv_msg ?: __( 'New videos have been added!', 'pv-youtube-importer' ) ); ?>"
+								placeholder="<?php esc_attr_e( 'New videos have been added!', 'pv-youtube-importer' ); ?>">
+							<span class="pvc-hint">Shown once per browser as a small toast when new content is published. Visitors dismiss it themselves.</span>
+						</div>
+					</div>
+				</div>
+
+				<button class="pvc-tour-replay-btn" id="pvc-tour-replay-btn" type="button">
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+					Replay feature tour
+				</button>
+
+			</div><!-- /#pvc-panel-notifications -->
+
 		</div><!-- /.pvc-settings -->
+
+		</div><!-- /.pvc-body -->
 	</div><!-- /.pvc-sidebar -->
 
 	<!-- ── Preview Pane ───────────────────────────────────── -->
@@ -460,6 +652,10 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 			<div class="pvc-frame-wrap" id="pvc-frame-wrap" data-device="desktop">
 				<iframe id="pvc-preview-iframe" src="about:blank" title="Archive preview"></iframe>
 				<div class="pvc-frame-loading" id="pvc-frame-loading"><div class="pvc-frame-loading__spinner"></div></div>
+				<!-- Tour preview callout — points to where banner/toast appear in the iframe -->
+				<div class="pvc-preview-callout" id="pvc-preview-callout">
+					<span class="pvc-preview-callout__label" id="pvc-preview-callout-label"></span>
+				</div>
 			</div>
 		</div>
 	</div><!-- /.pvc-preview -->

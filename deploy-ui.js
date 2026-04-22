@@ -64,7 +64,10 @@ const FILES = [
 	// PHP — import
 	'includes/import/class-youtube-api.php',
 	'includes/import/class-channel-importer.php',
+	// Display — notifications
+	'includes/display/class-notifications.php',
 	// CSS
+	'assets/dist/css/pv-notifications.css',
 	'assets/dist/css/admin.min.css',
 	'assets/dist/css/offcanvas.min.css',
 	'assets/dist/css/grid.min.css',
@@ -76,6 +79,7 @@ const FILES = [
 	'assets/dist/js/lazy-video.min.js',
 	'assets/dist/js/archive-filter.min.js',
 	'assets/dist/js/admin-customizer.min.js',
+	'assets/dist/js/pv-notifications.js',
 ];
 
 async function main() {

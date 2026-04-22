@@ -63,6 +63,32 @@
 				searchInput.focus();
 			});
 		}
+
+		var searchMicBtn = main.querySelector('.pv-search-mic-btn');
+		var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+		if (searchMicBtn && SpeechRec) {
+			var recognition = null;
+			var micOn = false;
+			searchMicBtn.addEventListener('click', function () {
+				if (micOn) { if (recognition) recognition.stop(); return; }
+				recognition = new SpeechRec();
+				recognition.lang = 'en-US';
+				recognition.interimResults = false;
+				recognition.maxAlternatives = 1;
+				recognition.onstart  = function () { micOn = true;  searchMicBtn.classList.add('pv-search-mic-btn--active'); };
+				recognition.onresult = function (e) {
+					var t = e.results[0][0].transcript;
+					searchInput.value = t;
+					if (searchClear) searchClear.hidden = false;
+					doSearch(t);
+				};
+				recognition.onend    = function () { micOn = false; searchMicBtn.classList.remove('pv-search-mic-btn--active'); };
+				recognition.onerror  = function () { micOn = false; searchMicBtn.classList.remove('pv-search-mic-btn--active'); };
+				try { recognition.start(); } catch (err) { micOn = false; }
+			});
+		} else if (searchMicBtn) {
+			searchMicBtn.style.display = 'none';
+		}
 	}
 
 	function doSearch(q) {
@@ -292,6 +318,27 @@
 		var bcIndicator = bc.querySelector('.pv-bc-tab-indicator');
 		var bcTabBar    = bc.querySelector('.pv-bc-tabs');
 
+		// ── Broadcast lazy tab loader ─────────────────────────────────
+		var bcAjaxUrl = (window.pvBroadcast && window.pvBroadcast.ajaxUrl) || (window.pvOffcanvas && window.pvOffcanvas.ajaxUrl) || '';
+		var bcNonce   = (window.pvBroadcast && window.pvBroadcast.nonce)   || '';
+
+		function loadBcLazy(container, type) {
+			if (!bcAjaxUrl) return;
+			var fd = new FormData();
+			fd.append('action', 'pv_bc_' + type);
+			fd.append('nonce',  bcNonce);
+			fd.append('page',   '1');
+			fetch(bcAjaxUrl, { method: 'POST', body: fd })
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					if (!data.success) { container.innerHTML = '<p class="pv-no-videos">Could not load content.</p>'; return; }
+					container.innerHTML = data.data.html || '<p class="pv-no-videos">No content found.</p>';
+				})
+				.catch(function () {
+					container.innerHTML = '<p class="pv-no-videos">Could not load content.</p>';
+				});
+		}
+
 		function activateBcTab(tab) {
 			bcTabs.forEach(function (t) {
 				t.classList.remove('pv-bc-tab--active');
@@ -308,6 +355,15 @@
 				var barRect = bcTabBar.getBoundingClientRect();
 				bcIndicator.style.left  = (tabRect.left - barRect.left) + 'px';
 				bcIndicator.style.width = tabRect.width + 'px';
+			}
+			// Lazy-load Videos / Playlists panel content on first activation
+			var panel = bc.querySelector('.pv-bc-panel[data-bc-panel="' + key + '"]');
+			if (panel) {
+				var lazy = panel.querySelector('[data-bc-lazy]');
+				if (lazy && !lazy.dataset.bcLoaded) {
+					lazy.dataset.bcLoaded = 'true';
+					loadBcLazy(lazy, lazy.dataset.bcLazy);
+				}
 			}
 		}
 
@@ -474,5 +530,67 @@
 			micBtn.style.display = 'none';
 		}
 	}
+
+	/* ── Live customizer preview bridge ──────────────────────────────── */
+	window.addEventListener('message', function (e) {
+		var d = e.data;
+		if (!d || d.type !== 'pv-update') return;
+
+		if (d.page_bg) {
+			var wrap    = document.querySelector('.pv-archive-wrap');
+			var content = document.querySelector('.pv-archive-content');
+			if (wrap)    { wrap.style.background    = d.page_bg; wrap.style.backgroundColor    = d.page_bg; }
+			if (content) { content.style.background = d.page_bg; content.style.backgroundColor = d.page_bg; }
+		}
+		if (d.sidebar_bg) {
+			var aside = document.querySelector('.pv-archive-aside');
+			if (aside) aside.style.setProperty('--pv-sidebar-bg', d.sidebar_bg);
+		}
+		if (d.accent) {
+			document.querySelectorAll('.pv-archive-wrap').forEach(function (el) {
+				el.style.setProperty('--pv-accent', d.accent);
+			});
+		}
+		if (d.hero_title) {
+			var ht = document.querySelector('[data-pv-hero-title]');
+			if (ht) ht.textContent = d.hero_title;
+		}
+		if (d.hero_subtitle !== undefined) {
+			var hs = document.querySelector('[data-pv-hero-sub]');
+			if (hs) hs.textContent = d.hero_subtitle;
+		}
+		if (d.hero_title_color) {
+			var htEl = document.querySelector('[data-pv-hero-title]');
+			if (htEl) htEl.style.color = d.hero_title_color;
+		}
+		if (d.hero_sub_color !== undefined) {
+			var hsEl = document.querySelector('[data-pv-hero-sub]');
+			if (hsEl) hsEl.style.color = d.hero_sub_color || '';
+		}
+	});
+
+	/* ── Live feed: pause when offcanvas opens, resume when it closes ── */
+	(function () {
+		function sendYT(iframe, func) {
+			if (!iframe) return;
+			try {
+				iframe.contentWindow.postMessage(
+					JSON.stringify({ event: 'command', func: func, args: '' }), '*'
+				);
+			} catch (e) { /* cross-origin guard */ }
+		}
+
+		function getLiveIframe() {
+			return document.querySelector('.pv-live-now__embed iframe');
+		}
+
+		document.addEventListener('pv:opened', function () {
+			sendYT(getLiveIframe(), 'pauseVideo');
+		});
+
+		document.addEventListener('pv:closed', function () {
+			sendYT(getLiveIframe(), 'playVideo');
+		});
+	}());
 
 }());

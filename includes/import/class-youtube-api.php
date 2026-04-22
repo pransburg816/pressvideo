@@ -87,6 +87,44 @@ class PV_YouTube_API {
 	}
 
 	/**
+	 * Check if the channel is currently live. Returns stream data or null.
+	 * Cached for 2 minutes to avoid hammering the API on every page load.
+	 *
+	 * @return array{video_id:string,title:string}|null
+	 */
+	public function get_live_stream( string $channel_id ): ?array {
+		if ( ! $channel_id ) return null;
+
+		$transient_key = 'pv_live_check_' . md5( $channel_id );
+		$cached = get_transient( $transient_key );
+		if ( $cached !== false ) {
+			return is_array( $cached ) ? $cached : null;
+		}
+
+		$response = $this->request( 'search', [
+			'part'       => 'snippet',
+			'channelId'  => $channel_id,
+			'eventType'  => 'live',
+			'type'       => 'video',
+			'maxResults' => 1,
+		] );
+
+		if ( is_wp_error( $response ) || empty( $response['items'] ) ) {
+			set_transient( $transient_key, 0, 2 * MINUTE_IN_SECONDS );
+			return null;
+		}
+
+		$item   = $response['items'][0];
+		$result = [
+			'video_id' => $item['id']['videoId']       ?? '',
+			'title'    => $item['snippet']['title']     ?? '',
+		];
+
+		set_transient( $transient_key, $result, 2 * MINUTE_IN_SECONDS );
+		return $result;
+	}
+
+	/**
 	 * Get detailed info for a single video (duration, view count, tags, category).
 	 *
 	 * @return array|WP_Error

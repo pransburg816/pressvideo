@@ -18,20 +18,288 @@
 	var toastTimer  = null;
 	var iframeReady = false;
 
-	// ── Tab navigation ────────────────────────────────────────
-	document.querySelectorAll('.pvc-tab').forEach(function (tab) {
-		tab.addEventListener('click', function () {
-			document.querySelectorAll('.pvc-tab').forEach(function (t) {
-				t.classList.remove('pvc-tab--active');
+	// ── Nav rail open/close toggle ────────────────────────────
+	var navRail       = document.getElementById('pvc-nav-rail');
+	var navToggleBtn  = document.getElementById('pvc-nav-toggle');
+	var navOpen       = localStorage.getItem('pvc_nav_open') === '1';
+
+	function setNavOpen(open) {
+		navOpen = open;
+		if (navRail) navRail.classList.toggle('pvc-nav-rail--open', open);
+		localStorage.setItem('pvc_nav_open', open ? '1' : '0');
+	}
+
+	setNavOpen(navOpen);
+
+	if (navToggleBtn) {
+		navToggleBtn.addEventListener('click', function () {
+			setNavOpen(!navOpen);
+		});
+	}
+
+	// ── Nav rail navigation ───────────────────────────────────
+	document.querySelectorAll('.pvc-nav-btn').forEach(function (btn) {
+		btn.addEventListener('click', function () {
+			document.querySelectorAll('.pvc-nav-btn').forEach(function (b) {
+				b.classList.remove('pvc-nav-btn--active');
 			});
 			document.querySelectorAll('.pvc-panel').forEach(function (p) {
 				p.classList.remove('pvc-panel--active');
 			});
-			this.classList.add('pvc-tab--active');
+			this.classList.add('pvc-nav-btn--active');
 			var panel = document.getElementById('pvc-panel-' + this.dataset.tab);
 			if (panel) panel.classList.add('pvc-panel--active');
+			// Auto-check live status when opening notifications panel
+			if (this.dataset.tab === 'notifications') {
+				checkLiveStatus();
+				if (!notifTourDone) {
+					notifTourDone = true;
+					setTimeout(startTour, 500);
+				}
+			}
 		});
 	});
+
+	// ── Live status checker ───────────────────────────────────
+	var liveStatusEl  = document.getElementById('pvc-live-status');
+	var liveDotEl     = document.getElementById('pvc-live-dot');
+	var liveTextEl    = document.getElementById('pvc-live-text');
+	var liveCheckBtn  = document.getElementById('pvc-live-check-btn');
+
+	function checkLiveStatus() {
+		if (!liveStatusEl) return;
+		liveStatusEl.className = 'pvc-live-status';
+		if (liveTextEl) liveTextEl.textContent = 'Checking live status\u2026';
+
+		var fd = new FormData();
+		fd.append('action', 'pv_check_live_status');
+		fd.append('nonce', cfg.nonce);
+
+		fetch(cfg.ajaxUrl, { method: 'POST', body: fd })
+			.then(function (r) { return r.json(); })
+			.then(function (data) {
+				if (!data.success) {
+					if (liveTextEl) liveTextEl.textContent = data.data && data.data.message ? data.data.message : 'Could not check — configure API key and Channel ID in Settings.';
+					liveStatusEl.classList.add('pvc-live-status--off');
+					return;
+				}
+				if (data.data.live) {
+					liveStatusEl.classList.add('pvc-live-status--on');
+					if (liveTextEl) liveTextEl.textContent = 'Live now: ' + (data.data.title || 'Stream detected');
+				} else {
+					liveStatusEl.classList.add('pvc-live-status--off');
+					if (liveTextEl) liveTextEl.textContent = 'Not currently live';
+				}
+			})
+			.catch(function () {
+				liveStatusEl.classList.add('pvc-live-status--off');
+				if (liveTextEl) liveTextEl.textContent = 'Could not reach server';
+			});
+	}
+
+	if (liveCheckBtn) {
+		liveCheckBtn.addEventListener('click', checkLiveStatus);
+	}
+
+	// ── Test Mode toggle ──────────────────────────────────────
+	var testModeBtn   = document.getElementById('pvc-test-mode-btn');
+	var testModeLabel = testModeBtn ? testModeBtn.querySelector('.pvc-test-mode-btn__label') : null;
+	var testModeOn      = false;
+	var testIndicator   = document.getElementById('pvc-test-mode-indicator');
+
+	var ALL_NOTIF_SECTIONS = ['pvc-section-live-feed', 'pvc-section-live-banner', 'pvc-section-new-video'];
+	var testVideoField = document.getElementById('pvc-test-video-field');
+	var testVideoInput = document.getElementById('pvc-test-video-id');
+
+	// Reload iframe when a valid 11-char video ID is typed (debounced)
+	if (testVideoInput) {
+		testVideoInput.addEventListener('input', function () {
+			if (!testModeOn) return;
+			clearTimeout(saveTimer);
+			saveTimer = setTimeout(function () { reloadIframe(); }, 800);
+		});
+	}
+
+	function setTestMode(on) {
+		testModeOn = on;
+		if (testModeBtn) {
+			testModeBtn.classList.toggle('pvc-test-mode-btn--active', on);
+			if (testModeLabel) testModeLabel.textContent = on ? 'Disable Test Mode' : 'Enable Test Mode';
+		}
+		if (testIndicator) testIndicator.classList.toggle('pvc-test-mode-indicator--visible', on);
+
+		// Disable "Check now" refresh during test mode so it can't wipe the status
+		if (liveCheckBtn) liveCheckBtn.disabled = on;
+
+		// Reflect test state in the live status indicator
+		if (liveStatusEl) {
+			if (on) {
+				liveStatusEl.className = 'pvc-live-status pvc-live-status--on';
+				if (liveTextEl) liveTextEl.textContent = 'Currently Live (Test Mode)';
+			} else {
+				// Restore real status, end any active tour
+				endTour();
+				checkLiveStatus();
+			}
+		}
+
+		// Show/hide test video ID field
+		if (testVideoField) testVideoField.classList.toggle('pvc-test-video-field--visible', on);
+
+		// Mute/unmute all notification feature sections
+		ALL_NOTIF_SECTIONS.forEach(function (id) {
+			var el = document.getElementById(id);
+			if (el) el.classList.toggle('pvc-aside-section--muted', on);
+		});
+
+		reloadIframe();
+	}
+
+	if (testModeBtn) {
+		testModeBtn.addEventListener('click', function () {
+			setTestMode(!testModeOn);
+		});
+	}
+
+	// ── Notifications feature tour ───────────────────────────────
+	var notifTourDone     = localStorage.getItem('pvc_notif_tour_done') === '1';
+	var tourCalloutEl     = null;
+	var tourReplayBtn     = document.getElementById('pvc-tour-replay-btn');
+	var previewCalloutEl  = document.getElementById('pvc-preview-callout');
+	var previewCalloutLbl = document.getElementById('pvc-preview-callout-label');
+
+	var TOUR_STEPS = [
+		{
+			sectionId    : 'pvc-section-live-banner',
+			icon         : '🔴',
+			title        : 'Sitewide Live Banner',
+			body         : 'When your YouTube channel goes live, a full-width strip automatically appears at the top of every page on your site with a Watch Live link. Visitors dismiss it per-stream — it won\'t nag them again for the same broadcast.',
+			step         : '1 of 2',
+			isLast       : false,
+			calloutClass : 'pvc-preview-callout--banner',
+			calloutLabel : '↑ Live Banner'
+		},
+		{
+			sectionId    : 'pvc-section-new-video',
+			icon         : '🎬',
+			title        : 'New Video Alerts',
+			body         : 'Whenever new videos are imported to your library, a small toast notification slides in once per visitor — a gentle nudge to check out your latest content. They dismiss it on their own and won\'t see it again.',
+			step         : '2 of 2',
+			isLast       : true,
+			calloutClass : 'pvc-preview-callout--toast',
+			calloutLabel : '🎬 New Video Alert'
+		}
+	];
+
+	var TOUR_SECTION_IDS = TOUR_STEPS.map(function (s) { return s.sectionId; });
+
+	function setPreviewCallout(step) {
+		if (!previewCalloutEl) return;
+		previewCalloutEl.className = 'pvc-preview-callout';
+		if (!step) return;
+		previewCalloutEl.classList.add(step.calloutClass);
+		if (previewCalloutLbl) previewCalloutLbl.textContent = step.calloutLabel;
+		requestAnimationFrame(function () {
+			requestAnimationFrame(function () {
+				previewCalloutEl.classList.add('pvc-preview-callout--visible');
+			});
+		});
+	}
+
+	function startTour() {
+		// Sections are already muted by setTestMode; just ensure tour sections are muted
+		TOUR_SECTION_IDS.forEach(function (id) {
+			var el = document.getElementById(id);
+			if (el) el.classList.add('pvc-aside-section--muted');
+		});
+		if (tourCalloutEl) { tourCalloutEl.remove(); tourCalloutEl = null; }
+		showTourStep(0);
+	}
+
+	function showTourStep(stepIdx) {
+		var step = TOUR_STEPS[stepIdx];
+
+		// Deactivate all tour sections, then spotlight current
+		TOUR_SECTION_IDS.forEach(function (id) {
+			var el = document.getElementById(id);
+			if (el) {
+				el.classList.add('pvc-aside-section--muted');
+				el.classList.remove('pvc-aside-section--tour-active');
+			}
+		});
+		var activeEl = document.getElementById(step.sectionId);
+		if (activeEl) {
+			activeEl.classList.remove('pvc-aside-section--muted');
+			activeEl.classList.add('pvc-aside-section--tour-active');
+		}
+
+		// Update preview callout
+		setPreviewCallout(step);
+
+		// Build sidebar callout card
+		var callout = document.createElement('div');
+		callout.className = 'pvc-tour-callout';
+		callout.innerHTML =
+			'<span class="pvc-tour-callout__icon">' + step.icon + '</span>'
+			+ '<div class="pvc-tour-callout__title">' + step.title + '</div>'
+			+ '<p class="pvc-tour-callout__body">' + step.body + '</p>'
+			+ '<div class="pvc-tour-callout__footer">'
+			+ '<span class="pvc-tour-callout__step">' + step.step + '</span>'
+			+ (step.isLast
+				? '<button class="pvc-tour-callout__btn pvc-tour-callout__btn--done" type="button">Got it!</button>'
+				: '<button class="pvc-tour-callout__btn" type="button">Next &rarr;</button>')
+			+ '</div>';
+
+		// Exit-animate old callout, insert new
+		if (tourCalloutEl) {
+			tourCalloutEl.classList.add('pvc-tour-callout--exit');
+			var old = tourCalloutEl;
+			setTimeout(function () { if (old.parentNode) old.remove(); }, 300);
+		}
+
+		tourCalloutEl = callout;
+		if (activeEl) activeEl.insertAdjacentElement('afterend', callout);
+
+		requestAnimationFrame(function () {
+			requestAnimationFrame(function () {
+				callout.classList.add('pvc-tour-callout--visible');
+			});
+		});
+
+		var actionBtn = callout.querySelector('.pvc-tour-callout__btn');
+		if (actionBtn) {
+			actionBtn.addEventListener('click', function () {
+				if (step.isLast) endTour();
+				else showTourStep(stepIdx + 1);
+			});
+		}
+	}
+
+	function endTour() {
+		// Hide sidebar callout
+		if (tourCalloutEl) {
+			tourCalloutEl.classList.remove('pvc-tour-callout--visible');
+			var c = tourCalloutEl;
+			setTimeout(function () { if (c.parentNode) c.remove(); }, 300);
+			tourCalloutEl = null;
+		}
+		// Hide preview callout
+		setPreviewCallout(null);
+		// Re-apply muting based on current test mode state
+		TOUR_SECTION_IDS.forEach(function (id) {
+			var el = document.getElementById(id);
+			if (el) {
+				el.classList.toggle('pvc-aside-section--muted', testModeOn);
+				el.classList.remove('pvc-aside-section--tour-active');
+			}
+		});
+		localStorage.setItem('pvc_notif_tour_done', '1');
+		notifTourDone = true;
+	}
+
+	if (tourReplayBtn) {
+		tourReplayBtn.addEventListener('click', startTour);
+	}
 
 	// ── Segmented controls (generic — uses data-for to find hidden input) ──
 	document.querySelectorAll('.pvc-segment').forEach(function (seg) {
@@ -112,6 +380,19 @@
 	var ytListEl  = document.getElementById('pvc-yt-playlists');
 	var ytFetched = false;
 
+	function renderYtPlaylists(playlists, savedArr) {
+		var html = '';
+		playlists.forEach(function (pl) {
+			if (!pl.count) return; // skip 0-item playlists
+			var checked = savedArr.indexOf('yt:' + pl.id) !== -1 ? ' checked' : '';
+			html += '<label class="pvc-bc-playlist-item">'
+				+ '<input type="checkbox" class="pvc-bc-playlist-cb" value="yt:' + escAttr(pl.id) + '"' + checked + '>'
+				+ '<span class="pvc-bc-playlist-name">' + escAttr(pl.title) + ' (' + pl.count + ')</span>'
+				+ '</label>';
+		});
+		ytListEl.innerHTML = html || '<span class="pvc-hint">No YouTube playlists with videos found.</span>';
+	}
+
 	function fetchYtPlaylists() {
 		if (!ytListEl || ytFetched) return;
 		ytFetched = true;
@@ -119,6 +400,19 @@
 		var savedRaw = bcPlaylistsInput ? bcPlaylistsInput.value : '[]';
 		var savedArr = [];
 		try { savedArr = JSON.parse(savedRaw); } catch (e) {}
+
+		// Serve from sessionStorage if available (avoids repeat API round-trip)
+		var cacheKey = 'pv_yt_playlists';
+		try {
+			var cached = sessionStorage.getItem(cacheKey);
+			if (cached) {
+				var cachedList = JSON.parse(cached);
+				if (cachedList && cachedList.length) {
+					renderYtPlaylists(cachedList, savedArr);
+					return;
+				}
+			}
+		} catch (e) {}
 
 		var fd = new FormData();
 		fd.append('action', 'pv_fetch_yt_playlists');
@@ -131,15 +425,8 @@
 					ytListEl.innerHTML = '<span class="pvc-hint">' + (data.data || 'No YouTube playlists found.') + '</span>';
 					return;
 				}
-				var html = '';
-				data.data.forEach(function (pl) {
-					var checked = savedArr.indexOf('yt:' + pl.id) !== -1 ? ' checked' : '';
-					html += '<label class="pvc-bc-playlist-item">'
-						+ '<input type="checkbox" class="pvc-bc-playlist-cb" value="yt:' + pl.id + '"' + checked + '>'
-						+ '<span class="pvc-bc-playlist-name">' + escAttr(pl.title) + ' (' + pl.count + ')</span>'
-						+ '</label>';
-				});
-				ytListEl.innerHTML = html;
+				try { sessionStorage.setItem(cacheKey, JSON.stringify(data.data)); } catch (e) {}
+				renderYtPlaylists(data.data, savedArr);
 			})
 			.catch(function () {
 				ytListEl.innerHTML = '<span class="pvc-hint">Could not load YouTube playlists.</span>';
@@ -167,6 +454,8 @@
 					if (key === 'default_accent')      { msg.accent            = hex; }
 					if (key === 'hero_title_color')    { msg.hero_title_color  = hex; }
 					if (key === 'hero_subtitle_color') { msg.hero_sub_color    = hex; }
+					if (key === 'page_bg_color')       { msg.page_bg           = hex; }
+					if (key === 'sidebar_bg_color')    { msg.sidebar_bg        = hex; }
 					sendMessage(msg);
 					triggerSave(true); // color: save only, no reload
 				},
@@ -175,6 +464,8 @@
 					if (key === 'default_accent')      { msg.accent           = '#4f46e5'; }
 					if (key === 'hero_title_color')    { msg.hero_title_color = '#ffffff'; }
 					if (key === 'hero_subtitle_color') { msg.hero_sub_color   = ''; }
+					if (key === 'page_bg_color')       { msg.page_bg          = '#0c0c18'; }
+					if (key === 'sidebar_bg_color')    { msg.sidebar_bg       = '#0f0f1e'; }
 					sendMessage(msg);
 					triggerSave(true);
 				},
@@ -370,7 +661,13 @@
 		iframeReady = false;
 		frameLoader.classList.add('pvc-frame-loading--visible');
 		setStatus('loading', 'Loading\u2026');
-		iframe.src = cfg.previewUrl + '&_r=' + Date.now();
+		var url = cfg.previewUrl + '&_r=' + Date.now();
+		if (testModeOn) {
+			url += '&pv_force_live=1';
+			var vid = testVideoInput ? testVideoInput.value.trim() : '';
+			if (vid) url += '&pv_test_video_id=' + encodeURIComponent(vid);
+		}
+		iframe.src = url;
 	}
 
 	function sendMessage(data) {

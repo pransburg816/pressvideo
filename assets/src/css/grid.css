@@ -43,7 +43,7 @@
 	content: '';
 	position: absolute;
 	inset: 0;
-	background: rgba(5,5,18,0.52);
+	background: rgba(0,0,0,0.72);
 	border-radius: inherit;
 	opacity: 0;
 	transition: opacity 0.35s ease;
@@ -65,14 +65,14 @@
 	display: block;
 }
 
-/* ── Footer — title + duration, fades out on hover ──────────────────── */
+/* ── Footer — title, vertically centered left-aligned ───────────────── */
 .pv-card__footer {
 	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	padding: 12px 16px 14px;
-	background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);
+	inset: 0;
+	display: flex;
+	align-items: center;
+	padding: 0 16px;
+	background: none;
 	z-index: 2;
 	transition: opacity 0.2s ease;
 	transition-delay: 0.1s;
@@ -185,7 +185,6 @@
 }
 .pv-card__read-more:hover {
 	color: #fff;
-	text-decoration: underline;
 }
 
 /* ── Watch button inside hover area ─────────────────────────────────── */
@@ -237,7 +236,7 @@
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
-	padding: 0 0 24px;
+	padding: 0 0 32px;
 }
 
 .pv-filter-btn {

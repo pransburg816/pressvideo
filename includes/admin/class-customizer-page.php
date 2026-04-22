@@ -13,7 +13,8 @@ class PV_Customizer_Page {
 		add_action( 'admin_body_class', [ $this, 'body_class' ] );
 		add_action( 'wp_ajax_pv_save_preview',       [ $this, 'ajax_save_preview' ] );
 		add_action( 'wp_ajax_pv_publish_settings',   [ $this, 'ajax_publish_settings' ] );
-		add_action( 'wp_ajax_pv_fetch_yt_playlists', [ $this, 'ajax_fetch_yt_playlists' ] );
+		add_action( 'wp_ajax_pv_fetch_yt_playlists',  [ $this, 'ajax_fetch_yt_playlists' ] );
+		add_action( 'wp_ajax_pv_check_live_status',   [ $this, 'ajax_check_live_status' ] );
 	}
 
 	public function add_menu(): void {
@@ -98,16 +99,43 @@ class PV_Customizer_Page {
 
 		$playlists = [];
 		foreach ( $body['items'] ?? [] as $item ) {
+			$count = (int) ( $item['contentDetails']['itemCount'] ?? 0 );
+			if ( $count === 0 ) continue; // skip empty playlists
 			$playlists[] = [
 				'id'    => $item['id'],
 				'title' => $item['snippet']['title']        ?? '',
 				'thumb' => $item['snippet']['thumbnails']['default']['url'] ?? '',
-				'count' => (int) ( $item['contentDetails']['itemCount'] ?? 0 ),
+				'count' => $count,
 			];
 		}
 
 		set_transient( $transient_key, $playlists, HOUR_IN_SECONDS );
 		wp_send_json_success( $playlists );
+	}
+
+	public function ajax_check_live_status(): void {
+		check_ajax_referer( 'pv_customizer', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
+
+		$settings   = get_option( 'pv_settings', [] );
+		$api_key    = $settings['api_key']    ?? '';
+		$channel_id = $settings['channel_id'] ?? '';
+
+		if ( ! $api_key || ! $channel_id ) {
+			wp_send_json_error( [ 'message' => 'API key or Channel ID not configured in Settings.' ] );
+		}
+
+		// Delete cached transient so this is a fresh check
+		delete_transient( 'pv_live_check_' . md5( $channel_id ) );
+
+		$api    = new PV_YouTube_API( $api_key );
+		$stream = $api->get_live_stream( $channel_id );
+
+		if ( $stream && ! empty( $stream['video_id'] ) ) {
+			wp_send_json_success( [ 'live' => true, 'title' => $stream['title'] ] );
+		} else {
+			wp_send_json_success( [ 'live' => false ] );
+		}
 	}
 
 	private function sanitize( array $raw ): array {
@@ -120,6 +148,9 @@ class PV_Customizer_Page {
 			'watch_page_layout' => [ 'hero-top', 'hero-split', 'theater' ],
 			'hero_title_size'   => [ '', 'lg', 'xl' ],
 			'hero_overlay'      => [ 'light', 'medium', 'dark' ],
+			'hero_text_align'   => [ 'left', 'center', 'right' ],
+			'hero_inner_width'  => [ 'full', 'contained' ],
+			'search_bar_align'  => [ 'left', 'center', 'right' ],
 		];
 		foreach ( $map_enum as $key => $allowed ) {
 			if ( isset( $raw[ $key ] ) && in_array( $raw[ $key ], $allowed, true ) ) {
@@ -127,7 +158,7 @@ class PV_Customizer_Page {
 			}
 		}
 
-		foreach ( [ 'default_accent', 'hero_title_color', 'hero_subtitle_color' ] as $k ) {
+		foreach ( [ 'default_accent', 'hero_title_color', 'hero_subtitle_color', 'page_bg_color', 'sidebar_bg_color' ] as $k ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$val = sanitize_hex_color( $raw[ $k ] ?? '' );
 				if ( $val ) {
@@ -140,7 +171,7 @@ class PV_Customizer_Page {
 			}
 		}
 
-		foreach ( [ 'hero_title', 'hero_subtitle', 'aside_new_releases_label', 'aside_topics_label', 'aside_tags_label', 'aside_cat_label', 'aside_tag_label' ] as $k ) {
+		foreach ( [ 'hero_title', 'hero_subtitle', 'aside_new_releases_label', 'aside_topics_label', 'aside_tags_label', 'aside_cat_label', 'aside_tag_label', 'new_video_notify_msg' ] as $k ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$clean[ $k ] = sanitize_text_field( $raw[ $k ] );
 			}
@@ -156,7 +187,7 @@ class PV_Customizer_Page {
 			$clean['hero_bg_image'] = esc_url_raw( $raw['hero_bg_image'] );
 		}
 
-		foreach ( [ 'aside_new_releases', 'aside_topics', 'aside_tags', 'cards_show_excerpt', 'cards_show_category', 'aside_cat_on', 'aside_tag_on' ] as $k ) {
+		foreach ( [ 'aside_new_releases', 'aside_topics', 'aside_tags', 'cards_show_excerpt', 'cards_show_category', 'aside_cat_on', 'aside_tag_on', 'hero_show', 'live_feed_enabled', 'live_chat_enabled', 'live_banner_enabled', 'new_video_notify' ] as $k ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$clean[ $k ] = (bool) $raw[ $k ];
 			}
@@ -170,10 +201,12 @@ class PV_Customizer_Page {
 		}
 
 		foreach ( [
-			'aside_new_releases_count' => [ 3, 10 ],
-			'aside_tags_count'         => [ 6, 24 ],
-			'aside_cat_count'          => [ 3, 10 ],
-			'aside_tag_count'          => [ 3, 10 ],
+			'aside_new_releases_count' => [ 3,  10  ],
+			'aside_tags_count'         => [ 6,  24  ],
+			'aside_cat_count'          => [ 3,  10  ],
+			'aside_tag_count'          => [ 3,  10  ],
+			'hero_height_desktop'      => [ 100, 800 ],
+			'hero_height_mobile'       => [ 80,  500 ],
 		] as $k => $range ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$clean[ $k ] = max( $range[0], min( $range[1], (int) $raw[ $k ] ) );

@@ -25,15 +25,27 @@ $pv_layout    = $pv_settings['archive_layout'] ?? 'grid';
 $pv_display   = $pv_settings['display_mode']   ?? 'offcanvas';
 $total_videos = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
 
-// Hero
-$pv_hero_title = $pv_settings['hero_title']    ?? '';
-$pv_hero_sub   = $pv_settings['hero_subtitle'] ?? '';
+// Content width (computed first — used by both hero and content area)
+$_pv_cw_map     = [ 'wide' => '1400px', 'medium' => '1200px', 'narrow' => '960px' ];
+$_pv_max_w      = $_pv_cw_map[ $pv_settings['content_width'] ?? '' ] ?? '';
+$_pv_width_attr = ''; // built after $_pv_page_bg is defined (see below)
 
-$_pv_hero_style = '';
+// Hero
+$pv_hero_show    = isset( $pv_settings['hero_show'] ) ? (bool) $pv_settings['hero_show'] : true;
+$pv_hero_align   = $pv_settings['hero_text_align']  ?? 'center';
+$pv_hero_inner_w = $pv_settings['hero_inner_width'] ?? 'full';
+$pv_hero_title   = $pv_settings['hero_title']       ?? '';
+$pv_hero_sub     = $pv_settings['hero_subtitle']    ?? '';
+$_hero_h_desk    = max( 100, min( 800, (int) ( $pv_settings['hero_height_desktop'] ?? 440 ) ) );
+$_hero_h_mob     = max( 80,  min( 500, (int) ( $pv_settings['hero_height_mobile']  ?? 280 ) ) );
+
+$_hero_inner_max_w = 'contained' === $pv_hero_inner_w ? ( $_pv_max_w ?: '1200px' ) : '';
+$_pv_hero_css = '--pv-hero-h:' . $_hero_h_desk . 'px;--pv-hero-h-mobile:' . $_hero_h_mob . 'px;'
+	. ( $_hero_inner_max_w ? '--pv-hero-inner-max-w:' . $_hero_inner_max_w . ';' : '' );
 if ( ! empty( $pv_settings['hero_bg_image'] ) ) {
-	$_ov_map        = [ 'light' => '0.45', 'medium' => '0.65', 'dark' => '0.82' ];
-	$_ov_op         = $_ov_map[ $pv_settings['hero_overlay'] ?? 'medium' ] ?? '0.65';
-	$_pv_hero_style = ' style="background-image:linear-gradient(rgba(0,0,0,' . esc_attr( $_ov_op ) . '),rgba(0,0,0,' . esc_attr( $_ov_op ) . ')),url(' . esc_url( $pv_settings['hero_bg_image'] ) . ');background-size:cover;background-position:center;"';
+	$_ov_map       = [ 'light' => '0.45', 'medium' => '0.65', 'dark' => '0.82' ];
+	$_ov_op        = $_ov_map[ $pv_settings['hero_overlay'] ?? 'medium' ] ?? '0.65';
+	$_pv_hero_css .= 'background-image:linear-gradient(rgba(0,0,0,' . esc_attr( $_ov_op ) . '),rgba(0,0,0,' . esc_attr( $_ov_op ) . ')),url(' . esc_url( $pv_settings['hero_bg_image'] ) . ');background-size:cover;background-position:center;';
 }
 
 $_pv_title_size  = $pv_settings['hero_title_size']     ?? '';
@@ -44,13 +56,9 @@ $_pv_title_style = $_pv_title_color ? ' style="color:' . esc_attr( $_pv_title_co
 $_pv_sub_style   = $_pv_sub_color   ? ' style="color:' . esc_attr( $_pv_sub_color ) . '"'   : '';
 
 // Card options
-$pv_cards_excerpt = isset( $pv_settings['cards_show_excerpt'] )  ? (bool) $pv_settings['cards_show_excerpt']  : true;
-$pv_cards_cat     = isset( $pv_settings['cards_show_category'] ) ? (bool) $pv_settings['cards_show_category'] : true;
-
-// Content width
-$_pv_cw_map     = [ 'wide' => '1400px', 'medium' => '1200px', 'narrow' => '960px' ];
-$_pv_max_w      = $_pv_cw_map[ $pv_settings['content_width'] ?? '' ] ?? '';
-$_pv_width_attr = $_pv_max_w ? ' style="max-width:' . esc_attr( $_pv_max_w ) . ';margin:0 auto;"' : '';
+$pv_cards_excerpt  = isset( $pv_settings['cards_show_excerpt'] )  ? (bool) $pv_settings['cards_show_excerpt']  : true;
+$pv_cards_cat      = isset( $pv_settings['cards_show_category'] ) ? (bool) $pv_settings['cards_show_category'] : true;
+$pv_search_align   = $pv_settings['search_bar_align'] ?? 'center';
 
 if ( 'offcanvas' === $pv_display ) {
 	do_action( 'pv_player_enqueued' );
@@ -210,9 +218,27 @@ $render_card = function() use ( $pv_display, $pv_playlist_json, $pv_cards_excerp
 
 get_header();
 ?>
-<div class="pv-archive-wrap" style="--pv-accent:<?php echo esc_attr( $pv_accent ); ?>;">
+<?php
+$_pv_page_bg    = $pv_settings['page_bg_color'] ?? '';
+$_pv_wrap_style = '--pv-accent:' . esc_attr( $pv_accent );
+if ( $_pv_page_bg ) {
+	$_pv_wrap_style .= ';background-color:' . esc_attr( $_pv_page_bg );
+}
 
-	<div class="pv-archive-hero"<?php echo $_pv_hero_style; // phpcs:ignore ?>>
+// Build content div style now that $_pv_page_bg is available
+$_pv_content_style = $_pv_max_w ? 'max-width:' . esc_attr( $_pv_max_w ) . ';margin:0 auto;' : '';
+if ( $_pv_page_bg ) {
+	$_pv_content_style .= 'background-color:' . esc_attr( $_pv_page_bg ) . ';';
+}
+$_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '';
+?>
+<div class="pv-archive-wrap" style="<?php echo $_pv_wrap_style; // phpcs:ignore ?>">
+
+	<?php if ( $pv_hero_show ) : ?>
+	<div class="pv-archive-hero<?php
+		echo 'center' !== $pv_hero_align ? ' pv-archive-hero--align-' . esc_attr( $pv_hero_align ) : '';
+		echo 'contained' === $pv_hero_inner_w ? ' pv-archive-hero--inner-contained' : '';
+	?>" style="<?php echo esc_attr( $_pv_hero_css ); ?>">
 		<div class="pv-archive-hero__inner">
 			<p class="pv-archive-hero__eyebrow"><svg class="pv-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> PressVideo</p>
 			<h1 class="<?php echo esc_attr( $_pv_title_class ); ?>"<?php echo $_pv_title_style; // phpcs:ignore ?> data-pv-hero-title>
@@ -225,8 +251,85 @@ get_header();
 			<?php endif; ?>
 		</div>
 	</div>
+	<?php endif; ?>
 
-	<div class="pv-archive-content"<?php echo $_pv_width_attr; // phpcs:ignore ?>>
+	<?php
+	// Live feed: check if enabled, or if admin is forcing a preview
+	$_pv_force_live = $pv_is_preview
+		&& isset( $_GET['pv_force_live'] ) // phpcs:ignore
+		&& current_user_can( 'manage_options' );
+
+	if ( ! empty( $pv_settings['live_feed_enabled'] ) || $_pv_force_live ) :
+		$_pv_api_key    = $pv_settings['api_key']    ?? '';
+		$_pv_channel_id = $pv_settings['channel_id'] ?? '';
+		$_pv_live       = null;
+
+		if ( $_pv_force_live ) {
+			$_pv_test_id          = isset( $_GET['pv_test_video_id'] ) ? sanitize_text_field( wp_unslash( $_GET['pv_test_video_id'] ) ) : ''; // phpcs:ignore
+			$_pv_has_real_test_id = $_pv_test_id && preg_match( '/^[A-Za-z0-9_-]{11}$/', $_pv_test_id );
+			if ( $_pv_has_real_test_id ) {
+				$_pv_live = [ 'video_id' => $_pv_test_id, 'title' => 'Live Stream (Test Mode)' ];
+			} else {
+				$_pv_live = [ 'video_id' => 'jNQXAC9IVRw', 'title' => 'Preview: Live Stream Title Goes Here' ];
+			}
+		} elseif ( $_pv_api_key && $_pv_channel_id ) {
+			$_pv_yt_api = new PV_YouTube_API( $_pv_api_key );
+			$_pv_live   = $_pv_yt_api->get_live_stream( $_pv_channel_id );
+		}
+		$_pv_chat_on     = ! empty( $pv_settings['live_chat_enabled'] );
+		$_pv_embed_domain = parse_url( home_url(), PHP_URL_HOST );
+
+		if ( $_pv_live && ! empty( $_pv_live['video_id'] ) ) :
+	?>
+	<div class="pv-live-now"<?php if ( $_pv_max_w ) echo ' style="max-width:' . esc_attr( $_pv_max_w ) . ';margin:0 auto;"'; // phpcs:ignore ?>>
+		<div class="pv-live-now__header">
+			<span class="pv-live-now__badge">
+				<span class="pv-live-now__dot" aria-hidden="true"></span>
+				<?php esc_html_e( 'Live Now', 'pv-youtube-importer' ); ?>
+			</span>
+			<span class="pv-live-now__title"><?php echo esc_html( $_pv_live['title'] ); ?></span>
+		</div>
+		<?php
+		// Show chat panel when: test mode (always show placeholder) OR setting enabled in production
+		$_pv_show_chat = $_pv_force_live || $_pv_chat_on;
+		?>
+		<div class="pv-live-now__body<?php echo $_pv_show_chat ? '' : ' pv-live-now__body--no-chat'; ?>">
+			<div class="pv-live-now__embed">
+				<iframe
+					src="https://www.youtube.com/embed/<?php echo esc_attr( $_pv_live['video_id'] ); ?>?autoplay=0&rel=0&modestbranding=1&enablejsapi=1"
+					title="<?php echo esc_attr( $_pv_live['title'] ); ?>"
+					frameborder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+					allowfullscreen
+					loading="lazy"
+				></iframe>
+			</div>
+			<?php if ( $_pv_show_chat ) : ?>
+			<div class="pv-live-now__chat">
+				<?php if ( $_pv_force_live && ! ( $_pv_has_real_test_id ?? false ) ) : ?>
+				<div class="pv-live-now__chat-placeholder">
+					<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+					<span class="pv-live-now__chat-placeholder__title">Live Chat</span>
+					<span class="pv-live-now__chat-placeholder__sub">Viewers can participate in your live chat here without leaving your site</span>
+				</div>
+				<?php else : ?>
+				<iframe
+					src="https://www.youtube.com/live_chat?v=<?php echo esc_attr( $_pv_live['video_id'] ); ?>&embed_domain=<?php echo esc_attr( $_pv_embed_domain ); ?>"
+					title="<?php esc_attr_e( 'Live chat', 'pv-youtube-importer' ); ?>"
+					frameborder="0"
+					loading="lazy"
+				></iframe>
+				<?php endif; ?>
+			</div>
+			<?php endif; ?>
+		</div>
+	</div>
+	<?php
+		endif;
+	endif;
+	?>
+
+	<div class="pv-archive-content<?php echo $pv_hero_show ? '' : ' pv-archive-content--no-hero'; ?>"<?php echo $_pv_width_attr; // phpcs:ignore ?>>
 		<div class="pv-archive-layout">
 
 			<div class="pv-archive-main"
@@ -236,13 +339,18 @@ get_header();
 			<?php if ( have_posts() ) : ?>
 
 				<?php if ( 'broadcast' !== $pv_layout ) : ?>
-				<div class="pv-search-wrap">
-					<svg class="pv-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-					<input type="search" class="pv-search-input"
-					       placeholder="<?php esc_attr_e( 'Search videos...', 'pv-youtube-importer' ); ?>"
-					       autocomplete="off" spellcheck="false"
-					       aria-label="<?php esc_attr_e( 'Search videos', 'pv-youtube-importer' ); ?>">
-					<button class="pv-search-clear" aria-label="<?php esc_attr_e( 'Clear search', 'pv-youtube-importer' ); ?>" hidden>&#x2715;</button>
+				<div class="pv-search-bar<?php echo 'center' !== $pv_search_align ? ' pv-search-bar--' . esc_attr( $pv_search_align ) : ''; ?>">
+					<div class="pv-search-wrap">
+						<svg class="pv-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+						<input type="search" class="pv-search-input"
+						       placeholder="<?php esc_attr_e( 'Search videos...', 'pv-youtube-importer' ); ?>"
+						       autocomplete="off" spellcheck="false"
+						       aria-label="<?php esc_attr_e( 'Search videos', 'pv-youtube-importer' ); ?>">
+						<button class="pv-search-clear" aria-label="<?php esc_attr_e( 'Clear search', 'pv-youtube-importer' ); ?>" hidden>&#x2715;</button>
+						<button class="pv-search-mic-btn" aria-label="<?php esc_attr_e( 'Voice search', 'pv-youtube-importer' ); ?>" title="<?php esc_attr_e( 'Search by voice', 'pv-youtube-importer' ); ?>">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+						</button>
+					</div>
 				</div>
 				<p class="pv-search-results-msg" hidden></p>
 				<div class="pv-search-results" hidden></div>
@@ -399,12 +507,8 @@ get_header();
 					</div>
 
 				<?php elseif ( 'broadcast' === $pv_layout ) :
-					// Collect all posts from main loop
-					$bc_all_posts = [];
-					while ( have_posts() ) {
-						the_post();
-						$bc_all_posts[] = clone $GLOBALS['post'];
-					}
+					// Videos and Playlists tabs are lazy-loaded via AJAX on first click.
+					// $bc_all_posts is no longer pre-fetched on page load.
 
 					// Decode selected playlist entries — may be series slugs or yt:PLxxxx
 					$bc_pl_raw   = $pv_settings['bc_playlists'] ?? '[]';
@@ -489,6 +593,13 @@ get_header();
 					if ( empty( $bc_series ) && empty( $bc_yt_sections ) ) {
 						$_all_s = get_terms( [ 'taxonomy' => 'pv_series', 'hide_empty' => true, 'number' => 4, 'orderby' => 'count', 'order' => 'DESC' ] );
 						if ( $_all_s && ! is_wp_error( $_all_s ) ) $bc_series = $_all_s;
+					}
+
+					// Secondary fallback: top 4 categories when no series exist either
+					$bc_cat_sections = [];
+					if ( empty( $bc_series ) && empty( $bc_yt_sections ) ) {
+						$_all_cats = get_terms( [ 'taxonomy' => 'pv_category', 'hide_empty' => true, 'number' => 4, 'orderby' => 'count', 'order' => 'DESC' ] );
+						if ( $_all_cats && ! is_wp_error( $_all_cats ) ) $bc_cat_sections = $_all_cats;
 					}
 
 					// All series for Playlists tab
@@ -607,9 +718,7 @@ get_header();
 							<div class="pv-bc-section">
 								<div class="pv-bc-section__head">
 									<h2 class="pv-bc-section__title"><?php echo esc_html( $_bcs->name ); ?></h2>
-									<?php if ( ! is_wp_error( $_bcs_link ) ) : ?>
-										<a href="<?php echo esc_url( $_bcs_link ); ?>" class="pv-bc-section__view-all"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?> &rarr;</a>
-									<?php endif; ?>
+									<button type="button" class="pv-bc-section__view-all pv-bc-tab-switch" data-target-tab="videos"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?> &rarr;</button>
 								</div>
 								<div class="pv-bc-row">
 									<?php foreach ( $_bcs_posts as $_bcs_p ) : $render_bc_card( $_bcs_p ); endforeach; ?>
@@ -617,14 +726,41 @@ get_header();
 							</div>
 							<?php endforeach; ?>
 
-							<?php // Fallback: show latest videos when no sections configured
-							if ( empty( $bc_yt_sections ) && empty( $bc_series ) && ! empty( $bc_all_posts ) ) : ?>
+							<?php // Category sections fallback (no series or yt playlists exist)
+							foreach ( $bc_cat_sections as $_bcc ) :
+								$_bcc_posts = get_posts( [
+									'post_type'      => 'pv_youtube',
+									'posts_per_page' => 4,
+									'post_status'    => 'publish',
+									'orderby'        => 'date',
+									'order'          => 'DESC',
+									'tax_query'      => [ [ 'taxonomy' => 'pv_category', 'field' => 'term_id', 'terms' => $_bcc->term_id ] ], // phpcs:ignore
+								] );
+								if ( empty( $_bcc_posts ) ) continue;
+							?>
+							<div class="pv-bc-section">
+								<div class="pv-bc-section__head">
+									<h2 class="pv-bc-section__title"><?php echo esc_html( $_bcc->name ); ?></h2>
+									<button type="button" class="pv-bc-section__view-all pv-bc-tab-switch" data-target-tab="videos"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?> &rarr;</button>
+								</div>
+								<div class="pv-bc-row">
+									<?php foreach ( $_bcc_posts as $_bcc_p ) : $render_bc_card( $_bcc_p ); endforeach; ?>
+								</div>
+							</div>
+							<?php endforeach; ?>
+
+							<?php // Fallback: show latest videos when no sections configured at all
+							$bc_latest_fallback = [];
+							if ( empty( $bc_yt_sections ) && empty( $bc_series ) && empty( $bc_cat_sections ) ) {
+								$bc_latest_fallback = get_posts( [ 'post_type' => 'pv_youtube', 'posts_per_page' => 4, 'post_status' => 'publish', 'orderby' => 'date', 'order' => 'DESC', 'no_found_rows' => true ] );
+							}
+							if ( ! empty( $bc_latest_fallback ) ) : ?>
 							<div class="pv-bc-section">
 								<div class="pv-bc-section__head">
 									<h2 class="pv-bc-section__title"><?php esc_html_e( 'Latest Videos', 'pv-youtube-importer' ); ?></h2>
 								</div>
 								<div class="pv-bc-row">
-									<?php foreach ( array_slice( $bc_all_posts, 0, 4 ) as $_bcp ) : $render_bc_card( $_bcp ); endforeach; ?>
+									<?php foreach ( $bc_latest_fallback as $_bcp ) : $render_bc_card( $_bcp ); endforeach; ?>
 								</div>
 							</div>
 							<?php endif; ?>
@@ -651,57 +787,18 @@ get_header();
 							</div>
 							<?php endif; ?>
 
-							<!-- 4-column video grid -->
-							<div class="pv-bc-video-grid">
-								<?php foreach ( $bc_all_posts as $_bc_v ) : $render_bc_card( $_bc_v ); endforeach; ?>
+							<!-- 4-column video grid — lazy-loaded on first tab click -->
+							<div class="pv-bc-video-grid" data-bc-lazy="videos">
+								<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>
 							</div>
 
 						</div><!-- /videos panel -->
 
-						<!-- PLAYLISTS panel: grid of all series as playlist cards -->
+						<!-- PLAYLISTS panel: lazy-loaded on first tab click -->
 						<div class="pv-bc-panel" data-bc-panel="playlists" role="tabpanel">
-							<?php if ( ! empty( $bc_all_series ) ) : ?>
-							<div class="pv-bc-playlist-list">
-								<?php foreach ( $bc_all_series as $_pls ) :
-									// One query gives both the cover image and an accurate published post count
-									$_pls_q = new WP_Query( [
-										'post_type'      => 'pv_youtube',
-										'posts_per_page' => 1,
-										'post_status'    => 'publish',
-										'orderby'        => 'date',
-										'order'          => 'DESC',
-										'no_found_rows'  => false,
-										'tax_query'      => [ [ 'taxonomy' => 'pv_series', 'field' => 'term_id', 'terms' => $_pls->term_id ] ], // phpcs:ignore
-									] );
-									$_pls_count = (int) $_pls_q->found_posts;
-									if ( $_pls_count === 0 ) continue; // hide empty playlists
-									$_pls_thumb = ! empty( $_pls_q->posts ) ? get_the_post_thumbnail_url( $_pls_q->posts[0]->ID, 'medium' ) : '';
-									$_pls_link  = get_term_link( $_pls );
-								?>
-								<div class="pv-bc-pl-list-card">
-									<div class="pv-bc-pl-list-card__thumb">
-										<?php if ( $_pls_thumb ) : ?>
-											<img src="<?php echo esc_url( $_pls_thumb ); ?>" alt="<?php echo esc_attr( $_pls->name ); ?>" loading="lazy">
-										<?php else : ?>
-											<div class="pv-bc-pl-list-card__no-thumb"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg></div>
-										<?php endif; ?>
-										<div class="pv-bc-pl-list-card__count">
-											<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg>
-											<?php echo esc_html( sprintf( _n( '%d video', '%d videos', $_pls_count, 'pv-youtube-importer' ), $_pls_count ) ); ?>
-										</div>
-									</div>
-									<div class="pv-bc-pl-list-card__info">
-										<div class="pv-bc-pl-list-card__title"><?php echo esc_html( $_pls->name ); ?></div>
-										<?php if ( ! is_wp_error( $_pls_link ) ) : ?>
-											<a href="<?php echo esc_url( $_pls_link ); ?>" class="pv-bc-pl-list-card__view-all"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?> &rarr;</a>
-										<?php endif; ?>
-									</div>
-								</div>
-								<?php endforeach; ?>
+							<div data-bc-lazy="playlists">
+								<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>
 							</div>
-							<?php else : ?>
-							<p class="pv-no-videos"><?php esc_html_e( 'No playlists found. Assign the Series taxonomy to your videos to create playlists.', 'pv-youtube-importer' ); ?></p>
-							<?php endif; ?>
 						</div><!-- /playlists panel -->
 
 					</div><!-- /.pv-bc-panels -->
@@ -712,7 +809,9 @@ get_header();
 					<div class="pv-grid" style="--pv-cols:3;"><?php while ( have_posts() ) : the_post(); $render_card(); endwhile; ?></div>
 				<?php endif; ?>
 
+				<?php if ( 'broadcast' !== $pv_layout ) : ?>
 				<div class="pv-pagination"><?php the_posts_pagination( [ 'prev_text' => '&#8592; ' . __( 'Prev', 'pv-youtube-importer' ), 'next_text' => __( 'Next', 'pv-youtube-importer' ) . ' &#8594;' ] ); ?></div>
+				<?php endif; ?>
 
 			<?php else : ?>
 				<p class="pv-no-videos"><?php esc_html_e( 'No videos found.', 'pv-youtube-importer' ); ?></p>
@@ -720,7 +819,8 @@ get_header();
 
 			</div><!-- /.pv-archive-main -->
 
-			<aside class="pv-archive-aside">
+			<?php $_pv_sidebar_bg = $pv_settings['sidebar_bg_color'] ?? ''; ?>
+			<aside class="pv-archive-aside"<?php if ( $_pv_sidebar_bg ) echo ' style="--pv-sidebar-bg:' . esc_attr( $_pv_sidebar_bg ) . '"'; // phpcs:ignore ?>>
 
 				<?php if ( $pv_aside_nr_on && ! empty( $pv_aside_recent ) ) : ?>
 				<div class="pv-aside-section">
