@@ -305,3 +305,103 @@
 	.pv-grid { --pv-cols: 1; }
 	.pv-card { height: clamp(240px, 62vw, 340px); }
 }
+
+/* ── Toolbar (per-page selector row) ───────────────────────────────── */
+.pv-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding: 0 0 16px;
+}
+.pv-per-page {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+.pv-per-page__label {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: rgba(255,255,255,0.4);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	margin-right: 4px;
+}
+.pv-per-page__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 36px;
+	padding: 5px 10px;
+	background: rgba(255,255,255,0.05);
+	border: 1.5px solid rgba(255,255,255,0.1);
+	border-radius: 6px;
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: rgba(255,255,255,0.5);
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s, border-color 0.15s;
+	line-height: 1;
+}
+.pv-per-page__btn:hover {
+	border-color: var(--pv-accent);
+	color: #fff;
+	background: rgba(79,70,229,0.15);
+}
+.pv-per-page__btn--active {
+	background: var(--pv-accent);
+	border-color: var(--pv-accent);
+	color: #fff;
+	pointer-events: none;
+}
+
+/* ── Pagination ─────────────────────────────────────────────────────── */
+.pv-pagination {
+	padding: 24px 0 8px;
+}
+.pv-pagination--top {
+	padding: 0 0 20px;
+}
+.pv-pagination .nav-links {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+.pv-pagination .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 36px;
+	height: 36px;
+	padding: 0 10px;
+	background: rgba(255,255,255,0.06);
+	border: 1.5px solid rgba(255,255,255,0.1);
+	border-radius: 8px;
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: rgba(255,255,255,0.6);
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s, border-color 0.15s;
+	line-height: 1;
+}
+.pv-pagination .page-numbers:hover {
+	border-color: var(--pv-accent);
+	color: #fff;
+	background: rgba(79,70,229,0.18);
+}
+.pv-pagination .page-numbers.current {
+	background: var(--pv-accent);
+	border-color: var(--pv-accent);
+	color: #fff;
+	pointer-events: none;
+}
+.pv-pagination .page-numbers.dots {
+	background: transparent;
+	border-color: transparent;
+	color: rgba(255,255,255,0.3);
+	pointer-events: none;
+}
+@media (max-width: 480px) {
+	.pv-per-page__label { display: none; }
+	.pv-pagination .page-numbers { min-width: 32px; height: 32px; font-size: 0.78rem; }
+}
