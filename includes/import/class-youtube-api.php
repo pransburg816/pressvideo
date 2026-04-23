@@ -129,6 +129,40 @@ class PV_YouTube_API {
 	 *
 	 * @return array|WP_Error
 	 */
+	/**
+	 * Fetch details for multiple videos in batches of 50 (one API call per batch).
+	 * Returns an array keyed by YouTube video ID.
+	 *
+	 * @param  string[] $video_ids
+	 * @return array<string, array>
+	 */
+	public function get_video_details_batch( array $video_ids ): array {
+		$results = [];
+		foreach ( array_chunk( $video_ids, 50 ) as $chunk ) {
+			$response = $this->request( 'videos', [
+				'part' => 'snippet,contentDetails,statistics',
+				'id'   => implode( ',', $chunk ),
+			] );
+			if ( is_wp_error( $response ) ) continue;
+			foreach ( $response['items'] ?? [] as $item ) {
+				$id = $item['id'] ?? '';
+				if ( ! $id ) continue;
+				$snippet     = $item['snippet'] ?? [];
+				$category_id = (string) ( $snippet['categoryId'] ?? '' );
+				$results[ $id ] = [
+					'duration'      => $this->parse_duration( $item['contentDetails']['duration'] ?? '' ),
+					'view_count'    => absint( $item['statistics']['viewCount'] ?? 0 ),
+					'tags'          => array_values( array_filter( array_map(
+						'sanitize_text_field',
+						(array) ( $snippet['tags'] ?? [] )
+					) ) ),
+					'category_name' => self::youtube_category_name( $category_id ),
+				];
+			}
+		}
+		return $results;
+	}
+
 	public function get_video_details( string $video_id ): array|WP_Error {
 		$response = $this->request( 'videos', [
 			'part' => 'snippet,contentDetails,statistics',

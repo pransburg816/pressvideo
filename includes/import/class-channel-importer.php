@@ -10,8 +10,8 @@ class PV_Channel_Importer {
 	private PV_YouTube_API $api;
 
 	public function __construct() {
-		$settings      = get_option( 'pv_settings', [] );
-		$this->api     = new PV_YouTube_API( $settings['api_key'] ?? '' );
+		$settings  = get_option( 'pv_settings', [] );
+		$this->api = new PV_YouTube_API( $settings['api_key'] ?? '' );
 	}
 
 	/**
@@ -20,43 +20,97 @@ class PV_Channel_Importer {
 	 * @return array { imported: int, skipped: int, limit_reached: bool, errors: string[] }
 	 */
 	public function import_channel( string $channel_id ): array {
-		$result = [ 'imported' => 0, 'skipped' => 0, 'limit_reached' => false, 'errors' => [] ];
+		// Give the import process plenty of time — image sideloading is slow.
+		@set_time_limit( 300 );
 
+		$result         = [ 'imported' => 0, 'skipped' => 0, 'limit_reached' => false, 'errors' => [] ];
 		$limit          = PV_Tier::get_video_limit();
 		$existing_count = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
 
-		// Import recent channel uploads first.
-		$videos = $this->api->get_channel_videos( $channel_id, 50 );
+		// Fetch up to 500 channel uploads (all tiers — video limit gates creation, not fetch).
+		$videos = $this->api->get_channel_videos( $channel_id, 500 );
 		if ( is_wp_error( $videos ) ) {
 			$result['errors'][] = $videos->get_error_message();
-		} else {
-			[ $result, $existing_count ] = $this->process_videos( $videos, $channel_id, $result, $limit, $existing_count );
+			return $result;
 		}
 
-		// Import all videos from each configured YouTube broadcast playlist so
-		// playlist filtering in the Broadcast layout always has the full set.
+		// Separate new videos from already-imported ones.
+		$new_videos = [];
+		foreach ( $videos as $video_data ) {
+			if ( $existing_count >= $limit ) {
+				$result['limit_reached'] = true;
+				break;
+			}
+			if ( $this->video_exists( $video_data['youtube_id'] ) ) {
+				$result['skipped']++;
+				continue;
+			}
+			$new_videos[] = $video_data;
+			$existing_count++;
+		}
+
+		if ( empty( $new_videos ) ) {
+			update_option( 'pv_last_import', [ 'time' => time(), 'imported' => 0, 'skipped' => $result['skipped'] ] );
+			return $result;
+		}
+
+		// Batch-fetch details for all new videos (50 IDs per API call).
+		$new_ids      = array_column( $new_videos, 'youtube_id' );
+		$details_map  = $this->api->get_video_details_batch( $new_ids );
+
+		// Create posts.
+		foreach ( $new_videos as $video_data ) {
+			$details = $details_map[ $video_data['youtube_id'] ] ?? [];
+			$post_id = $this->create_video_post( $video_data, $channel_id, $details );
+			if ( is_wp_error( $post_id ) ) {
+				$result['errors'][] = $post_id->get_error_message();
+				continue;
+			}
+			$result['imported']++;
+		}
+
+		// Also import from each configured YouTube broadcast playlist so playlist
+		// filtering shows the full set even for videos older than the top 500 uploads.
 		if ( ! $result['limit_reached'] ) {
 			$settings     = get_option( 'pv_settings', [] );
 			$bc_raw_items = json_decode( $settings['bc_playlists'] ?? '[]', true );
 			if ( is_array( $bc_raw_items ) ) {
 				foreach ( $bc_raw_items as $_item ) {
-					// Only process YouTube playlists (yt: prefix); skip series slugs.
 					if ( strncmp( (string) $_item, 'yt:', 3 ) !== 0 ) continue;
 					$pl_id     = substr( (string) $_item, 3 );
 					if ( $result['limit_reached'] ) break;
+
 					$pl_videos = $this->api->get_playlist_videos( $pl_id, 200 );
 					if ( is_wp_error( $pl_videos ) ) {
 						$result['errors'][] = $pl_videos->get_error_message();
 						continue;
 					}
-					// Bust stale transient so next page load re-caches the full 200 IDs.
+
+					$pl_new = [];
+					foreach ( $pl_videos as $video_data ) {
+						if ( $existing_count >= $limit ) { $result['limit_reached'] = true; break; }
+						if ( $this->video_exists( $video_data['youtube_id'] ) ) { $result['skipped']++; continue; }
+						$pl_new[] = $video_data;
+						$existing_count++;
+					}
+
+					if ( ! empty( $pl_new ) ) {
+						$pl_new_ids   = array_column( $pl_new, 'youtube_id' );
+						$pl_details   = $this->api->get_video_details_batch( $pl_new_ids );
+						foreach ( $pl_new as $video_data ) {
+							$details = $pl_details[ $video_data['youtube_id'] ] ?? [];
+							$post_id = $this->create_video_post( $video_data, $channel_id, $details );
+							if ( is_wp_error( $post_id ) ) { $result['errors'][] = $post_id->get_error_message(); continue; }
+							$result['imported']++;
+						}
+					}
+
+					// Bust stale transient so next page load re-caches with the full set.
 					delete_transient( 'pv_yt_pl_vids_' . md5( $pl_id ) );
-					[ $result, $existing_count ] = $this->process_videos( $pl_videos, $channel_id, $result, $limit, $existing_count );
 				}
 			}
 		}
 
-		// Persist result for dashboard stats display.
 		update_option( 'pv_last_import', [
 			'time'     => time(),
 			'imported' => $result['imported'],
@@ -64,36 +118,6 @@ class PV_Channel_Importer {
 		] );
 
 		return $result;
-	}
-
-	/**
-	 * Process a list of video data arrays into pv_youtube posts.
-	 *
-	 * @return array{ 0: array, 1: int } Updated $result and $existing_count.
-	 */
-	private function process_videos( array $videos, string $channel_id, array $result, int $limit, int $existing_count ): array {
-		foreach ( $videos as $video_data ) {
-			if ( $existing_count >= $limit ) {
-				$result['limit_reached'] = true;
-				break;
-			}
-
-			if ( $this->video_exists( $video_data['youtube_id'] ) ) {
-				$result['skipped']++;
-				continue;
-			}
-
-			$post_id = $this->create_video_post( $video_data, $channel_id );
-			if ( is_wp_error( $post_id ) ) {
-				$result['errors'][] = $post_id->get_error_message();
-				continue;
-			}
-
-			$result['imported']++;
-			$existing_count++;
-		}
-
-		return [ $result, $existing_count ];
 	}
 
 	/** Check if a video with the given YouTube ID already exists. */
@@ -114,10 +138,11 @@ class PV_Channel_Importer {
 
 	/**
 	 * Create a pv_video post from YouTube video data.
+	 * Accepts pre-fetched $details to avoid redundant API calls.
 	 *
-	 * @return int|WP_Error  Post ID on success, WP_Error on failure.
+	 * @return int|WP_Error Post ID on success, WP_Error on failure.
 	 */
-	private function create_video_post( array $video_data, string $channel_id ): int|WP_Error {
+	private function create_video_post( array $video_data, string $channel_id, array $details = [] ): int|WP_Error {
 		$youtube_id = sanitize_text_field( $video_data['youtube_id'] );
 
 		$post_id = wp_insert_post( [
@@ -132,30 +157,29 @@ class PV_Channel_Importer {
 
 		if ( is_wp_error( $post_id ) ) return $post_id;
 
-		$embed_url = 'https://www.youtube.com/watch?v=' . $youtube_id;
-		update_post_meta( $post_id, '_pv_youtube_id',   $youtube_id );
-		update_post_meta( $post_id, '_pv_youtube_url',  $embed_url );
-		update_post_meta( $post_id, '_pv_channel_id',   sanitize_text_field( $channel_id ) );
-		update_post_meta( $post_id, '_pv_imported_at',  time() );
+		update_post_meta( $post_id, '_pv_youtube_id',  $youtube_id );
+		update_post_meta( $post_id, '_pv_youtube_url', 'https://www.youtube.com/watch?v=' . $youtube_id );
+		update_post_meta( $post_id, '_pv_channel_id',  sanitize_text_field( $channel_id ) );
+		update_post_meta( $post_id, '_pv_imported_at', time() );
 
-		// Fetch duration, view count, tags, and YouTube category.
-		$details = $this->api->get_video_details( $youtube_id );
-		if ( ! is_wp_error( $details ) ) {
-			update_post_meta( $post_id, '_pv_duration',   $details['duration'] );
-			update_post_meta( $post_id, '_pv_view_count', $details['view_count'] );
+		// Use pre-fetched details if available; fall back to individual API call.
+		if ( empty( $details ) ) {
+			$fetched = $this->api->get_video_details( $youtube_id );
+			$details = is_wp_error( $fetched ) ? [] : $fetched;
+		}
 
-			// Auto-assign YouTube tags → pv_tag terms.
+		if ( ! empty( $details ) ) {
+			update_post_meta( $post_id, '_pv_duration',   $details['duration'] ?? '' );
+			update_post_meta( $post_id, '_pv_view_count', $details['view_count'] ?? 0 );
+
 			if ( ! empty( $details['tags'] ) ) {
 				wp_set_object_terms( $post_id, $details['tags'], 'pv_tag' );
 			}
-
-			// Auto-assign YouTube category → pv_category term.
 			if ( ! empty( $details['category_name'] ) ) {
 				wp_set_object_terms( $post_id, [ $details['category_name'] ], 'pv_category' );
 			}
 		}
 
-		// Sideload thumbnail as featured image.
 		if ( ! empty( $video_data['thumbnail'] ) ) {
 			$this->sideload_thumbnail( $video_data['thumbnail'], $post_id, $video_data['title'] );
 		}
