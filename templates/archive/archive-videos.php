@@ -332,21 +332,21 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 
 				<?php if ( 'broadcast' !== $pv_layout ) : ?>
 				<div class="pv-toolbar">
-					<?php if ( ! $_pv_show_all && $GLOBALS['wp_query']->max_num_pages > 1 ) : ?>
-					<div class="pv-pagination pv-pagination--top"><?php the_posts_pagination( [ 'prev_text' => '&#8592; ' . __( 'Prev', 'pv-youtube-importer' ), 'next_text' => __( 'Next', 'pv-youtube-importer' ) . ' &#8594;' ] ); ?></div>
-					<?php else : ?>
-					<div></div>
-					<?php endif; ?>
+					<div id="pv-top-pagination" class="pv-pagination pv-pagination--top">
+					<?php if ( ! $_pv_show_all && $GLOBALS['wp_query']->max_num_pages > 1 ) : the_posts_pagination( [ 'prev_text' => '&#8592; ' . __( 'Prev', 'pv-youtube-importer' ), 'next_text' => __( 'Next', 'pv-youtube-importer' ) . ' &#8594;' ] ); endif; ?>
+				</div>
 					<div class="pv-per-page" role="group" aria-label="<?php esc_attr_e( 'Videos per page', 'pv-youtube-importer' ); ?>">
 						<span class="pv-per-page__label"><?php esc_html_e( 'Show:', 'pv-youtube-importer' ); ?></span>
 						<?php foreach ( $_pv_pp_allowed as $_n ) : ?>
 							<a href="<?php echo esc_url( add_query_arg( 'per_page', $_n, $_pv_pp_base_url ) ); ?>"
+							   data-per-page="<?php echo esc_attr( $_n ); ?>"
 							   class="pv-per-page__btn<?php echo $_pv_cur_pp === $_n ? ' pv-per-page__btn--active' : ''; ?>"
 							   aria-current="<?php echo $_pv_cur_pp === $_n ? 'true' : 'false'; ?>">
 								<?php echo esc_html( $_n ); ?>
 							</a>
 						<?php endforeach; ?>
 						<a href="<?php echo esc_url( add_query_arg( 'per_page', 'all', $_pv_pp_base_url ) ); ?>"
+						   data-per-page="all"
 						   class="pv-per-page__btn<?php echo 'all' === $_pv_cur_pp ? ' pv-per-page__btn--active' : ''; ?>"
 						   aria-current="<?php echo 'all' === $_pv_cur_pp ? 'true' : 'false'; ?>">
 							<?php esc_html_e( 'All', 'pv-youtube-importer' ); ?>
@@ -354,6 +354,8 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 					</div>
 				</div>
 				<?php endif; /* end toolbar */ ?>
+
+				<div id="pv-layout-wrap">
 
 				<?php if ( 'featured' === $pv_layout ) :
 					the_post();
@@ -775,8 +777,12 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 					<div class="pv-grid" style="--pv-cols:3;"><?php while ( have_posts() ) : the_post(); $render_card(); endwhile; ?></div>
 				<?php endif; ?>
 
-				<?php if ( 'broadcast' !== $pv_layout && ! $_pv_show_all ) : ?>
-				<div class="pv-pagination"><?php the_posts_pagination( [ 'prev_text' => '&#8592; ' . __( 'Prev', 'pv-youtube-importer' ), 'next_text' => __( 'Next', 'pv-youtube-importer' ) . ' &#8594;' ] ); ?></div>
+				</div><!-- /#pv-layout-wrap -->
+
+				<?php if ( 'broadcast' !== $pv_layout ) : ?>
+				<div id="pv-bottom-pagination" class="pv-pagination">
+					<?php if ( ! $_pv_show_all ) : the_posts_pagination( [ 'prev_text' => '&#8592; ' . __( 'Prev', 'pv-youtube-importer' ), 'next_text' => __( 'Next', 'pv-youtube-importer' ) . ' &#8594;' ] ); endif; ?>
+				</div>
 				<?php endif; ?>
 
 			<?php else : ?>
