@@ -313,77 +313,30 @@
 		var bcHomeToolbar      = bc.querySelector('#pv-bc-home-toolbar');
 		var bcHomeSectionHead  = bc.querySelector('.pv-bc-home-section-head');
 		var bcHomeSectionTitle = bc.querySelector('.pv-bc-home-section-title');
-		var bcHomeViewAll      = bc.querySelector('#pv-bc-home-view-all');
-		var bcHomeViewAllBtn   = bc.querySelector('#pv-bc-home-view-all-btn');
-		var bcHomePerPage      = '20';
+		var bcHomePerPage      = '24';
 		var bcHomePage         = 1;
 		var bcHomeSelectedPl   = '';
-		var bcHomeExpandedPl   = '';
 		var bcHasLabel         = bcHomeSectionHead ? bcHomeSectionHead.dataset.hasLabel === '1' : false;
 		var bcDefaultLabel     = bcHomeSectionHead ? (bcHomeSectionHead.dataset.defaultLabel || '') : '';
 
 		function goToLatest() {
 			bcHomeSelectedPl = '';
-			bcHomeExpandedPl = '';
-			if (bcHomeToolbar) bcHomeToolbar.hidden = false;
 			if (bcHomeSectionHead) bcHomeSectionHead.hidden = !bcHasLabel;
 			if (bcHasLabel && bcHomeSectionTitle) bcHomeSectionTitle.textContent = bcDefaultLabel;
-			if (bcHomeViewAll) bcHomeViewAll.hidden = true;
 			bc.querySelectorAll('.pv-bc-pl-nav-btn').forEach(function (btn) {
 				btn.classList.toggle('pv-bc-pl-nav-btn--active', btn.dataset.plId === '');
 			});
 			loadBcHomeGrid(1, bcHomePerPage);
 		}
 
-		function goToPlaylistPreview(plId, plTitle) {
+		function goToPlaylist(plId, plTitle) {
 			bcHomeSelectedPl = plId;
-			bcHomeExpandedPl = '';
-			if (bcHomeToolbar) bcHomeToolbar.hidden = true;
 			if (bcHomeSectionHead) bcHomeSectionHead.hidden = false;
 			if (bcHomeSectionTitle) bcHomeSectionTitle.textContent = plTitle;
-			if (bcHomeViewAll) bcHomeViewAll.hidden = true;
 			bc.querySelectorAll('.pv-bc-pl-nav-btn').forEach(function (btn) {
 				btn.classList.toggle('pv-bc-pl-nav-btn--active', btn.dataset.plId === plId);
 			});
-			loadBcHomePlaylistPreview(plId);
-		}
-
-		function goToPlaylistExpanded(plId) {
-			bcHomeExpandedPl = plId;
-			if (bcHomeToolbar) bcHomeToolbar.hidden = false;
-			if (bcHomeViewAll) bcHomeViewAll.hidden = true;
 			loadBcHomePlaylistGrid(plId, 1, bcHomePerPage);
-		}
-
-		function loadBcHomePlaylistPreview(plId) {
-			if (!bcHomeGrid || !bcAjaxUrl) return;
-			bcHomeGrid.innerHTML = '<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>';
-			if (bcHomeTopPag) bcHomeTopPag.innerHTML = '';
-			if (bcHomeBotPag) bcHomeBotPag.innerHTML = '';
-			var fd = new FormData();
-			fd.append('action',   'pv_bc_videos');
-			fd.append('nonce',    bcNonce);
-			fd.append('page',     '1');
-			fd.append('per_page', '4');
-			fd.append('pv_yt_pl', plId);
-			fetch(bcAjaxUrl, { method: 'POST', body: fd })
-				.then(function (r) { return r.json(); })
-				.then(function (data) {
-					if (!data.success) {
-						bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>';
-						return;
-					}
-					var d = data.data;
-					bcHomeGrid.innerHTML = d.html || '<p class="pv-no-videos">No videos found.</p>';
-					if (d.total > 4 && bcHomeViewAll && bcHomeViewAllBtn) {
-						bcHomeViewAllBtn.textContent = 'View All (' + d.total + ') \u2192';
-						bcHomeViewAllBtn.dataset.ytPl = plId;
-						bcHomeViewAll.hidden = false;
-					}
-				})
-				.catch(function () {
-					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>';
-				});
 		}
 
 		function loadBcHomePlaylistGrid(plId, page, perPage) {
@@ -568,7 +521,7 @@
 				var panel = ppBtn.closest('.pv-bc-panel');
 				var pk    = panel && panel.dataset.bcPanel;
 				if (pk === 'home') {
-					if (bcHomeExpandedPl) { loadBcHomePlaylistGrid(bcHomeExpandedPl, 1, pp); }
+					if (bcHomeSelectedPl) { loadBcHomePlaylistGrid(bcHomeSelectedPl, 1, pp); }
 					else                  { loadBcHomeGrid(1, pp); }
 				}
 				if (pk === 'videos') loadBcVideosGrid(1, pp, bcVideosCategory, bcVideosYtPl);
@@ -585,7 +538,7 @@
 					var match = pageLink.href.match(/[?&]paged=(\d+)/);
 					var pg    = match ? parseInt(match[1], 10) : 1;
 					if (pk === 'home') {
-						if (bcHomeExpandedPl) { loadBcHomePlaylistGrid(bcHomeExpandedPl, pg, bcHomePerPage); }
+						if (bcHomeSelectedPl) { loadBcHomePlaylistGrid(bcHomeSelectedPl, pg, bcHomePerPage); }
 						else                  { loadBcHomeGrid(pg, bcHomePerPage); }
 					}
 					if (pk === 'videos') loadBcVideosGrid(pg, bcVideosPerPage, bcVideosCategory, bcVideosYtPl);
@@ -598,21 +551,8 @@
 			if (plNavBtn) {
 				var plId    = plNavBtn.dataset.plId;
 				var plTitle = plNavBtn.dataset.plTitle || '';
-				if (!plId) {
-					goToLatest();
-				} else if (bcHomeSelectedPl === plId && !bcHomeExpandedPl) {
-					goToLatest();
-				} else {
-					goToPlaylistPreview(plId, plTitle);
-				}
-				return;
-			}
-
-			// "View All" button → expand playlist inline in home panel
-			var expandBtn = e.target.closest('.pv-bc-home-expand-btn');
-			if (expandBtn) {
-				var ytPl = expandBtn.dataset.ytPl;
-				if (ytPl) goToPlaylistExpanded(ytPl);
+				if (!plId) { goToLatest(); }
+				else       { goToPlaylist(plId, plTitle); }
 				return;
 			}
 

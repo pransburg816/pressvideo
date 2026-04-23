@@ -677,8 +677,8 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 								<div class="pv-per-page" role="group" aria-label="<?php esc_attr_e( 'Videos per page', 'pv-youtube-importer' ); ?>">
 									<span class="pv-per-page__label"><?php esc_html_e( 'Show:', 'pv-youtube-importer' ); ?></span>
 									<button class="pv-per-page__btn" data-bc-per-page="10">10</button>
-									<button class="pv-per-page__btn pv-per-page__btn--active" data-bc-per-page="20">20</button>
-									<button class="pv-per-page__btn" data-bc-per-page="50">50</button>
+									<button class="pv-per-page__btn pv-per-page__btn--active" data-bc-per-page="24">24</button>
+									<button class="pv-per-page__btn" data-bc-per-page="48">48</button>
 									<button class="pv-per-page__btn" data-bc-per-page="all"><?php esc_html_e( 'All', 'pv-youtube-importer' ); ?></button>
 								</div>
 							</div>
@@ -710,11 +710,6 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							<!-- Video grid: AJAX-loaded on activation -->
 							<div class="pv-bc-home-grid" data-bc-lazy="bc_home">
 								<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>
-							</div>
-
-							<!-- View All: shown in playlist preview mode when total > 4 -->
-							<div id="pv-bc-home-view-all" hidden>
-								<button class="pv-bc-home-expand-btn pv-btn" id="pv-bc-home-view-all-btn" type="button"></button>
 							</div>
 
 							<!-- Bottom pagination -->

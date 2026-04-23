@@ -2082,7 +2082,7 @@
 .pv-bc-home-section-head { margin: 0 0 16px; }
 .pv-bc-home-section-title { color: #fff; font-size: 1rem; font-weight: 700; margin: 0; }
 
-/* ── Home panel: video grid + View All ──────────────────────────── */
+/* ── Home panel: video grid ──────────────────────────────────────── */
 .pv-bc-home-grid {
 	display: grid;
 	grid-template-columns: repeat(4, 1fr);
@@ -2091,8 +2091,6 @@
 }
 @media (max-width: 900px) { .pv-bc-home-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .pv-bc-home-grid { grid-template-columns: 1fr; } }
-#pv-bc-home-view-all { text-align: center; padding: 16px 0 4px; }
-.pv-bc-home-expand-btn { cursor: pointer; font-family: inherit; }
 
 /* ── Videos tab: sort bar ────────────────────────────────────────── */
 .pv-bc-sort-bar {
