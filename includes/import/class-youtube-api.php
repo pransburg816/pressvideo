@@ -131,6 +131,42 @@ class PV_YouTube_API {
 	 * @return array|WP_Error
 	 */
 	/**
+	 * Fetch all non-empty playlists for a channel.
+	 *
+	 * @return array[]|WP_Error  Each item: { id, title, count }
+	 */
+	public function get_channel_playlists( string $channel_id ): array|WP_Error {
+		$playlists  = [];
+		$page_token = '';
+
+		do {
+			$params = [
+				'part'       => 'snippet,contentDetails',
+				'channelId'  => $channel_id,
+				'maxResults' => 50,
+			];
+			if ( $page_token ) $params['pageToken'] = $page_token;
+
+			$response = $this->request( 'playlists', $params );
+			if ( is_wp_error( $response ) ) return $response;
+
+			foreach ( $response['items'] ?? [] as $item ) {
+				$count = (int) ( $item['contentDetails']['itemCount'] ?? 0 );
+				if ( $count === 0 ) continue;
+				$playlists[] = [
+					'id'    => $item['id'],
+					'title' => $item['snippet']['title'] ?? '',
+					'count' => $count,
+				];
+			}
+
+			$page_token = $response['nextPageToken'] ?? '';
+		} while ( $page_token );
+
+		return $playlists;
+	}
+
+	/**
 	 * Fetch details for multiple videos in batches of 50 (one API call per batch).
 	 * Returns an array keyed by YouTube video ID.
 	 *

@@ -37,7 +37,65 @@ class PV_Channel_Importer {
 			return $result;
 		}
 
-		// Separate new videos from already-imported ones.
+		// Process channel uploads — skip already-imported, batch-create new ones.
+		[ $result, $existing_count ] = $this->process_video_list( $videos, $channel_id, $result, $limit, $existing_count );
+
+		// ── Playlist pass ────────────────────────────────────────────────────
+		// Platinum: automatically import from ALL channel playlists so unlisted
+		// or playlist-only videos (not in the public uploads feed) are captured.
+		// Any tier: also run configured bc_playlists as a supplement.
+		$playlist_ids = [];
+
+		if ( PV_Tier::is_platinum() && ! $result['limit_reached'] ) {
+			$ch_playlists = $this->api->get_channel_playlists( $channel_id );
+			if ( ! is_wp_error( $ch_playlists ) ) {
+				foreach ( $ch_playlists as $pl ) {
+					$playlist_ids[ $pl['id'] ] = true;
+				}
+			}
+		}
+
+		// Merge in manually-configured bc_playlists (any tier).
+		if ( ! $result['limit_reached'] ) {
+			$settings     = get_option( 'pv_settings', [] );
+			$bc_raw_items = json_decode( $settings['bc_playlists'] ?? '[]', true );
+			foreach ( (array) $bc_raw_items as $_item ) {
+				if ( strncmp( (string) $_item, 'yt:', 3 ) === 0 ) {
+					$playlist_ids[ substr( (string) $_item, 3 ) ] = true;
+				}
+			}
+		}
+
+		foreach ( array_keys( $playlist_ids ) as $pl_id ) {
+			if ( $result['limit_reached'] ) break;
+
+			$pl_videos = $this->api->get_playlist_videos( $pl_id, PHP_INT_MAX );
+			if ( is_wp_error( $pl_videos ) ) {
+				$result['errors'][] = $pl_videos->get_error_message();
+				continue;
+			}
+
+			[ $result, $existing_count ] = $this->process_video_list( $pl_videos, $channel_id, $result, $limit, $existing_count );
+
+			// Bust stale video-ID transient so archive page rebuilds it with full set.
+			delete_transient( 'pv_yt_pl_vids_' . md5( $pl_id ) );
+		}
+
+		update_option( 'pv_last_import', [
+			'time'     => time(),
+			'imported' => $result['imported'],
+			'skipped'  => $result['skipped'],
+		] );
+
+		return $result;
+	}
+
+	/**
+	 * Filter $videos to new-only, batch-fetch details, create posts.
+	 *
+	 * @return array{ 0: array, 1: int } Updated [$result, $existing_count].
+	 */
+	private function process_video_list( array $videos, string $channel_id, array $result, int $limit, int $existing_count ): array {
 		$new_videos = [];
 		foreach ( $videos as $video_data ) {
 			if ( $existing_count >= $limit ) {
@@ -48,20 +106,16 @@ class PV_Channel_Importer {
 				$result['skipped']++;
 				continue;
 			}
-			$new_videos[] = $video_data;
+			$new_videos[]   = $video_data;
 			$existing_count++;
 		}
 
 		if ( empty( $new_videos ) ) {
-			update_option( 'pv_last_import', [ 'time' => time(), 'imported' => 0, 'skipped' => $result['skipped'] ] );
-			return $result;
+			return [ $result, $existing_count ];
 		}
 
-		// Batch-fetch details for all new videos (50 IDs per API call).
-		$new_ids      = array_column( $new_videos, 'youtube_id' );
-		$details_map  = $this->api->get_video_details_batch( $new_ids );
+		$details_map = $this->api->get_video_details_batch( array_column( $new_videos, 'youtube_id' ) );
 
-		// Create posts.
 		foreach ( $new_videos as $video_data ) {
 			$details = $details_map[ $video_data['youtube_id'] ] ?? [];
 			$post_id = $this->create_video_post( $video_data, $channel_id, $details );
@@ -72,55 +126,7 @@ class PV_Channel_Importer {
 			$result['imported']++;
 		}
 
-		// Also import from each configured YouTube broadcast playlist so playlist
-		// filtering shows the full set even for videos older than the top 500 uploads.
-		if ( ! $result['limit_reached'] ) {
-			$settings     = get_option( 'pv_settings', [] );
-			$bc_raw_items = json_decode( $settings['bc_playlists'] ?? '[]', true );
-			if ( is_array( $bc_raw_items ) ) {
-				foreach ( $bc_raw_items as $_item ) {
-					if ( strncmp( (string) $_item, 'yt:', 3 ) !== 0 ) continue;
-					$pl_id     = substr( (string) $_item, 3 );
-					if ( $result['limit_reached'] ) break;
-
-					$pl_videos = $this->api->get_playlist_videos( $pl_id, 200 );
-					if ( is_wp_error( $pl_videos ) ) {
-						$result['errors'][] = $pl_videos->get_error_message();
-						continue;
-					}
-
-					$pl_new = [];
-					foreach ( $pl_videos as $video_data ) {
-						if ( $existing_count >= $limit ) { $result['limit_reached'] = true; break; }
-						if ( $this->video_exists( $video_data['youtube_id'] ) ) { $result['skipped']++; continue; }
-						$pl_new[] = $video_data;
-						$existing_count++;
-					}
-
-					if ( ! empty( $pl_new ) ) {
-						$pl_new_ids   = array_column( $pl_new, 'youtube_id' );
-						$pl_details   = $this->api->get_video_details_batch( $pl_new_ids );
-						foreach ( $pl_new as $video_data ) {
-							$details = $pl_details[ $video_data['youtube_id'] ] ?? [];
-							$post_id = $this->create_video_post( $video_data, $channel_id, $details );
-							if ( is_wp_error( $post_id ) ) { $result['errors'][] = $post_id->get_error_message(); continue; }
-							$result['imported']++;
-						}
-					}
-
-					// Bust stale transient so next page load re-caches with the full set.
-					delete_transient( 'pv_yt_pl_vids_' . md5( $pl_id ) );
-				}
-			}
-		}
-
-		update_option( 'pv_last_import', [
-			'time'     => time(),
-			'imported' => $result['imported'],
-			'skipped'  => $result['skipped'],
-		] );
-
-		return $result;
+		return [ $result, $existing_count ];
 	}
 
 	/** Check if a video with the given YouTube ID already exists. */
