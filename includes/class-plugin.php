@@ -83,21 +83,27 @@ class PV_Plugin {
 		add_action( 'wp_ajax_pv_bc_playlists',      [ $this, 'ajax_bc_playlists' ] );
 		add_action( 'wp_ajax_nopriv_pv_bc_playlists', [ $this, 'ajax_bc_playlists' ] );
 
-		add_action( 'pre_get_posts',         [ $this, 'archive_per_page' ], 20 );
+		add_action( 'pre_get_posts',         [ $this, 'archive_per_page' ], 50 );
 		add_action( 'wp_enqueue_scripts',    [ $this, 'enqueue_frontend_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 	}
 
 	public function archive_per_page( WP_Query $q ): void {
-		if ( is_admin() || ! $q->is_main_query() || ! $q->is_post_type_archive( 'pv_youtube' ) ) return;
+		if ( is_admin() || ! $q->is_main_query() ) return;
+		$pt = $q->get( 'post_type' );
+		if ( is_array( $pt ) ) $pt = (string) reset( $pt );
+		if ( 'pv_youtube' !== $pt ) return;
+
 		$raw = sanitize_key( $_GET['per_page'] ?? '' ); // phpcs:ignore
 		if ( 'all' === $raw ) {
 			$q->set( 'posts_per_page', -1 );
+			$q->set( 'nopaging', true );
 			return;
 		}
 		$n = (int) $raw;
 		if ( in_array( $n, [ 5, 10, 20 ], true ) ) {
 			$q->set( 'posts_per_page', $n );
+			$q->set( 'nopaging', false );
 		}
 	}
 

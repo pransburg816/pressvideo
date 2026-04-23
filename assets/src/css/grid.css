@@ -306,12 +306,19 @@
 	.pv-card { height: clamp(240px, 62vw, 340px); }
 }
 
+/* ── Animations ─────────────────────────────────────────────────────── */
+@keyframes pv-fade-up {
+	from { opacity: 0; transform: translateY(10px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Toolbar (per-page selector row) ───────────────────────────────── */
 .pv-toolbar {
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
 	padding: 0 0 16px;
+	animation: pv-fade-up 0.35s ease both;
 }
 .pv-per-page {
 	display: flex;
@@ -339,24 +346,33 @@
 	font-weight: 600;
 	color: rgba(255,255,255,0.5);
 	text-decoration: none;
-	transition: background 0.15s, color 0.15s, border-color 0.15s;
+	transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.18s;
 	line-height: 1;
+	animation: pv-fade-up 0.3s ease both;
 }
+.pv-per-page > a:nth-of-type(1) { animation-delay: 0.04s; }
+.pv-per-page > a:nth-of-type(2) { animation-delay: 0.08s; }
+.pv-per-page > a:nth-of-type(3) { animation-delay: 0.12s; }
+.pv-per-page > a:nth-of-type(4) { animation-delay: 0.16s; }
 .pv-per-page__btn:hover {
 	border-color: var(--pv-accent);
 	color: #fff;
-	background: rgba(79,70,229,0.15);
+	background: rgba(79,70,229,0.18);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(79,70,229,0.25);
 }
 .pv-per-page__btn--active {
 	background: var(--pv-accent);
 	border-color: var(--pv-accent);
 	color: #fff;
 	pointer-events: none;
+	box-shadow: 0 2px 8px rgba(79,70,229,0.35);
 }
 
 /* ── Pagination ─────────────────────────────────────────────────────── */
 .pv-pagination {
 	padding: 24px 0 8px;
+	animation: pv-fade-up 0.4s 0.05s ease both;
 }
 .pv-pagination--top {
 	padding: 0 0 20px;
@@ -381,25 +397,39 @@
 	font-weight: 600;
 	color: rgba(255,255,255,0.6);
 	text-decoration: none;
-	transition: background 0.15s, color 0.15s, border-color 0.15s;
+	transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.18s;
 	line-height: 1;
+	animation: pv-fade-up 0.28s ease both;
 }
+.pv-pagination .nav-links > :nth-child(1)  { animation-delay: 0.04s; }
+.pv-pagination .nav-links > :nth-child(2)  { animation-delay: 0.07s; }
+.pv-pagination .nav-links > :nth-child(3)  { animation-delay: 0.10s; }
+.pv-pagination .nav-links > :nth-child(4)  { animation-delay: 0.13s; }
+.pv-pagination .nav-links > :nth-child(5)  { animation-delay: 0.16s; }
+.pv-pagination .nav-links > :nth-child(6)  { animation-delay: 0.19s; }
+.pv-pagination .nav-links > :nth-child(7)  { animation-delay: 0.22s; }
+.pv-pagination .nav-links > :nth-child(8)  { animation-delay: 0.25s; }
 .pv-pagination .page-numbers:hover {
 	border-color: var(--pv-accent);
 	color: #fff;
 	background: rgba(79,70,229,0.18);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(79,70,229,0.25);
 }
 .pv-pagination .page-numbers.current {
 	background: var(--pv-accent);
 	border-color: var(--pv-accent);
 	color: #fff;
 	pointer-events: none;
+	box-shadow: 0 2px 8px rgba(79,70,229,0.35);
 }
 .pv-pagination .page-numbers.dots {
 	background: transparent;
 	border-color: transparent;
 	color: rgba(255,255,255,0.3);
 	pointer-events: none;
+	transform: none !important;
+	box-shadow: none !important;
 }
 @media (max-width: 480px) {
 	.pv-per-page__label { display: none; }
