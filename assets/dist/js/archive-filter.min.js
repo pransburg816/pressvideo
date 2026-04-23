@@ -28,6 +28,18 @@
 
 	var ajaxUrl = (window.pvOffcanvas && window.pvOffcanvas.ajaxUrl) || '';
 
+	/* ── Smooth page transitions (pagination + per-page) ─────────────── */
+	document.addEventListener('click', function (e) {
+		var link = e.target.closest(
+			'.pv-per-page__btn:not(.pv-per-page__btn--active),' +
+			'.pv-pagination .page-numbers:not(.current):not(.dots)'
+		);
+		if (!link || !link.href) return;
+		e.preventDefault();
+		main.classList.add('pv-archive-main--leaving');
+		setTimeout(function () { window.location.href = link.href; }, 200);
+	});
+
 	setupBroadcast();
 
 	function getContainer() {

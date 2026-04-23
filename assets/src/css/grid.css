@@ -306,6 +306,15 @@
 	.pv-card { height: clamp(240px, 62vw, 340px); }
 }
 
+/* ── Page transition ────────────────────────────────────────────────── */
+.pv-archive-main {
+	transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.pv-archive-main--leaving {
+	opacity: 0;
+	transform: translateY(6px);
+}
+
 /* ── Animations ─────────────────────────────────────────────────────── */
 @keyframes pv-fade-up {
 	from { opacity: 0; transform: translateY(10px); }
