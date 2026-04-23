@@ -44,7 +44,7 @@ function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas' ): string
 	$cslug  = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0]->slug : '';
 	$date   = get_the_date( 'M j, Y', $post->ID );
 	$ts     = strtotime( $post->post_date );
-	$views  = (int) $post->comment_count;
+	$views  = (int) get_post_meta( $post->ID, '_pv_view_count', true );
 	$title  = esc_html( $post->post_title );
 	$link   = esc_url( get_permalink( $post->ID ) );
 	$play_svg = '<svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';

@@ -586,7 +586,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 						$_bc_cslug  = ( $_bc_cats && ! is_wp_error( $_bc_cats ) ) ? $_bc_cats[0]->slug : '';
 						$_bc_date   = get_the_date( 'M j, Y', $_bcp->ID );
 						$_bc_ts     = strtotime( $_bcp->post_date );
-						$_bc_views  = (int) $_bcp->comment_count;
+						$_bc_views  = (int) get_post_meta( $_bcp->ID, '_pv_view_count', true );
 						?>
 						<div class="pv-bc-card" data-category="<?php echo esc_attr( $_bc_cslug ); ?>" data-date="<?php echo esc_attr( $_bc_ts ); ?>" data-views="<?php echo esc_attr( $_bc_views ); ?>" style="--pv-accent:<?php echo esc_attr( $_bc_accent ); ?>;">
 							<div class="pv-bc-card__thumb">
