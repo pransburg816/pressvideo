@@ -538,7 +538,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 								$_yt_vids_key = 'pv_yt_pl_vids_' . md5( $_yt_pl_id );
 								$_yt_vid_ids  = get_transient( $_yt_vids_key );
 								if ( ! is_array( $_yt_vid_ids ) ) {
-									$_yt_result  = $_yt_api->get_playlist_videos( $_yt_pl_id, 20 );
+									$_yt_result  = $_yt_api->get_playlist_videos( $_yt_pl_id, 200 );
 									$_yt_vid_ids = ! is_wp_error( $_yt_result )
 										? array_column( $_yt_result, 'youtube_id' )
 										: [];

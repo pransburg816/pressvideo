@@ -33,19 +33,24 @@ class PV_Channel_Importer {
 			[ $result, $existing_count ] = $this->process_videos( $videos, $channel_id, $result, $limit, $existing_count );
 		}
 
-		// Import all videos from each configured broadcast playlist so playlist
-		// filtering in the Broadcast layout always has the full set available.
+		// Import all videos from each configured YouTube broadcast playlist so
+		// playlist filtering in the Broadcast layout always has the full set.
 		if ( ! $result['limit_reached'] ) {
-			$settings    = get_option( 'pv_settings', [] );
-			$bc_playlists = json_decode( $settings['bc_playlists'] ?? '[]', true );
-			if ( is_array( $bc_playlists ) ) {
-				foreach ( $bc_playlists as $pl_id ) {
+			$settings     = get_option( 'pv_settings', [] );
+			$bc_raw_items = json_decode( $settings['bc_playlists'] ?? '[]', true );
+			if ( is_array( $bc_raw_items ) ) {
+				foreach ( $bc_raw_items as $_item ) {
+					// Only process YouTube playlists (yt: prefix); skip series slugs.
+					if ( strncmp( (string) $_item, 'yt:', 3 ) !== 0 ) continue;
+					$pl_id     = substr( (string) $_item, 3 );
 					if ( $result['limit_reached'] ) break;
-					$pl_videos = $this->api->get_playlist_videos( (string) $pl_id, 200 );
+					$pl_videos = $this->api->get_playlist_videos( $pl_id, 200 );
 					if ( is_wp_error( $pl_videos ) ) {
 						$result['errors'][] = $pl_videos->get_error_message();
 						continue;
 					}
+					// Bust stale transient so next page load re-caches the full 200 IDs.
+					delete_transient( 'pv_yt_pl_vids_' . md5( $pl_id ) );
 					[ $result, $existing_count ] = $this->process_videos( $pl_videos, $channel_id, $result, $limit, $existing_count );
 				}
 			}
