@@ -323,7 +323,15 @@
 }
 .pv-toolbar .pv-pagination--top {
 	padding: 0;
+	margin: 0;
 	animation: none;
+}
+.pv-toolbar .pv-pagination--top .navigation,
+.pv-toolbar .pv-pagination--top .nav-links {
+	display: flex;
+	align-items: center;
+	margin: 0;
+	padding: 0;
 }
 .pv-per-page {
 	display: flex;
