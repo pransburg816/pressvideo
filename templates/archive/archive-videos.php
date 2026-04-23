@@ -64,7 +64,7 @@ $pv_search_align   = $pv_settings['search_bar_align'] ?? 'center';
 $_pv_pp_allowed  = [ 5, 10, 20 ];
 $_pv_pp_raw      = sanitize_key( $_GET['per_page'] ?? '' ); // phpcs:ignore
 $_pv_show_all    = 'all' === $_pv_pp_raw;
-$_pv_cur_pp      = $_pv_show_all ? 'all' : ( in_array( (int) $_pv_pp_raw, $_pv_pp_allowed, true ) ? (int) $_pv_pp_raw : 10 );
+$_pv_cur_pp      = $_pv_show_all ? 'all' : ( in_array( (int) $_pv_pp_raw, $_pv_pp_allowed, true ) ? (int) $_pv_pp_raw : 5 );
 $_pv_pp_base_url = remove_query_arg( 'paged' );
 
 if ( 'offcanvas' === $pv_display ) {

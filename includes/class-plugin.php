@@ -100,11 +100,10 @@ class PV_Plugin {
 			$q->set( 'nopaging', true );
 			return;
 		}
-		$n = (int) $raw;
-		if ( in_array( $n, [ 5, 10, 20 ], true ) ) {
-			$q->set( 'posts_per_page', $n );
-			$q->set( 'nopaging', false );
-		}
+		$n   = (int) $raw;
+		$ppp = in_array( $n, [ 5, 10, 20 ], true ) ? $n : 5;
+		$q->set( 'posts_per_page', $ppp );
+		$q->set( 'nopaging', false );
 	}
 
 	public function ajax_bc_videos(): void {
