@@ -668,10 +668,10 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 					<!-- Panels -->
 					<div class="pv-bc-panels">
 
-						<!-- HOME panel: paginated latest-videos grid with optional playlist chip filter -->
+						<!-- HOME panel: Latest Videos + single-select playlist navigator -->
 						<div class="pv-bc-panel pv-bc-panel--active" data-bc-panel="home" role="tabpanel">
 
-							<!-- Toolbar: per-page + top pagination -->
+							<!-- Toolbar: per-page + top pagination (hidden in playlist preview mode) -->
 							<div id="pv-bc-home-toolbar" class="pv-bc-toolbar">
 								<div id="pv-bc-home-top-pag" class="pv-pagination pv-pagination--top"></div>
 								<div class="pv-per-page" role="group" aria-label="<?php esc_attr_e( 'Videos per page', 'pv-youtube-importer' ); ?>">
@@ -684,10 +684,13 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							</div>
 
 							<?php if ( ! empty( $bc_yt_sections ) ) : ?>
-							<!-- YouTube playlist chip filter (multi-select) -->
-							<div class="pv-bc-pl-chips" role="group" aria-label="<?php esc_attr_e( 'Filter by playlist', 'pv-youtube-importer' ); ?>">
+							<!-- Playlist navigator (single-select: All Latest + each playlist) -->
+							<div class="pv-bc-pl-nav" role="group" aria-label="<?php esc_attr_e( 'Browse playlists', 'pv-youtube-importer' ); ?>">
+								<button class="pv-bc-pl-nav-btn pv-bc-pl-nav-btn--active" data-pl-id="" type="button">
+									<?php esc_html_e( 'All Latest', 'pv-youtube-importer' ); ?>
+								</button>
 								<?php foreach ( $bc_yt_sections as $_yts ) : ?>
-								<button class="pv-bc-pl-chip" type="button"
+								<button class="pv-bc-pl-nav-btn" type="button"
 								        data-pl-id="<?php echo esc_attr( $_yts['id'] ); ?>"
 								        data-pl-title="<?php echo esc_attr( $_yts['title'] ); ?>">
 									<?php echo esc_html( $_yts['title'] ); ?>
@@ -696,25 +699,26 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							</div>
 							<?php endif; ?>
 
-							<!-- Latest Videos section (hidden when any playlist chip is selected) -->
-							<div id="pv-bc-latest-section">
-								<?php if ( $_pv_label_show ) : ?>
-								<div class="pv-section-label">
-									<h2 class="pv-section-label__title"><?php echo esc_html( $_pv_label_text ); ?></h2>
-								</div>
-								<?php endif; ?>
-
-								<!-- Video grid: AJAX-loaded on activation -->
-								<div class="pv-bc-home-grid" data-bc-lazy="bc_home">
-									<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>
-								</div>
-
-								<!-- Bottom pagination -->
-								<div id="pv-bc-home-bot-pag" class="pv-pagination"></div>
+							<!-- Section heading: shows label (Latest Videos) or selected playlist title -->
+							<div class="pv-bc-home-section-head"
+							     <?php echo ! $_pv_label_show ? 'hidden' : ''; ?>
+							     data-has-label="<?php echo esc_attr( $_pv_label_show ? '1' : '0' ); ?>"
+							     data-default-label="<?php echo esc_attr( $_pv_label_text ); ?>">
+								<h2 class="pv-bc-home-section-title"><?php echo esc_html( $_pv_label_show ? $_pv_label_text : '' ); ?></h2>
 							</div>
 
-							<!-- Playlist rows: rendered when chips are selected -->
-							<div id="pv-bc-pl-rows" hidden></div>
+							<!-- Video grid: AJAX-loaded on activation -->
+							<div class="pv-bc-home-grid" data-bc-lazy="bc_home">
+								<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>
+							</div>
+
+							<!-- View All: shown in playlist preview mode when total > 4 -->
+							<div id="pv-bc-home-view-all" hidden>
+								<button class="pv-bc-home-expand-btn pv-btn" id="pv-bc-home-view-all-btn" type="button"></button>
+							</div>
+
+							<!-- Bottom pagination -->
+							<div id="pv-bc-home-bot-pag" class="pv-pagination"></div>
 
 						</div><!-- /home panel -->
 

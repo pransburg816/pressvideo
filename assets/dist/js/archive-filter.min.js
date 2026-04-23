@@ -307,44 +307,61 @@
 		var bcNonce   = (window.pvBroadcast && window.pvBroadcast.nonce)   || '';
 
 		// ── Home tab state ────────────────────────────────────────────
-		var bcHomeGrid    = bc.querySelector('.pv-bc-home-grid');
-		var bcHomeTopPag  = bc.querySelector('#pv-bc-home-top-pag');
-		var bcHomeBotPag  = bc.querySelector('#pv-bc-home-bot-pag');
-		var bcHomeToolbar = bc.querySelector('#pv-bc-home-toolbar');
-		var bcLatestSec   = bc.querySelector('#pv-bc-latest-section');
-		var bcPlRows      = bc.querySelector('#pv-bc-pl-rows');
-		var bcHomePerPage = '20';
-		var bcHomePage    = 1;
-		var bcSelectedPls = [];
+		var bcHomeGrid         = bc.querySelector('.pv-bc-home-grid');
+		var bcHomeTopPag       = bc.querySelector('#pv-bc-home-top-pag');
+		var bcHomeBotPag       = bc.querySelector('#pv-bc-home-bot-pag');
+		var bcHomeToolbar      = bc.querySelector('#pv-bc-home-toolbar');
+		var bcHomeSectionHead  = bc.querySelector('.pv-bc-home-section-head');
+		var bcHomeSectionTitle = bc.querySelector('.pv-bc-home-section-title');
+		var bcHomeViewAll      = bc.querySelector('#pv-bc-home-view-all');
+		var bcHomeViewAllBtn   = bc.querySelector('#pv-bc-home-view-all-btn');
+		var bcHomePerPage      = '20';
+		var bcHomePage         = 1;
+		var bcHomeSelectedPl   = '';
+		var bcHomeExpandedPl   = '';
+		var bcHasLabel         = bcHomeSectionHead ? bcHomeSectionHead.dataset.hasLabel === '1' : false;
+		var bcDefaultLabel     = bcHomeSectionHead ? (bcHomeSectionHead.dataset.defaultLabel || '') : '';
 
-		function bcPlRowId(plId) {
-			return 'pv-bc-pl-row-' + plId.replace(/[^a-zA-Z0-9]/g, '-');
-		}
-		function bcEnterPlMode() {
-			if (bcLatestSec)   bcLatestSec.hidden   = true;
-			if (bcHomeToolbar) bcHomeToolbar.hidden = true;
-			if (bcPlRows)      bcPlRows.hidden      = false;
-		}
-		function bcExitPlMode() {
-			if (bcLatestSec)   bcLatestSec.hidden   = false;
+		function goToLatest() {
+			bcHomeSelectedPl = '';
+			bcHomeExpandedPl = '';
 			if (bcHomeToolbar) bcHomeToolbar.hidden = false;
-			if (bcPlRows) { bcPlRows.hidden = true; bcPlRows.innerHTML = ''; }
+			if (bcHomeSectionHead) bcHomeSectionHead.hidden = !bcHasLabel;
+			if (bcHasLabel && bcHomeSectionTitle) bcHomeSectionTitle.textContent = bcDefaultLabel;
+			if (bcHomeViewAll) bcHomeViewAll.hidden = true;
+			bc.querySelectorAll('.pv-bc-pl-nav-btn').forEach(function (btn) {
+				btn.classList.toggle('pv-bc-pl-nav-btn--active', btn.dataset.plId === '');
+			});
+			loadBcHomeGrid(1, bcHomePerPage);
 		}
-		function addBcPlRow(plId, plTitle) {
-			if (!bcPlRows || !bcAjaxUrl) return;
-			var rowId = bcPlRowId(plId);
-			if (bc.querySelector('#' + rowId)) return;
-			var row = document.createElement('div');
-			row.className = 'pv-bc-section pv-bc-pl-row';
-			row.id = rowId;
-			row.innerHTML = '<div class="pv-bc-section__head"><h2 class="pv-bc-section__title">' + escHtml(plTitle) + '</h2></div>'
-				+ '<div class="pv-bc-pl-row__cards pv-bc-row"><div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div></div>'
-				+ '<div class="pv-bc-pl-row__foot"></div>';
-			bcPlRows.appendChild(row);
-			var cardsEl = row.querySelector('.pv-bc-pl-row__cards');
-			var footEl  = row.querySelector('.pv-bc-pl-row__foot');
+
+		function goToPlaylistPreview(plId, plTitle) {
+			bcHomeSelectedPl = plId;
+			bcHomeExpandedPl = '';
+			if (bcHomeToolbar) bcHomeToolbar.hidden = true;
+			if (bcHomeSectionHead) bcHomeSectionHead.hidden = false;
+			if (bcHomeSectionTitle) bcHomeSectionTitle.textContent = plTitle;
+			if (bcHomeViewAll) bcHomeViewAll.hidden = true;
+			bc.querySelectorAll('.pv-bc-pl-nav-btn').forEach(function (btn) {
+				btn.classList.toggle('pv-bc-pl-nav-btn--active', btn.dataset.plId === plId);
+			});
+			loadBcHomePlaylistPreview(plId);
+		}
+
+		function goToPlaylistExpanded(plId) {
+			bcHomeExpandedPl = plId;
+			if (bcHomeToolbar) bcHomeToolbar.hidden = false;
+			if (bcHomeViewAll) bcHomeViewAll.hidden = true;
+			loadBcHomePlaylistGrid(plId, 1, bcHomePerPage);
+		}
+
+		function loadBcHomePlaylistPreview(plId) {
+			if (!bcHomeGrid || !bcAjaxUrl) return;
+			bcHomeGrid.innerHTML = '<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>';
+			if (bcHomeTopPag) bcHomeTopPag.innerHTML = '';
+			if (bcHomeBotPag) bcHomeBotPag.innerHTML = '';
 			var fd = new FormData();
-			fd.append('action', 'pv_bc_videos');
+			fd.append('action',   'pv_bc_videos');
 			fd.append('nonce',    bcNonce);
 			fd.append('page',     '1');
 			fd.append('per_page', '4');
@@ -352,18 +369,51 @@
 			fetch(bcAjaxUrl, { method: 'POST', body: fd })
 				.then(function (r) { return r.json(); })
 				.then(function (data) {
-					if (!data.success) { cardsEl.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>'; return; }
+					if (!data.success) {
+						bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>';
+						return;
+					}
 					var d = data.data;
-					cardsEl.innerHTML = d.html || '<p class="pv-no-videos">No videos found.</p>';
-					if (d.total > 4) {
-						footEl.innerHTML = '<button class="pv-bc-section__view-all pv-bc-home-expand-btn" data-yt-pl="' + plId + '">Show All (' + d.total + ') \u2192</button>';
+					bcHomeGrid.innerHTML = d.html || '<p class="pv-no-videos">No videos found.</p>';
+					if (d.total > 4 && bcHomeViewAll && bcHomeViewAllBtn) {
+						bcHomeViewAllBtn.textContent = 'View All (' + d.total + ') \u2192';
+						bcHomeViewAllBtn.dataset.ytPl = plId;
+						bcHomeViewAll.hidden = false;
 					}
 				})
-				.catch(function () { cardsEl.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>'; });
+				.catch(function () {
+					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>';
+				});
 		}
-		function removeBcPlRow(plId) {
-			var row = bc.querySelector('#' + bcPlRowId(plId));
-			if (row) row.remove();
+
+		function loadBcHomePlaylistGrid(plId, page, perPage) {
+			if (!bcHomeGrid || !bcAjaxUrl) return;
+			bcHomePage    = page;
+			bcHomePerPage = perPage;
+			bcHomeGrid.innerHTML = '<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>';
+			var fd = new FormData();
+			fd.append('action',   'pv_bc_videos');
+			fd.append('nonce',    bcNonce);
+			fd.append('page',     String(page));
+			fd.append('per_page', String(perPage));
+			fd.append('pv_yt_pl', plId);
+			fetch(bcAjaxUrl, { method: 'POST', body: fd })
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					if (!data.success) {
+						bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>';
+						return;
+					}
+					var d = data.data;
+					bcHomeGrid.innerHTML = d.html || '<p class="pv-no-videos">No videos found.</p>';
+					if (bcHomeTopPag) bcHomeTopPag.innerHTML = d.pagination || '';
+					if (bcHomeBotPag) bcHomeBotPag.innerHTML = d.pagination || '';
+					var homePanel = bc.querySelector('.pv-bc-panel[data-bc-panel="home"]');
+					updateBcPerPageBtns(homePanel, perPage);
+				})
+				.catch(function () {
+					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>';
+				});
 		}
 
 		// ── Videos tab state ─────────────────────────────────────────
@@ -517,7 +567,10 @@
 				var pp    = ppBtn.dataset.bcPerPage;
 				var panel = ppBtn.closest('.pv-bc-panel');
 				var pk    = panel && panel.dataset.bcPanel;
-				if (pk === 'home')   loadBcHomeGrid(1,   pp);
+				if (pk === 'home') {
+					if (bcHomeExpandedPl) { loadBcHomePlaylistGrid(bcHomeExpandedPl, 1, pp); }
+					else                  { loadBcHomeGrid(1, pp); }
+				}
 				if (pk === 'videos') loadBcVideosGrid(1, pp, bcVideosCategory, bcVideosYtPl);
 				return;
 			}
@@ -531,41 +584,35 @@
 					e.preventDefault();
 					var match = pageLink.href.match(/[?&]paged=(\d+)/);
 					var pg    = match ? parseInt(match[1], 10) : 1;
-					if (pk === 'home')   loadBcHomeGrid(pg,   bcHomePerPage);
+					if (pk === 'home') {
+						if (bcHomeExpandedPl) { loadBcHomePlaylistGrid(bcHomeExpandedPl, pg, bcHomePerPage); }
+						else                  { loadBcHomeGrid(pg, bcHomePerPage); }
+					}
 					if (pk === 'videos') loadBcVideosGrid(pg, bcVideosPerPage, bcVideosCategory, bcVideosYtPl);
 					return;
 				}
 			}
 
-			// Playlist chip toggle (home panel — multi-select)
-			var plChip = e.target.closest('.pv-bc-pl-chip');
-			if (plChip) {
-				var plId    = plChip.dataset.plId;
-				var plTitle = plChip.dataset.plTitle || plChip.textContent.trim();
-				var isActive = plChip.classList.contains('pv-bc-pl-chip--active');
-				if (isActive) {
-					plChip.classList.remove('pv-bc-pl-chip--active');
-					var idx = bcSelectedPls.indexOf(plId);
-					if (idx > -1) bcSelectedPls.splice(idx, 1);
-					removeBcPlRow(plId);
-					if (bcSelectedPls.length === 0) bcExitPlMode();
+			// Playlist nav button (home panel — single-select)
+			var plNavBtn = e.target.closest('.pv-bc-pl-nav-btn');
+			if (plNavBtn) {
+				var plId    = plNavBtn.dataset.plId;
+				var plTitle = plNavBtn.dataset.plTitle || '';
+				if (!plId) {
+					goToLatest();
+				} else if (bcHomeSelectedPl === plId && !bcHomeExpandedPl) {
+					goToLatest();
 				} else {
-					plChip.classList.add('pv-bc-pl-chip--active');
-					bcSelectedPls.push(plId);
-					if (bcSelectedPls.length === 1) bcEnterPlMode();
-					addBcPlRow(plId, plTitle);
+					goToPlaylistPreview(plId, plTitle);
 				}
 				return;
 			}
 
-			// "View All" button on playlist preview → Videos tab
+			// "View All" button → expand playlist inline in home panel
 			var expandBtn = e.target.closest('.pv-bc-home-expand-btn');
 			if (expandBtn) {
 				var ytPl = expandBtn.dataset.ytPl;
-				if (bcVideosGrid) bcVideosGrid.dataset.bcLoaded = 'true';
-				var vTab = bc.querySelector('.pv-bc-tab[data-bc-tab="videos"]');
-				if (vTab) activateBcTab(vTab);
-				loadBcVideosGrid(1, bcVideosPerPage, '', ytPl);
+				if (ytPl) goToPlaylistExpanded(ytPl);
 				return;
 			}
 
