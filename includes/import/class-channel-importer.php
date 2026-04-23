@@ -27,8 +27,11 @@ class PV_Channel_Importer {
 		$limit          = PV_Tier::get_video_limit();
 		$existing_count = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
 
-		// Fetch up to 500 channel uploads (all tiers — video limit gates creation, not fetch).
-		$videos = $this->api->get_channel_videos( $channel_id, 500 );
+		// Fetch channel uploads — tier gates creation, not fetch count.
+		// Platinum: no fetch cap (paginate until exhausted).
+		// Gold/Silver: fetch enough to fill the tier limit with a buffer.
+		$fetch_max = PHP_INT_MAX === $limit ? PHP_INT_MAX : min( $limit + 100, 500 );
+		$videos    = $this->api->get_channel_videos( $channel_id, $fetch_max );
 		if ( is_wp_error( $videos ) ) {
 			$result['errors'][] = $videos->get_error_message();
 			return $result;

@@ -55,29 +55,30 @@ class PV_YouTube_API {
 			$params = [
 				'part'       => 'snippet,contentDetails',
 				'playlistId' => $playlist_id,
-				'maxResults' => min( 50, $max_results - $fetched ),
+				'maxResults' => 50, // always request full pages; caller's $max_results gates the count
 			];
 			if ( $page_token ) $params['pageToken'] = $page_token;
 
 			$response = $this->request( 'playlistItems', $params );
 			if ( is_wp_error( $response ) ) return $response;
 
-			$items = $response['items'] ?? [];
-			foreach ( $items as $item ) {
+			foreach ( $response['items'] ?? [] as $item ) {
 				$snippet  = $item['snippet'] ?? [];
 				$video_id = $snippet['resourceId']['videoId'] ?? '';
 				if ( ! $video_id ) continue;
 
 				$videos[] = [
-					'youtube_id'   => $video_id,
-					'title'        => $snippet['title'] ?? '',
-					'description'  => $snippet['description'] ?? '',
-					'published_at' => $snippet['publishedAt'] ?? '',
-					'thumbnail'    => $this->best_thumbnail( $snippet['thumbnails'] ?? [] ),
-					'channel_id'   => $snippet['channelId'] ?? '',
-					'channel_title'=> $snippet['channelTitle'] ?? '',
+					'youtube_id'    => $video_id,
+					'title'         => $snippet['title'] ?? '',
+					'description'   => $snippet['description'] ?? '',
+					'published_at'  => $snippet['publishedAt'] ?? '',
+					'thumbnail'     => $this->best_thumbnail( $snippet['thumbnails'] ?? [] ),
+					'channel_id'    => $snippet['channelId'] ?? '',
+					'channel_title' => $snippet['channelTitle'] ?? '',
 				];
 				$fetched++;
+
+				if ( $fetched >= $max_results ) break; // honour caller's limit
 			}
 
 			$page_token = $response['nextPageToken'] ?? '';
