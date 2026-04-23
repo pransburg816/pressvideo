@@ -240,7 +240,7 @@ class PV_Plugin {
 			$nopaging = true;
 		} else {
 			$n        = (int) $per_page_raw;
-			$ppp      = in_array( $n, [ 4, 10, 20, 50 ], true ) ? $n : 20;
+			$ppp      = in_array( $n, [ 4, 10, 12, 20, 24, 48, 50 ], true ) ? $n : 24;
 			$nopaging = false;
 		}
 

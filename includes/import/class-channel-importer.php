@@ -22,20 +22,54 @@ class PV_Channel_Importer {
 	public function import_channel( string $channel_id ): array {
 		$result = [ 'imported' => 0, 'skipped' => 0, 'limit_reached' => false, 'errors' => [] ];
 
-		$videos = $this->api->get_channel_videos( $channel_id, 50 );
-
-		if ( is_wp_error( $videos ) ) {
-			$result['errors'][] = $videos->get_error_message();
-			return $result;
-		}
-
 		$limit          = PV_Tier::get_video_limit();
 		$existing_count = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
 
+		// Import recent channel uploads first.
+		$videos = $this->api->get_channel_videos( $channel_id, 50 );
+		if ( is_wp_error( $videos ) ) {
+			$result['errors'][] = $videos->get_error_message();
+		} else {
+			[ $result, $existing_count ] = $this->process_videos( $videos, $channel_id, $result, $limit, $existing_count );
+		}
+
+		// Import all videos from each configured broadcast playlist so playlist
+		// filtering in the Broadcast layout always has the full set available.
+		if ( ! $result['limit_reached'] ) {
+			$settings    = get_option( 'pv_settings', [] );
+			$bc_playlists = json_decode( $settings['bc_playlists'] ?? '[]', true );
+			if ( is_array( $bc_playlists ) ) {
+				foreach ( $bc_playlists as $pl_id ) {
+					if ( $result['limit_reached'] ) break;
+					$pl_videos = $this->api->get_playlist_videos( (string) $pl_id, 200 );
+					if ( is_wp_error( $pl_videos ) ) {
+						$result['errors'][] = $pl_videos->get_error_message();
+						continue;
+					}
+					[ $result, $existing_count ] = $this->process_videos( $pl_videos, $channel_id, $result, $limit, $existing_count );
+				}
+			}
+		}
+
+		// Persist result for dashboard stats display.
+		update_option( 'pv_last_import', [
+			'time'     => time(),
+			'imported' => $result['imported'],
+			'skipped'  => $result['skipped'],
+		] );
+
+		return $result;
+	}
+
+	/**
+	 * Process a list of video data arrays into pv_youtube posts.
+	 *
+	 * @return array{ 0: array, 1: int } Updated $result and $existing_count.
+	 */
+	private function process_videos( array $videos, string $channel_id, array $result, int $limit, int $existing_count ): array {
 		foreach ( $videos as $video_data ) {
 			if ( $existing_count >= $limit ) {
 				$result['limit_reached'] = true;
-				$result['skipped']      += count( $videos ) - $result['imported'] - $result['skipped'];
 				break;
 			}
 
@@ -54,14 +88,7 @@ class PV_Channel_Importer {
 			$existing_count++;
 		}
 
-		// Persist result for dashboard stats display.
-		update_option( 'pv_last_import', [
-			'time'     => time(),
-			'imported' => $result['imported'],
-			'skipped'  => $result['skipped'],
-		] );
-
-		return $result;
+		return [ $result, $existing_count ];
 	}
 
 	/** Check if a video with the given YouTube ID already exists. */
