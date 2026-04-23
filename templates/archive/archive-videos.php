@@ -332,6 +332,11 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 
 				<?php if ( 'broadcast' !== $pv_layout ) : ?>
 				<div class="pv-toolbar">
+					<?php if ( ! $_pv_show_all && $GLOBALS['wp_query']->max_num_pages > 1 ) : ?>
+					<div class="pv-pagination pv-pagination--top"><?php the_posts_pagination( [ 'prev_text' => '&#8592; ' . __( 'Prev', 'pv-youtube-importer' ), 'next_text' => __( 'Next', 'pv-youtube-importer' ) . ' &#8594;' ] ); ?></div>
+					<?php else : ?>
+					<div></div>
+					<?php endif; ?>
 					<div class="pv-per-page" role="group" aria-label="<?php esc_attr_e( 'Videos per page', 'pv-youtube-importer' ); ?>">
 						<span class="pv-per-page__label"><?php esc_html_e( 'Show:', 'pv-youtube-importer' ); ?></span>
 						<?php foreach ( $_pv_pp_allowed as $_n ) : ?>
@@ -348,11 +353,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 						</a>
 					</div>
 				</div>
-
-				<?php if ( ! $_pv_show_all && $GLOBALS['wp_query']->max_num_pages > 1 ) : ?>
-				<div class="pv-pagination pv-pagination--top"><?php the_posts_pagination( [ 'prev_text' => '&#8592; ' . __( 'Prev', 'pv-youtube-importer' ), 'next_text' => __( 'Next', 'pv-youtube-importer' ) . ' &#8594;' ] ); ?></div>
-				<?php endif; ?>
-				<?php endif; /* end toolbar + top pagination */ ?>
+				<?php endif; /* end toolbar */ ?>
 
 				<?php if ( 'featured' === $pv_layout ) :
 					the_post();
