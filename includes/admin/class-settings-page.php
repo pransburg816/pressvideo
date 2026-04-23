@@ -50,7 +50,25 @@ class PV_Settings_Page {
 		$clean['content_width']     = in_array( $input['content_width'] ?? '', [ 'full', 'wide', 'medium', 'narrow' ], true )
 			? $input['content_width'] : ( $existing['content_width'] ?? 'full' );
 
+		$clean['import_playlists'] = $this->sanitize_playlist_ids( $input['import_playlists'] ?? '' );
+
 		return $clean;
+	}
+
+	/** Parse raw textarea input into a newline-separated list of valid playlist IDs. */
+	private function sanitize_playlist_ids( string $raw ): string {
+		$ids = [];
+		foreach ( preg_split( '/[\r\n,]+/', $raw ) as $line ) {
+			$line = trim( $line );
+			if ( ! $line ) continue;
+			// Accept full YouTube playlist URL — extract the list= parameter.
+			if ( preg_match( '/[?&]list=([A-Za-z0-9_\-]{10,})/', $line, $m ) ) {
+				$ids[] = $m[1];
+			} elseif ( preg_match( '/^[A-Za-z0-9_\-]{10,}$/', $line ) ) {
+				$ids[] = $line;
+			}
+		}
+		return implode( "\n", array_unique( $ids ) );
 	}
 
 	// ── Page render ──────────────────────────────────────────────────
@@ -160,6 +178,34 @@ class PV_Settings_Page {
 								</div>
 							</div>
 
+						</div>
+					</div>
+				</div>
+
+				<!-- Additional Playlists -->
+				<div class="pv-card">
+					<div class="pv-card__head">
+						<div class="pv-card__icon"><span class="dashicons dashicons-playlist-video"></span></div>
+						<div class="pv-card__head-text">
+							<h2><?php esc_html_e( 'Additional Playlists', 'pv-youtube-importer' ); ?></h2>
+							<p><?php esc_html_e( 'Import from specific playlists, including private and unlisted ones.', 'pv-youtube-importer' ); ?></p>
+						</div>
+					</div>
+					<div class="pv-card__body">
+						<div class="pv-field-rows">
+							<div class="pv-field-row">
+								<div class="pv-field-row__label">
+									<label for="pv_import_playlists"><?php esc_html_e( 'Playlist IDs', 'pv-youtube-importer' ); ?></label>
+								</div>
+								<div class="pv-field-row__control">
+									<textarea name="pv_settings[import_playlists]" id="pv_import_playlists"
+									          class="large-text" rows="6"
+									          placeholder="PLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"><?php echo esc_textarea( $settings['import_playlists'] ?? '' ); ?></textarea>
+									<p class="pv-field-row__desc">
+										<?php esc_html_e( 'One playlist ID or full playlist URL per line. Use this for private or unlisted playlists your channel auto-importer cannot discover. Already-imported videos are always skipped — re-running the importer with the same IDs is safe.', 'pv-youtube-importer' ); ?>
+									</p>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

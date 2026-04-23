@@ -37,7 +37,7 @@ class PV_Import_UI {
 
 		$message = sprintf(
 			/* translators: 1: imported count, 2: skipped count */
-			__( 'Imported %1$d video(s). Skipped %2$d (already exist or limit reached).', 'pv-youtube-importer' ),
+			__( 'Imported %1$d new video(s). %2$d already imported (skipped).', 'pv-youtube-importer' ),
 			$result['imported'],
 			$result['skipped']
 		);

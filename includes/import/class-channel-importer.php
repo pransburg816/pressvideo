@@ -64,6 +64,12 @@ class PV_Channel_Importer {
 					$playlist_ids[ substr( (string) $_item, 3 ) ] = true;
 				}
 			}
+
+			// Merge in manually-entered import_playlists (any tier — enables private/unlisted).
+			foreach ( preg_split( '/[\r\n]+/', $settings['import_playlists'] ?? '' ) as $_pl_id ) {
+				$_pl_id = trim( $_pl_id );
+				if ( $_pl_id ) $playlist_ids[ $_pl_id ] = true;
+			}
 		}
 
 		foreach ( array_keys( $playlist_ids ) as $pl_id ) {
