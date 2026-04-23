@@ -298,10 +298,13 @@ function pv_resolve_accent_color( int $post_id ): string {
 		if ( $color ) return sanitize_hex_color( $color ) ?? '#4f46e5';
 	}
 
-	// 4. Global plugin setting.
+	// 4. Global plugin setting — treat #ffffff as unset (invisible badge on white bg).
 	$settings = get_option( 'pv_settings', [] );
 	if ( ! empty( $settings['default_accent'] ) ) {
-		return sanitize_hex_color( $settings['default_accent'] ) ?? '#4f46e5';
+		$_c = sanitize_hex_color( $settings['default_accent'] );
+		if ( $_c && '#ffffff' !== strtolower( $_c ) ) {
+			return $_c;
+		}
 	}
 
 	// 5. Hardcoded fallback.

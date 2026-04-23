@@ -50,6 +50,8 @@ const FILES = [
 	// Templates
 	'templates/single/single-video.php',
 	'templates/archive/archive-videos.php',
+	'templates/archive/partials/card.php',
+	'templates/archive/partials/list-item.php',
 	'templates/offcanvas/video-offcanvas.php',
 	'templates/single/layouts/hero-top.php',
 	'templates/single/layouts/hero-split.php',

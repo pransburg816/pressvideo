@@ -304,9 +304,9 @@ class PV_Plugin {
 				true
 			);
 			wp_localize_script( 'pv-archive-filter', 'pvBroadcast', [
-				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'pv_bc_load' ),
-			] );
+				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+				'nonce'          => wp_create_nonce( 'pv_bc_load' ),
+				] );
 		}
 	}
 
