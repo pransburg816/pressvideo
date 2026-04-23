@@ -97,10 +97,11 @@
 
 	/* ── Click interceptors (per-page + pagination) ──────────────────── */
 	document.addEventListener('click', function (e) {
+		// Skip broadcast's own per-page buttons — handled inside setupBroadcast
 		var perPageBtn = e.target.closest('.pv-per-page__btn');
-		if (perPageBtn && !perPageBtn.classList.contains('pv-per-page__btn--active')) {
+		if (perPageBtn && !perPageBtn.closest('.pv-broadcast') && !perPageBtn.classList.contains('pv-per-page__btn--active')) {
 			e.preventDefault();
-			pvLoadPage(1, perPageBtn.dataset.perPage || '5');
+			pvLoadPage(1, perPageBtn.dataset.perPage || '20');
 			return;
 		}
 
@@ -306,12 +307,64 @@
 		var bcNonce   = (window.pvBroadcast && window.pvBroadcast.nonce)   || '';
 
 		// ── Home tab state ────────────────────────────────────────────
-		var bcHomeGrid   = bc.querySelector('.pv-bc-home-grid');
-		var bcHomeTopPag = bc.querySelector('#pv-bc-home-top-pag');
-		var bcHomeBotPag = bc.querySelector('#pv-bc-home-bot-pag');
+		var bcHomeGrid    = bc.querySelector('.pv-bc-home-grid');
+		var bcHomeTopPag  = bc.querySelector('#pv-bc-home-top-pag');
+		var bcHomeBotPag  = bc.querySelector('#pv-bc-home-bot-pag');
+		var bcHomeToolbar = bc.querySelector('#pv-bc-home-toolbar');
+		var bcLatestSec   = bc.querySelector('#pv-bc-latest-section');
+		var bcPlRows      = bc.querySelector('#pv-bc-pl-rows');
 		var bcHomePerPage = '20';
 		var bcHomePage    = 1;
-		var bcHomeYtPl    = '';
+		var bcSelectedPls = [];
+
+		function bcPlRowId(plId) {
+			return 'pv-bc-pl-row-' + plId.replace(/[^a-zA-Z0-9]/g, '-');
+		}
+		function bcEnterPlMode() {
+			if (bcLatestSec)   bcLatestSec.hidden   = true;
+			if (bcHomeToolbar) bcHomeToolbar.hidden = true;
+			if (bcPlRows)      bcPlRows.hidden      = false;
+		}
+		function bcExitPlMode() {
+			if (bcLatestSec)   bcLatestSec.hidden   = false;
+			if (bcHomeToolbar) bcHomeToolbar.hidden = false;
+			if (bcPlRows) { bcPlRows.hidden = true; bcPlRows.innerHTML = ''; }
+		}
+		function addBcPlRow(plId, plTitle) {
+			if (!bcPlRows || !bcAjaxUrl) return;
+			var rowId = bcPlRowId(plId);
+			if (bc.querySelector('#' + rowId)) return;
+			var row = document.createElement('div');
+			row.className = 'pv-bc-section pv-bc-pl-row';
+			row.id = rowId;
+			row.innerHTML = '<div class="pv-bc-section__head"><h2 class="pv-bc-section__title">' + escHtml(plTitle) + '</h2></div>'
+				+ '<div class="pv-bc-pl-row__cards pv-bc-row"><div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div></div>'
+				+ '<div class="pv-bc-pl-row__foot"></div>';
+			bcPlRows.appendChild(row);
+			var cardsEl = row.querySelector('.pv-bc-pl-row__cards');
+			var footEl  = row.querySelector('.pv-bc-pl-row__foot');
+			var fd = new FormData();
+			fd.append('action', 'pv_bc_videos');
+			fd.append('nonce',    bcNonce);
+			fd.append('page',     '1');
+			fd.append('per_page', '4');
+			fd.append('pv_yt_pl', plId);
+			fetch(bcAjaxUrl, { method: 'POST', body: fd })
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					if (!data.success) { cardsEl.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>'; return; }
+					var d = data.data;
+					cardsEl.innerHTML = d.html || '<p class="pv-no-videos">No videos found.</p>';
+					if (d.total > 4) {
+						footEl.innerHTML = '<button class="pv-bc-section__view-all pv-bc-home-expand-btn" data-yt-pl="' + plId + '">Show All (' + d.total + ') \u2192</button>';
+					}
+				})
+				.catch(function () { cardsEl.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>'; });
+		}
+		function removeBcPlRow(plId) {
+			var row = bc.querySelector('#' + bcPlRowId(plId));
+			if (row) row.remove();
+		}
 
 		// ── Videos tab state ─────────────────────────────────────────
 		var bcVideosGrid    = bc.querySelector('.pv-bc-video-grid');
@@ -329,11 +382,10 @@
 			});
 		}
 
-		function loadBcHomeGrid(page, perPage, ytPlId) {
+		function loadBcHomeGrid(page, perPage) {
 			if (!bcHomeGrid || !bcAjaxUrl) return;
 			bcHomePage    = page;
 			bcHomePerPage = perPage;
-			bcHomeYtPl    = ytPlId || '';
 
 			bcHomeGrid.innerHTML = '<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>';
 
@@ -341,9 +393,7 @@
 			fd.append('action', 'pv_bc_videos');
 			fd.append('nonce',    bcNonce);
 			fd.append('page',     String(page));
-			// Playlist preview mode: cap at 4
-			fd.append('per_page', bcHomeYtPl ? '4' : String(perPage));
-			if (bcHomeYtPl) fd.append('pv_yt_pl', bcHomeYtPl);
+			fd.append('per_page', String(perPage));
 
 			fetch(bcAjaxUrl, { method: 'POST', body: fd })
 				.then(function (r) { return r.json(); })
@@ -353,20 +403,11 @@
 						return;
 					}
 					var d = data.data;
-					if (bcHomeYtPl) {
-						var btn = d.total > 4
-							? '<div class="pv-bc-home-view-all"><button class="pv-bc-home-expand-btn pv-btn" data-yt-pl="' + bcHomeYtPl + '">View All (' + d.total + ') \u2192</button></div>'
-							: '';
-						bcHomeGrid.innerHTML = (d.html || '<p class="pv-no-videos">No videos found.</p>') + btn;
-						if (bcHomeTopPag) bcHomeTopPag.innerHTML = '';
-						if (bcHomeBotPag) bcHomeBotPag.innerHTML = '';
-					} else {
-						bcHomeGrid.innerHTML = d.html || '<p class="pv-no-videos">No videos found.</p>';
-						if (bcHomeTopPag) bcHomeTopPag.innerHTML = d.pagination || '';
-						if (bcHomeBotPag) bcHomeBotPag.innerHTML = d.pagination || '';
-					}
+					bcHomeGrid.innerHTML = d.html || '<p class="pv-no-videos">No videos found.</p>';
+					if (bcHomeTopPag) bcHomeTopPag.innerHTML = d.pagination || '';
+					if (bcHomeBotPag) bcHomeBotPag.innerHTML = d.pagination || '';
 					var homePanel = bc.querySelector('.pv-bc-panel[data-bc-panel="home"]');
-					updateBcPerPageBtns(homePanel, bcHomeYtPl ? '4' : perPage);
+					updateBcPerPageBtns(homePanel, perPage);
 				})
 				.catch(function () {
 					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load videos.</p>';
@@ -411,7 +452,7 @@
 
 		function loadBcLazy(container, type) {
 			if (type === 'bc_home') {
-				loadBcHomeGrid(1, bcHomePerPage, '');
+				loadBcHomeGrid(1, bcHomePerPage);
 				return;
 			}
 			if (type === 'videos') {
@@ -476,7 +517,7 @@
 				var pp    = ppBtn.dataset.bcPerPage;
 				var panel = ppBtn.closest('.pv-bc-panel');
 				var pk    = panel && panel.dataset.bcPanel;
-				if (pk === 'home')   loadBcHomeGrid(1,   pp, bcHomeYtPl);
+				if (pk === 'home')   loadBcHomeGrid(1,   pp);
 				if (pk === 'videos') loadBcVideosGrid(1, pp, bcVideosCategory, bcVideosYtPl);
 				return;
 			}
@@ -490,20 +531,30 @@
 					e.preventDefault();
 					var match = pageLink.href.match(/[?&]paged=(\d+)/);
 					var pg    = match ? parseInt(match[1], 10) : 1;
-					if (pk === 'home')   loadBcHomeGrid(pg,   bcHomePerPage,   bcHomeYtPl);
+					if (pk === 'home')   loadBcHomeGrid(pg,   bcHomePerPage);
 					if (pk === 'videos') loadBcVideosGrid(pg, bcVideosPerPage, bcVideosCategory, bcVideosYtPl);
 					return;
 				}
 			}
 
-			// Playlist radio filter (home panel)
-			var radio = e.target.closest('input[name="pv_bc_pl_filter"]');
-			if (radio) {
-				var val = radio.value;
-				bc.querySelectorAll('.pv-bc-pl-radio').forEach(function (lbl) {
-					lbl.classList.toggle('pv-bc-pl-radio--active', lbl.contains(radio));
-				});
-				loadBcHomeGrid(1, bcHomePerPage, val === '*' ? '' : val);
+			// Playlist chip toggle (home panel — multi-select)
+			var plChip = e.target.closest('.pv-bc-pl-chip');
+			if (plChip) {
+				var plId    = plChip.dataset.plId;
+				var plTitle = plChip.dataset.plTitle || plChip.textContent.trim();
+				var isActive = plChip.classList.contains('pv-bc-pl-chip--active');
+				if (isActive) {
+					plChip.classList.remove('pv-bc-pl-chip--active');
+					var idx = bcSelectedPls.indexOf(plId);
+					if (idx > -1) bcSelectedPls.splice(idx, 1);
+					removeBcPlRow(plId);
+					if (bcSelectedPls.length === 0) bcExitPlMode();
+				} else {
+					plChip.classList.add('pv-bc-pl-chip--active');
+					bcSelectedPls.push(plId);
+					if (bcSelectedPls.length === 1) bcEnterPlMode();
+					addBcPlRow(plId, plTitle);
+				}
 				return;
 			}
 

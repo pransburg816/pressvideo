@@ -171,7 +171,7 @@ class PV_Customizer_Page {
 			}
 		}
 
-		foreach ( [ 'hero_title', 'hero_subtitle', 'aside_new_releases_label', 'aside_topics_label', 'aside_tags_label', 'aside_cat_label', 'aside_tag_label', 'new_video_notify_msg' ] as $k ) {
+		foreach ( [ 'hero_title', 'hero_subtitle', 'aside_new_releases_label', 'aside_topics_label', 'aside_tags_label', 'aside_cat_label', 'aside_tag_label', 'new_video_notify_msg', 'grid_label_text' ] as $k ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$clean[ $k ] = sanitize_text_field( $raw[ $k ] );
 			}
@@ -187,7 +187,7 @@ class PV_Customizer_Page {
 			$clean['hero_bg_image'] = esc_url_raw( $raw['hero_bg_image'] );
 		}
 
-		foreach ( [ 'aside_new_releases', 'aside_topics', 'aside_tags', 'cards_show_excerpt', 'cards_show_category', 'aside_cat_on', 'aside_tag_on', 'hero_show', 'live_feed_enabled', 'live_chat_enabled', 'live_banner_enabled', 'new_video_notify' ] as $k ) {
+		foreach ( [ 'aside_new_releases', 'aside_topics', 'aside_tags', 'cards_show_excerpt', 'cards_show_category', 'aside_cat_on', 'aside_tag_on', 'hero_show', 'live_feed_enabled', 'live_chat_enabled', 'live_banner_enabled', 'new_video_notify', 'grid_label_show' ] as $k ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$clean[ $k ] = (bool) $raw[ $k ];
 			}

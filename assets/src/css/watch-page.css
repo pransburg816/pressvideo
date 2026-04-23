@@ -2046,30 +2046,29 @@
 	pointer-events: none;
 }
 
-/* ── Home panel: playlist radio filter ──────────────────────────── */
-.pv-bc-pl-radios {
+/* ── Home panel: playlist chip filter (multi-select) ─────────────── */
+.pv-bc-pl-chips {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 	margin-bottom: 20px;
 }
-.pv-bc-pl-radio {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	padding: 6px 14px;
+.pv-bc-pl-chip {
+	flex-shrink: 0;
 	background: rgba(255,255,255,0.05);
 	border: 1.5px solid rgba(255,255,255,0.1);
 	border-radius: 20px;
+	color: rgba(255,255,255,0.6);
 	font-size: 0.8rem;
 	font-weight: 600;
-	color: rgba(255,255,255,0.55);
+	padding: 6px 14px;
 	cursor: pointer;
 	transition: background 0.18s, border-color 0.18s, color 0.18s;
+	white-space: nowrap;
+	font-family: inherit;
 }
-.pv-bc-pl-radio input[type="radio"] { display: none; }
-.pv-bc-pl-radio:hover { border-color: var(--pv-accent); color: #fff; }
-.pv-bc-pl-radio--active { background: var(--pv-accent); border-color: var(--pv-accent); color: #fff; }
+.pv-bc-pl-chip:hover { border-color: var(--pv-accent); color: #fff; background: rgba(79,70,229,0.12); }
+.pv-bc-pl-chip--active { background: var(--pv-accent); border-color: var(--pv-accent); color: #fff; }
 
 /* ── Home panel: video grid + playlist View All ──────────────────── */
 .pv-bc-home-grid {

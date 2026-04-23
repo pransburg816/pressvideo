@@ -290,6 +290,18 @@
 	display: none;
 }
 
+/* ── Section label (above grid/list) ────────────────────────────────── */
+.pv-section-label {
+	margin: 0 0 16px;
+}
+.pv-section-label__title {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #fff;
+	margin: 0;
+	letter-spacing: -0.01em;
+}
+
 /* ── No-videos fallback ─────────────────────────────────────────────── */
 .pv-no-videos {
 	color: rgba(255,255,255,0.35);
