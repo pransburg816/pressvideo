@@ -48,7 +48,7 @@ class PV_Import_UI {
 
 		if ( ! empty( $result['errors'] ) ) {
 			wp_send_json_error( [
-				'message' => implode( ' ', $result['errors'] ),
+				'message' => implode( ' ', $result['errors'] ) . ' | ' . $message,
 				'result'  => $result,
 			] );
 		}
