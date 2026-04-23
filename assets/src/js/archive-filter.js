@@ -28,6 +28,16 @@
 
 	var ajaxUrl = (window.pvOffcanvas && window.pvOffcanvas.ajaxUrl) || '';
 
+	/* ── Page loader bar ────────────────────────────────────────────── */
+	var loaderBar = document.createElement('div');
+	loaderBar.className = 'pv-page-loader';
+	document.body.appendChild(loaderBar);
+
+	// On new page load: complete the bar then fade it out
+	requestAnimationFrame(function () {
+		loaderBar.classList.add('pv-page-loader--done');
+	});
+
 	/* ── Smooth page transitions (pagination + per-page) ─────────────── */
 	document.addEventListener('click', function (e) {
 		var link = e.target.closest(
@@ -37,7 +47,16 @@
 		if (!link || !link.href) return;
 		e.preventDefault();
 		main.classList.add('pv-archive-main--leaving');
-		setTimeout(function () { window.location.href = link.href; }, 200);
+		// Reset bar then start progress animation
+		loaderBar.classList.remove('pv-page-loader--done', 'pv-page-loader--leaving');
+		loaderBar.style.width = '0';
+		loaderBar.style.opacity = '1';
+		requestAnimationFrame(function () {
+			requestAnimationFrame(function () {
+				loaderBar.classList.add('pv-page-loader--leaving');
+			});
+		});
+		setTimeout(function () { window.location.href = link.href; }, 210);
 	});
 
 	setupBroadcast();
