@@ -2021,6 +2021,68 @@
 	color: #fff;
 }
 
+/* ── Broadcast toolbar (per-page + pagination row) ──────────────── */
+.pv-bc-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 0 0 16px;
+}
+.pv-bc-toolbar .pv-pagination--top { padding: 0; margin: 0; animation: none; }
+.pv-bc-toolbar .pv-pagination--top .navigation,
+.pv-bc-toolbar .pv-pagination--top .nav-links { display: flex; align-items: center; margin: 0; }
+.pv-bc-toolbar button.pv-per-page__btn {
+	cursor: pointer;
+	background: rgba(255,255,255,0.05);
+	border: 1.5px solid rgba(255,255,255,0.1);
+	font-family: inherit;
+}
+.pv-bc-toolbar button.pv-per-page__btn--active {
+	background: var(--pv-accent);
+	border-color: var(--pv-accent);
+	color: #fff;
+	pointer-events: none;
+}
+
+/* ── Home panel: playlist radio filter ──────────────────────────── */
+.pv-bc-pl-radios {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 20px;
+}
+.pv-bc-pl-radio {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 14px;
+	background: rgba(255,255,255,0.05);
+	border: 1.5px solid rgba(255,255,255,0.1);
+	border-radius: 20px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: rgba(255,255,255,0.55);
+	cursor: pointer;
+	transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+.pv-bc-pl-radio input[type="radio"] { display: none; }
+.pv-bc-pl-radio:hover { border-color: var(--pv-accent); color: #fff; }
+.pv-bc-pl-radio--active { background: var(--pv-accent); border-color: var(--pv-accent); color: #fff; }
+
+/* ── Home panel: video grid + playlist View All ──────────────────── */
+.pv-bc-home-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 20px;
+	margin-bottom: 20px;
+}
+@media (max-width: 900px) { .pv-bc-home-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .pv-bc-home-grid { grid-template-columns: 1fr; } }
+.pv-bc-home-view-all { text-align: center; padding: 8px 0 16px; }
+.pv-bc-home-expand-btn { cursor: pointer; font-family: inherit; }
+
 /* ── Videos tab: sort bar ────────────────────────────────────────── */
 .pv-bc-sort-bar {
 	display: flex;

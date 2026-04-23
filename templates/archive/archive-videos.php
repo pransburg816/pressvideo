@@ -67,10 +67,10 @@ $pv_cards_cat      = isset( $pv_settings['cards_show_category'] ) ? (bool) $pv_s
 $pv_search_align   = $pv_settings['search_bar_align'] ?? 'center';
 
 // Per-page selector
-$_pv_pp_allowed  = [ 5, 10, 20 ];
+$_pv_pp_allowed  = [ 10, 20, 50 ];
 $_pv_pp_raw      = sanitize_key( $_GET['per_page'] ?? '' ); // phpcs:ignore
 $_pv_show_all    = 'all' === $_pv_pp_raw;
-$_pv_cur_pp      = $_pv_show_all ? 'all' : ( in_array( (int) $_pv_pp_raw, $_pv_pp_allowed, true ) ? (int) $_pv_pp_raw : 5 );
+$_pv_cur_pp      = $_pv_show_all ? 'all' : ( in_array( (int) $_pv_pp_raw, $_pv_pp_allowed, true ) ? (int) $_pv_pp_raw : 20 );
 $_pv_pp_base_url = remove_query_arg( 'paged' );
 
 if ( 'offcanvas' === $pv_display ) {
@@ -660,89 +660,61 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 					<!-- Panels -->
 					<div class="pv-bc-panels">
 
-						<!-- HOME panel: YouTube playlist sections + series sections -->
+						<!-- HOME panel: paginated latest-videos grid with optional playlist radio filter -->
 						<div class="pv-bc-panel pv-bc-panel--active" data-bc-panel="home" role="tabpanel">
 
-							<?php // YouTube playlist sections
-							foreach ( $bc_yt_sections as $_yts ) : ?>
-							<div class="pv-bc-section">
-								<div class="pv-bc-section__head">
-									<h2 class="pv-bc-section__title"><?php echo esc_html( $_yts['title'] ); ?></h2>
-									<button type="button" class="pv-bc-section__view-all pv-bc-tab-switch" data-target-tab="videos"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?> &rarr;</button>
-								</div>
-								<div class="pv-bc-row">
-									<?php foreach ( $_yts['posts'] as $_yts_p ) : $render_bc_card( $_yts_p ); endforeach; ?>
-								</div>
-							</div>
-							<?php endforeach; ?>
-
-							<?php // Series sections
-							foreach ( $bc_series as $_bcs ) :
-								$_bcs_posts = get_posts( [
-									'post_type'      => 'pv_youtube',
-									'posts_per_page' => 4,
-									'post_status'    => 'publish',
-									'orderby'        => 'date',
-									'order'          => 'DESC',
-									'tax_query'      => [ [ 'taxonomy' => 'pv_series', 'field' => 'term_id', 'terms' => $_bcs->term_id ] ], // phpcs:ignore
-								] );
-								if ( empty( $_bcs_posts ) ) continue;
-								$_bcs_link = get_term_link( $_bcs );
-							?>
-							<div class="pv-bc-section">
-								<div class="pv-bc-section__head">
-									<h2 class="pv-bc-section__title"><?php echo esc_html( $_bcs->name ); ?></h2>
-									<button type="button" class="pv-bc-section__view-all pv-bc-tab-switch" data-target-tab="videos"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?> &rarr;</button>
-								</div>
-								<div class="pv-bc-row">
-									<?php foreach ( $_bcs_posts as $_bcs_p ) : $render_bc_card( $_bcs_p ); endforeach; ?>
+							<!-- Toolbar: per-page + top pagination -->
+							<div class="pv-bc-toolbar">
+								<div id="pv-bc-home-top-pag" class="pv-pagination pv-pagination--top"></div>
+								<div class="pv-per-page" role="group" aria-label="<?php esc_attr_e( 'Videos per page', 'pv-youtube-importer' ); ?>">
+									<span class="pv-per-page__label"><?php esc_html_e( 'Show:', 'pv-youtube-importer' ); ?></span>
+									<button class="pv-per-page__btn" data-bc-per-page="10">10</button>
+									<button class="pv-per-page__btn pv-per-page__btn--active" data-bc-per-page="20">20</button>
+									<button class="pv-per-page__btn" data-bc-per-page="50">50</button>
+									<button class="pv-per-page__btn" data-bc-per-page="all"><?php esc_html_e( 'All', 'pv-youtube-importer' ); ?></button>
 								</div>
 							</div>
-							<?php endforeach; ?>
 
-							<?php // Category sections fallback (no series or yt playlists exist)
-							foreach ( $bc_cat_sections as $_bcc ) :
-								$_bcc_posts = get_posts( [
-									'post_type'      => 'pv_youtube',
-									'posts_per_page' => 4,
-									'post_status'    => 'publish',
-									'orderby'        => 'date',
-									'order'          => 'DESC',
-									'tax_query'      => [ [ 'taxonomy' => 'pv_category', 'field' => 'term_id', 'terms' => $_bcc->term_id ] ], // phpcs:ignore
-								] );
-								if ( empty( $_bcc_posts ) ) continue;
-							?>
-							<div class="pv-bc-section">
-								<div class="pv-bc-section__head">
-									<h2 class="pv-bc-section__title"><?php echo esc_html( $_bcc->name ); ?></h2>
-									<button type="button" class="pv-bc-section__view-all pv-bc-tab-switch" data-target-tab="videos"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?> &rarr;</button>
-								</div>
-								<div class="pv-bc-row">
-									<?php foreach ( $_bcc_posts as $_bcc_p ) : $render_bc_card( $_bcc_p ); endforeach; ?>
-								</div>
-							</div>
-							<?php endforeach; ?>
-
-							<?php // Fallback: show latest videos when no sections configured at all
-							$bc_latest_fallback = [];
-							if ( empty( $bc_yt_sections ) && empty( $bc_series ) && empty( $bc_cat_sections ) ) {
-								$bc_latest_fallback = get_posts( [ 'post_type' => 'pv_youtube', 'posts_per_page' => 4, 'post_status' => 'publish', 'orderby' => 'date', 'order' => 'DESC', 'no_found_rows' => true ] );
-							}
-							if ( ! empty( $bc_latest_fallback ) ) : ?>
-							<div class="pv-bc-section">
-								<div class="pv-bc-section__head">
-									<h2 class="pv-bc-section__title"><?php esc_html_e( 'Latest Videos', 'pv-youtube-importer' ); ?></h2>
-								</div>
-								<div class="pv-bc-row">
-									<?php foreach ( $bc_latest_fallback as $_bcp ) : $render_bc_card( $_bcp ); endforeach; ?>
-								</div>
+							<?php if ( ! empty( $bc_yt_sections ) ) : ?>
+							<!-- YouTube playlist radio filter -->
+							<div class="pv-bc-pl-radios" role="group" aria-label="<?php esc_attr_e( 'Filter by playlist', 'pv-youtube-importer' ); ?>">
+								<label class="pv-bc-pl-radio pv-bc-pl-radio--active">
+									<input type="radio" name="pv_bc_pl_filter" value="*" checked>
+									<span><?php esc_html_e( 'All Videos', 'pv-youtube-importer' ); ?></span>
+								</label>
+								<?php foreach ( $bc_yt_sections as $_yts ) : ?>
+								<label class="pv-bc-pl-radio">
+									<input type="radio" name="pv_bc_pl_filter" value="<?php echo esc_attr( $_yts['id'] ); ?>">
+									<span><?php echo esc_html( $_yts['title'] ); ?></span>
+								</label>
+								<?php endforeach; ?>
 							</div>
 							<?php endif; ?>
 
+							<!-- Video grid: AJAX-loaded on activation -->
+							<div class="pv-bc-home-grid" data-bc-lazy="bc_home">
+								<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>
+							</div>
+
+							<!-- Bottom pagination -->
+							<div id="pv-bc-home-bot-pag" class="pv-pagination"></div>
+
 						</div><!-- /home panel -->
 
-						<!-- VIDEOS panel: sort bar + chip filter + 4-col grid -->
+						<!-- VIDEOS panel: toolbar + sort bar + chip filter + grid -->
 						<div class="pv-bc-panel" data-bc-panel="videos" role="tabpanel">
+
+							<!-- Toolbar: per-page + top pagination -->
+							<div class="pv-bc-toolbar">
+								<div id="pv-bc-videos-top-pag" class="pv-pagination pv-pagination--top"></div>
+								<div class="pv-per-page" role="group" aria-label="<?php esc_attr_e( 'Videos per page', 'pv-youtube-importer' ); ?>">
+									<span class="pv-per-page__label"><?php esc_html_e( 'Show:', 'pv-youtube-importer' ); ?></span>
+									<button class="pv-per-page__btn" data-bc-per-page="10">10</button>
+									<button class="pv-per-page__btn pv-per-page__btn--active" data-bc-per-page="20">20</button>
+									<button class="pv-per-page__btn" data-bc-per-page="50">50</button>
+									<button class="pv-per-page__btn" data-bc-per-page="all"><?php esc_html_e( 'All', 'pv-youtube-importer' ); ?></button>
+								</div>
+							</div>
 
 							<!-- Sort bar -->
 							<div class="pv-bc-sort-bar">
@@ -761,10 +733,13 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							</div>
 							<?php endif; ?>
 
-							<!-- 4-column video grid — lazy-loaded on first tab click -->
+							<!-- Video grid — lazy-loaded on first tab click -->
 							<div class="pv-bc-video-grid" data-bc-lazy="videos">
 								<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>
 							</div>
+
+							<!-- Bottom pagination -->
+							<div id="pv-bc-videos-bot-pag" class="pv-pagination"></div>
 
 						</div><!-- /videos panel -->
 

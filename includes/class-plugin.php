@@ -105,7 +105,7 @@ class PV_Plugin {
 			return;
 		}
 		$n   = (int) $raw;
-		$ppp = in_array( $n, [ 5, 10, 20 ], true ) ? $n : 5;
+		$ppp = in_array( $n, [ 10, 20, 50 ], true ) ? $n : 20;
 		$q->set( 'posts_per_page', $ppp );
 		$q->set( 'nopaging', false );
 	}
@@ -124,7 +124,7 @@ class PV_Plugin {
 			$nopaging = true;
 		} else {
 			$n        = (int) $per_page;
-			$ppp      = in_array( $n, [ 5, 10, 20 ], true ) ? $n : 5;
+			$ppp      = in_array( $n, [ 10, 20, 50 ], true ) ? $n : 20;
 			$nopaging = false;
 		}
 
@@ -228,15 +228,27 @@ class PV_Plugin {
 
 	public function ajax_bc_videos(): void {
 		check_ajax_referer( 'pv_bc_load', 'nonce' );
-		$settings = get_option( 'pv_settings', [] );
-		$display  = $settings['display_mode'] ?? 'offcanvas';
-		$page     = max( 1, (int) ( $_POST['page'] ?? 1 ) );      // phpcs:ignore
-		$category = sanitize_key( $_POST['category'] ?? '' );     // phpcs:ignore
+		$settings     = get_option( 'pv_settings', [] );
+		$display      = $settings['display_mode'] ?? 'offcanvas';
+		$page         = max( 1, (int) ( $_POST['page'] ?? 1 ) );                                    // phpcs:ignore
+		$category     = sanitize_key( $_POST['category'] ?? '' );                                   // phpcs:ignore
+		$yt_pl_id     = preg_replace( '/[^A-Za-z0-9_\-]/', '', (string) ( $_POST['pv_yt_pl'] ?? '' ) ); // phpcs:ignore
+		$per_page_raw = sanitize_key( $_POST['per_page'] ?? '' );                                   // phpcs:ignore
+
+		if ( 'all' === $per_page_raw ) {
+			$ppp      = -1;
+			$nopaging = true;
+		} else {
+			$n        = (int) $per_page_raw;
+			$ppp      = in_array( $n, [ 4, 10, 20, 50 ], true ) ? $n : 20;
+			$nopaging = false;
+		}
 
 		$query_args = [
 			'post_type'      => 'pv_youtube',
-			'posts_per_page' => 40,
+			'posts_per_page' => $ppp,
 			'paged'          => $page,
+			'nopaging'       => $nopaging,
 			'post_status'    => 'publish',
 			'orderby'        => 'date',
 			'order'          => 'DESC',
@@ -252,6 +264,35 @@ class PV_Plugin {
 			];
 		}
 
+		if ( $yt_pl_id ) {
+			$_pl_transient = 'pv_yt_pl_vids_' . md5( $yt_pl_id );
+			$_pl_vid_ids   = get_transient( $_pl_transient );
+			if ( ! is_array( $_pl_vid_ids ) ) {
+				$_api_key   = $settings['api_key'] ?? '';
+				$_pl_vid_ids = [];
+				if ( $_api_key ) {
+					$_yt_api    = new PV_YouTube_API( $_api_key );
+					$_pl_videos = $_yt_api->get_playlist_videos( $yt_pl_id, 200 );
+					if ( is_array( $_pl_videos ) ) {
+						$_pl_vid_ids = array_column( $_pl_videos, 'youtube_id' );
+					}
+					set_transient( $_pl_transient, $_pl_vid_ids, HOUR_IN_SECONDS );
+				}
+			}
+			if ( $_pl_vid_ids ) {
+				$query_args['meta_query'] = [ // phpcs:ignore
+					[
+						'key'     => '_pv_youtube_id',
+						'value'   => $_pl_vid_ids,
+						'compare' => 'IN',
+					],
+				];
+			} else {
+				wp_send_json_success( [ 'html' => '<p class="pv-no-videos">' . esc_html__( 'No imported videos found for this playlist.', 'pv-youtube-importer' ) . '</p>', 'total' => 0, 'pages' => 0, 'page' => 1 ] );
+				return;
+			}
+		}
+
 		$q = new WP_Query( $query_args );
 
 		$html = '';
@@ -260,11 +301,27 @@ class PV_Plugin {
 		}
 		wp_reset_postdata();
 
+		$max_pages  = $q->max_num_pages;
+		$pagination = '';
+		if ( ! $nopaging && $max_pages > 1 ) {
+			$_pag_links = paginate_links( [
+				'base'      => add_query_arg( 'paged', '%#%', get_post_type_archive_link( 'pv_youtube' ) ),
+				'format'    => '',
+				'current'   => $page,
+				'total'     => $max_pages,
+				'prev_text' => '&#8592; ' . __( 'Prev', 'pv-youtube-importer' ),
+				'next_text' => __( 'Next', 'pv-youtube-importer' ) . ' &#8594;',
+				'type'      => 'plain',
+			] );
+			$pagination = '<nav class="navigation pagination" aria-label="' . esc_attr__( 'Posts navigation', 'pv-youtube-importer' ) . '"><div class="nav-links">' . $_pag_links . '</div></nav>';
+		}
+
 		wp_send_json_success( [
-			'html'  => $html,
-			'total' => $q->found_posts,
-			'pages' => $q->max_num_pages,
-			'page'  => $page,
+			'html'       => $html,
+			'pagination' => $pagination,
+			'total'      => $q->found_posts,
+			'pages'      => $max_pages,
+			'page'       => $page,
 		] );
 	}
 
@@ -326,15 +383,15 @@ class PV_Plugin {
 		$pl_svg_sm = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg>';
 		$pl_svg_lg = '<svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg>';
 
-		$render_pl_card = function( string $title, int $count, string $thumb, string $link, bool $external = false ) use ( $pl_svg_sm, $pl_svg_lg ): string {
-			$target = $external ? ' target="_blank" rel="noopener noreferrer"' : '';
+		$render_pl_card = function( string $title, int $count, string $thumb, string $link, string $yt_pl_id = '' ) use ( $pl_svg_sm, $pl_svg_lg ): string {
+			$extra_attr = $yt_pl_id ? ' data-pv-yt-pl="' . esc_attr( $yt_pl_id ) . '"' : '';
 			$no_thumb = '<div class="pv-bc-pl-list-card__no-thumb">' . $pl_svg_lg . '</div>';
 			$thumb_html = $thumb
 				? '<img src="' . esc_url( $thumb ) . '" alt="' . esc_attr( $title ) . '" loading="lazy">'
 				: $no_thumb;
 			$count_label = sprintf( _n( '%d video', '%d videos', $count, 'pv-youtube-importer' ), $count );
 			$view_all = $link
-				? '<a href="' . esc_url( $link ) . '" class="pv-bc-pl-list-card__view-all"' . $target . '>' . esc_html__( 'View All', 'pv-youtube-importer' ) . ' &rarr;</a>'
+				? '<a href="' . esc_url( $link ) . '" class="pv-bc-pl-list-card__view-all"' . $extra_attr . '>' . esc_html__( 'View All', 'pv-youtube-importer' ) . ' &rarr;</a>'
 				: '';
 			return '<div class="pv-bc-pl-list-card">'
 				. '<div class="pv-bc-pl-list-card__thumb">' . $thumb_html
@@ -349,12 +406,12 @@ class PV_Plugin {
 		$cards = '';
 
 		// ── All YouTube playlists from the channel ────────────────────
+		$_archive_url = (string) get_post_type_archive_link( 'pv_youtube' );
 		if ( is_array( $ch_pls ) ) {
 			foreach ( $ch_pls as $_cp ) {
 				$_count = (int) ( $_cp['count'] ?? 0 );
 				if ( $_count === 0 ) continue;
-				$_yt_link = 'https://www.youtube.com/playlist?list=' . rawurlencode( $_cp['id'] );
-				$cards   .= $render_pl_card( $_cp['title'], $_count, $_cp['thumb'] ?? '', $_yt_link, true );
+				$cards .= $render_pl_card( $_cp['title'], $_count, $_cp['thumb'] ?? '', $_archive_url, $_cp['id'] );
 			}
 		}
 
@@ -374,7 +431,7 @@ class PV_Plugin {
 				$_pls_thumb = ! empty( $_pls_q->posts ) ? get_the_post_thumbnail_url( $_pls_q->posts[0]->ID, 'medium' ) : '';
 				$_pls_link  = get_term_link( $_pls );
 				wp_reset_postdata();
-				$cards .= $render_pl_card( $_pls->name, $_pls_count, $_pls_thumb, is_wp_error( $_pls_link ) ? '' : $_pls_link, false );
+				$cards .= $render_pl_card( $_pls->name, $_pls_count, $_pls_thumb, is_wp_error( $_pls_link ) ? '' : (string) $_pls_link );
 			}
 		}
 
