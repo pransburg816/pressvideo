@@ -230,16 +230,29 @@ class PV_Plugin {
 		check_ajax_referer( 'pv_bc_load', 'nonce' );
 		$settings = get_option( 'pv_settings', [] );
 		$display  = $settings['display_mode'] ?? 'offcanvas';
-		$page     = max( 1, (int) ( $_POST['page'] ?? 1 ) ); // phpcs:ignore
+		$page     = max( 1, (int) ( $_POST['page'] ?? 1 ) );      // phpcs:ignore
+		$category = sanitize_key( $_POST['category'] ?? '' );     // phpcs:ignore
 
-		$q = new WP_Query( [
+		$query_args = [
 			'post_type'      => 'pv_youtube',
 			'posts_per_page' => 40,
 			'paged'          => $page,
 			'post_status'    => 'publish',
 			'orderby'        => 'date',
 			'order'          => 'DESC',
-		] );
+		];
+
+		if ( $category ) {
+			$query_args['tax_query'] = [ // phpcs:ignore
+				[
+					'taxonomy' => 'pv_category',
+					'field'    => 'slug',
+					'terms'    => $category,
+				],
+			];
+		}
+
+		$q = new WP_Query( $query_args );
 
 		$html = '';
 		foreach ( $q->posts as $_p ) {

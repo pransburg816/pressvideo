@@ -23,6 +23,12 @@ if (
 $pv_accent    = $pv_settings['default_accent'] ?? '#4f46e5';
 $pv_layout    = $pv_settings['archive_layout'] ?? 'grid';
 $pv_display   = $pv_settings['display_mode']   ?? 'offcanvas';
+
+// Broadcast layout doesn't support taxonomy-filtered views — fall back to grid so
+// clicking a Browse Topics / tag / series link shows properly filtered content.
+if ( 'broadcast' === $pv_layout && is_tax( [ 'pv_category', 'pv_tag', 'pv_series', 'pv_type' ] ) ) {
+	$pv_layout = 'grid';
+}
 $total_videos = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
 
 // Content width (computed first — used by both hero and content area)

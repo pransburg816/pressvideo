@@ -402,29 +402,25 @@
 				});
 				var grid = bc.querySelector('.pv-bc-video-grid');
 				if (!grid) return;
-				var items = grid.querySelectorAll('[data-category]');
-				var toHide = [], toShow = [];
-				items.forEach(function (item) {
-					var matches = filter === '*' || item.dataset.category === filter;
-					if (!item.hidden && !matches) toHide.push(item);
-					if (item.hidden  &&  matches) toShow.push(item);
-				});
-				toHide.forEach(function (item) { item.classList.add('pv-filter-exit'); });
-				setTimeout(function () {
-					toHide.forEach(function (item) { item.hidden = true; item.classList.remove('pv-filter-exit'); });
-					toShow.forEach(function (item) { item.hidden = false; item.classList.add('pv-filter-enter'); });
-					requestAnimationFrame(function () {
-						requestAnimationFrame(function () {
-							toShow.forEach(function (item, i) {
-								item.style.transitionDelay = Math.min(i * 35, 280) + 'ms';
-								item.classList.remove('pv-filter-enter');
-							});
-						});
+				grid.innerHTML = '<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>';
+				var fd = new FormData();
+				fd.append('action', 'pv_bc_videos');
+				fd.append('nonce', bcNonce);
+				fd.append('page', '1');
+				if (filter !== '*') fd.append('category', filter);
+				fetch(bcAjaxUrl, { method: 'POST', body: fd })
+					.then(function (r) { return r.json(); })
+					.then(function (data) {
+						if (!data.success) {
+							grid.innerHTML = '<p class="pv-no-videos">Could not load content.</p>';
+							return;
+						}
+						grid.innerHTML = data.data.html
+							|| '<p class="pv-no-videos">No videos found for this category.</p>';
+					})
+					.catch(function () {
+						grid.innerHTML = '<p class="pv-no-videos">Could not load content.</p>';
 					});
-					setTimeout(function () {
-						toShow.forEach(function (item) { item.style.transitionDelay = ''; });
-					}, Math.min(toShow.length * 35, 280) + 450);
-				}, 200);
 			});
 		}
 
