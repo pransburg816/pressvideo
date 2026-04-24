@@ -120,185 +120,229 @@ class PV_Dashboard_Page {
 			'order'          => 'DESC',
 		] );
 		?>
-		<div class="wrap pv-settings-wrap">
+		<div class="wrap pvd-wrap">
+		<div class="pvd-inner">
 
-			<!-- Header -->
-			<div class="pv-page-header">
-				<h1>
-					<span class="dashicons dashicons-video-alt3"></span>
-					<?php esc_html_e( 'PressVideo', 'pv-youtube-importer' ); ?>
-				</h1>
-				<div class="pv-page-header__actions">
-					<?php if ( $archive_url ) : ?>
-						<a href="<?php echo esc_url( $archive_url ); ?>" target="_blank" rel="noopener" class="button">
-							<span class="dashicons dashicons-external" style="margin-top:3px;"></span>
-							<?php esc_html_e( 'View Archive', 'pv-youtube-importer' ); ?>
-						</a>
-					<?php endif; ?>
-					<a href="<?php echo esc_url( $preview_url ); ?>" class="button button-primary">
-						<span class="dashicons dashicons-visibility" style="margin-top:3px;"></span>
-						<?php esc_html_e( 'Live Preview', 'pv-youtube-importer' ); ?>
-					</a>
-					<span class="pv-tier-badge">
-						<?php echo esc_html( ucfirst( $tier ) ); ?> <?php esc_html_e( 'Plan', 'pv-youtube-importer' ); ?>
-						<?php if ( ! PV_Tier::is_gold() ) : ?>
-							&nbsp;&middot;&nbsp;<a href="https://pressvideo.com" target="_blank" rel="noopener"><?php esc_html_e( 'Upgrade →', 'pv-youtube-importer' ); ?></a>
+			<!-- ── Hero ──────────────────────────────────────────── -->
+			<div class="pvd-hero">
+				<div class="pvd-hero__left">
+					<div class="pvd-hero__brand">
+						<span class="dashicons dashicons-video-alt3"></span>
+						<h1><?php esc_html_e( 'PressVideo', 'pv-youtube-importer' ); ?></h1>
+					</div>
+					<p class="pvd-hero__tagline"><?php esc_html_e( 'Your YouTube channel, owned.', 'pv-youtube-importer' ); ?></p>
+					<div class="pvd-hero__actions">
+						<span class="pvd-tier-badge">
+							<?php echo esc_html( ucfirst( $tier ) ); ?> <?php esc_html_e( 'Plan', 'pv-youtube-importer' ); ?>
+							<?php if ( ! PV_Tier::is_gold() ) : ?>
+								&nbsp;&middot;&nbsp;<a href="https://pressvideo.com" target="_blank" rel="noopener"><?php esc_html_e( 'Upgrade →', 'pv-youtube-importer' ); ?></a>
+							<?php endif; ?>
+						</span>
+						<?php if ( $archive_url ) : ?>
+							<a href="<?php echo esc_url( $archive_url ); ?>" target="_blank" rel="noopener" class="pvd-btn pvd-btn--ghost">
+								<span class="dashicons dashicons-external"></span>
+								<?php esc_html_e( 'View Archive', 'pv-youtube-importer' ); ?>
+							</a>
 						<?php endif; ?>
-					</span>
-				</div>
-			</div>
-
-			<!-- ── Stats row ──────────────────────────────────────── -->
-			<div class="pv-stats-row pv-stats-row--6">
-
-				<div class="pv-stat-card">
-					<span class="pv-stat-card__value"><?php echo esc_html( $total_published ); ?><?php if ( $limit !== PHP_INT_MAX ) : ?><span class="pv-stat-card__cap"> / <?php echo esc_html( $limit ); ?></span><?php endif; ?></span>
-					<span class="pv-stat-card__label"><?php esc_html_e( 'Total Videos', 'pv-youtube-importer' ); ?></span>
+						<a href="<?php echo esc_url( $preview_url ); ?>" class="pvd-btn pvd-btn--primary">
+							<span class="dashicons dashicons-visibility"></span>
+							<?php esc_html_e( 'Live Preview', 'pv-youtube-importer' ); ?>
+						</a>
+					</div>
 				</div>
 
-				<div class="pv-stat-card">
-					<span class="pv-stat-card__value"><?php echo esc_html( $this_month ); ?></span>
-					<span class="pv-stat-card__label"><?php esc_html_e( 'Published This Month', 'pv-youtube-importer' ); ?></span>
+				<!-- Decorative video-grid SVG -->
+				<div class="pvd-hero__deco" aria-hidden="true">
+					<svg viewBox="0 0 220 155" xmlns="http://www.w3.org/2000/svg" fill="none">
+						<rect x="0"   y="0"   width="68" height="46" rx="7" fill="white"/>
+						<polygon points="25,15 25,31 43,23" fill="#7c3aed"/>
+						<rect x="76"  y="0"   width="68" height="46" rx="7" fill="white"/>
+						<polygon points="101,15 101,31 119,23" fill="#4f46e5"/>
+						<rect x="152" y="0"   width="68" height="46" rx="7" fill="white"/>
+						<polygon points="177,15 177,31 195,23" fill="#6d28d9"/>
+						<rect x="0"   y="53"  width="68" height="46" rx="7" fill="white"/>
+						<polygon points="25,68 25,84 43,76" fill="#4f46e5"/>
+						<rect x="76"  y="53"  width="68" height="46" rx="7" fill="white"/>
+						<polygon points="101,68 101,84 119,76" fill="#7c3aed"/>
+						<rect x="152" y="53"  width="68" height="46" rx="7" fill="white"/>
+						<polygon points="177,68 177,84 195,76" fill="#4f46e5"/>
+						<rect x="0"   y="106" width="68" height="46" rx="7" fill="white"/>
+						<polygon points="25,121 25,137 43,129" fill="#6d28d9"/>
+						<rect x="76"  y="106" width="68" height="46" rx="7" fill="white"/>
+						<polygon points="101,121 101,137 119,129" fill="#4f46e5"/>
+						<rect x="152" y="106" width="68" height="46" rx="7" fill="white"/>
+						<polygon points="177,121 177,137 195,129" fill="#7c3aed"/>
+					</svg>
+				</div>
+			</div><!-- /.pvd-hero -->
+
+			<!-- ── Stats row (glass morphism) ───────────────────── -->
+			<div class="pvd-stats">
+
+				<div class="pvd-stat">
+					<span class="pvd-stat__val"><?php echo esc_html( $total_published ); ?><?php if ( $limit !== PHP_INT_MAX ) : ?><span class="pvd-stat__cap"> / <?php echo esc_html( $limit ); ?></span><?php endif; ?></span>
+					<span class="pvd-stat__lbl"><?php esc_html_e( 'Total Videos', 'pv-youtube-importer' ); ?></span>
 				</div>
 
-				<div class="pv-stat-card">
-					<span class="pv-stat-card__value"><?php echo esc_html( $this_week ); ?></span>
-					<span class="pv-stat-card__label"><?php esc_html_e( 'Added This Week', 'pv-youtube-importer' ); ?></span>
+				<div class="pvd-stat">
+					<span class="pvd-stat__val"><?php echo esc_html( $this_month ); ?></span>
+					<span class="pvd-stat__lbl"><?php esc_html_e( 'Published This Month', 'pv-youtube-importer' ); ?></span>
 				</div>
 
-				<div class="pv-stat-card">
-					<span class="pv-stat-card__value"><?php echo esc_html( $cat_count ); ?></span>
-					<span class="pv-stat-card__label"><?php esc_html_e( 'Categories', 'pv-youtube-importer' ); ?></span>
+				<div class="pvd-stat">
+					<span class="pvd-stat__val"><?php echo esc_html( $this_week ); ?></span>
+					<span class="pvd-stat__lbl"><?php esc_html_e( 'Added This Week', 'pv-youtube-importer' ); ?></span>
+				</div>
+
+				<div class="pvd-stat">
+					<span class="pvd-stat__val"><?php echo esc_html( $cat_count ); ?></span>
+					<span class="pvd-stat__lbl"><?php esc_html_e( 'Categories', 'pv-youtube-importer' ); ?></span>
 					<?php if ( $top_cat ) : ?>
-						<span class="pv-stat-card__sub"><?php echo esc_html( sprintf( __( 'Top: %s (%d)', 'pv-youtube-importer' ), $top_cat->name, $top_cat->count ) ); ?></span>
+						<span class="pvd-stat__sub"><?php echo esc_html( sprintf( __( 'Top: %s (%d)', 'pv-youtube-importer' ), $top_cat->name, $top_cat->count ) ); ?></span>
 					<?php endif; ?>
 				</div>
 
-				<div class="pv-stat-card">
-					<span class="pv-stat-card__value"><?php echo esc_html( $tag_count ); ?></span>
-					<span class="pv-stat-card__label"><?php esc_html_e( 'Tags', 'pv-youtube-importer' ); ?></span>
+				<div class="pvd-stat">
+					<span class="pvd-stat__val"><?php echo esc_html( $tag_count ); ?></span>
+					<span class="pvd-stat__lbl"><?php esc_html_e( 'Tags', 'pv-youtube-importer' ); ?></span>
 				</div>
 
-				<div class="pv-stat-card">
+				<div class="pvd-stat">
 					<?php if ( $last ) : ?>
-						<span class="pv-stat-card__value pv-stat-card__value--sm"><?php echo esc_html( human_time_diff( $last['time'], time() ) ); ?> <?php esc_html_e( 'ago', 'pv-youtube-importer' ); ?></span>
-						<span class="pv-stat-card__label"><?php echo esc_html( sprintf( __( 'Last Import · %d added', 'pv-youtube-importer' ), $last['imported'] ) ); ?></span>
+						<span class="pvd-stat__val pvd-stat__val--sm"><?php echo esc_html( human_time_diff( $last['time'], time() ) ); ?> <?php esc_html_e( 'ago', 'pv-youtube-importer' ); ?></span>
+						<span class="pvd-stat__lbl"><?php echo esc_html( sprintf( __( 'Last Import · %d added', 'pv-youtube-importer' ), $last['imported'] ) ); ?></span>
 					<?php else : ?>
-						<span class="pv-stat-card__value pv-stat-card__value--dash">&mdash;</span>
-						<span class="pv-stat-card__label"><?php esc_html_e( 'No Imports Yet', 'pv-youtube-importer' ); ?></span>
+						<span class="pvd-stat__val pvd-stat__val--dash">&mdash;</span>
+						<span class="pvd-stat__lbl"><?php esc_html_e( 'No Imports Yet', 'pv-youtube-importer' ); ?></span>
 					<?php endif; ?>
 				</div>
 
-			</div>
+			</div><!-- /.pvd-stats -->
 
-			<!-- ── Import ────────────────────────────────────────── -->
-			<div class="pv-card">
-				<div class="pv-card__head">
-					<div class="pv-card__icon"><span class="dashicons dashicons-download"></span></div>
-					<div class="pv-card__head-text">
-						<h2><?php esc_html_e( 'Import', 'pv-youtube-importer' ); ?></h2>
-						<p><?php esc_html_e( 'Fetch the latest videos from your YouTube channel.', 'pv-youtube-importer' ); ?></p>
-					</div>
-				</div>
-				<div class="pv-card__body">
-					<button id="pv-run-import" class="button button-primary" type="button">
-						<?php esc_html_e( 'Run Import Now', 'pv-youtube-importer' ); ?>
-					</button>
-					<span id="pv-import-spinner" class="spinner" style="float:none;margin:0 6px;vertical-align:middle;"></span>
-					<?php wp_nonce_field( 'pv_manual_import_nonce', 'pv_import_nonce' ); ?>
-					<div id="pv-import-result"></div>
-				</div>
-			</div>
+			<!-- ── Main 2-col ────────────────────────────────────── -->
+			<div class="pvd-main">
 
-			<!-- ── Recent Videos ──────────────────────────────────── -->
-			<?php if ( ! empty( $recent_videos ) ) : ?>
-			<div class="pv-card">
-				<div class="pv-card__head">
-					<div class="pv-card__icon"><span class="dashicons dashicons-clock"></span></div>
-					<div class="pv-card__head-text">
-						<h2><?php esc_html_e( 'Recently Published', 'pv-youtube-importer' ); ?></h2>
-						<p><?php esc_html_e( 'Your latest imported videos at a glance.', 'pv-youtube-importer' ); ?></p>
-					</div>
-					<div class="pv-card__head-action">
-						<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="button button-small"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?></a>
-					</div>
-				</div>
-				<div class="pv-card__body pv-card__body--flush">
-					<div class="pv-recent-videos">
-						<?php foreach ( $recent_videos as $rv ) :
-							$rv_thumb = get_the_post_thumbnail_url( $rv->ID, 'thumbnail' ) ?: '';
-							$rv_cats  = get_the_terms( $rv->ID, 'pv_category' );
-							$rv_cat   = ( $rv_cats && ! is_wp_error( $rv_cats ) ) ? $rv_cats[0]->name : '—';
-							$rv_dur   = get_post_meta( $rv->ID, '_pv_duration', true );
-							$rv_yt    = get_post_meta( $rv->ID, '_pv_youtube_id', true );
-							$rv_accent = pv_resolve_accent_color( $rv->ID );
-						?>
-						<div class="pv-rv-row">
-							<div class="pv-rv-thumb">
-								<?php if ( $rv_thumb ) : ?>
-									<img src="<?php echo esc_url( $rv_thumb ); ?>" alt="" loading="lazy" width="80" height="45">
-								<?php else : ?>
-									<div class="pv-rv-thumb__placeholder"><span class="dashicons dashicons-video-alt3"></span></div>
-								<?php endif; ?>
-								<?php if ( $rv_dur ) : ?>
-									<span class="pv-rv-dur"><?php echo esc_html( $rv_dur ); ?></span>
-								<?php endif; ?>
+				<!-- Left: Import + Quick Links -->
+				<div class="pvd-col pvd-col--left">
+
+					<div class="pvd-card">
+						<div class="pvd-card__head">
+							<div class="pvd-card__icon"><span class="dashicons dashicons-download"></span></div>
+							<div class="pvd-card__head-text">
+								<h2><?php esc_html_e( 'Import', 'pv-youtube-importer' ); ?></h2>
+								<p><?php esc_html_e( 'Fetch the latest videos from your YouTube channel.', 'pv-youtube-importer' ); ?></p>
 							</div>
-							<div class="pv-rv-info">
-								<a href="<?php echo esc_url( get_edit_post_link( $rv->ID ) ); ?>" class="pv-rv-title"><?php echo esc_html( $rv->post_title ); ?></a>
-								<span class="pv-rv-meta">
-									<span class="pv-rv-cat" style="--pv-accent:<?php echo esc_attr( $rv_accent ); ?>;"><?php echo esc_html( $rv_cat ); ?></span>
-									<span class="pv-rv-date"><?php echo esc_html( get_the_date( 'M j, Y', $rv->ID ) ); ?></span>
-								</span>
+						</div>
+						<div class="pvd-card__body">
+							<button id="pv-run-import" class="button button-primary" type="button">
+								<?php esc_html_e( 'Run Import Now', 'pv-youtube-importer' ); ?>
+							</button>
+							<span id="pv-import-spinner" class="spinner" style="float:none;margin:0 6px;vertical-align:middle;"></span>
+							<?php wp_nonce_field( 'pv_manual_import_nonce', 'pv_import_nonce' ); ?>
+							<div id="pv-import-result"></div>
+						</div>
+					</div>
+
+					<div class="pvd-card">
+						<div class="pvd-card__head">
+							<div class="pvd-card__icon"><span class="dashicons dashicons-shortcode"></span></div>
+							<div class="pvd-card__head-text">
+								<h2><?php esc_html_e( 'Quick Links', 'pv-youtube-importer' ); ?></h2>
+								<p><?php esc_html_e( 'Jump to common plugin areas.', 'pv-youtube-importer' ); ?></p>
 							</div>
-							<div class="pv-rv-actions">
-								<?php if ( $rv_yt ) : ?>
-									<a href="<?php echo esc_url( 'https://www.youtube.com/watch?v=' . $rv_yt ); ?>" target="_blank" rel="noopener" title="<?php esc_attr_e( 'View on YouTube', 'pv-youtube-importer' ); ?>" class="pv-rv-yt-link">
-										<span class="dashicons dashicons-external"></span>
-									</a>
+						</div>
+						<div class="pvd-card__body">
+							<div class="pvd-qlinks">
+								<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pv_youtube' ) ); ?>" class="pvd-qlink">
+									<span class="dashicons dashicons-plus-alt"></span><?php esc_html_e( 'Add Video', 'pv-youtube-importer' ); ?>
+								</a>
+								<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ); ?>" class="pvd-qlink">
+									<span class="dashicons dashicons-admin-settings"></span><?php esc_html_e( 'Settings', 'pv-youtube-importer' ); ?>
+								</a>
+								<a href="<?php echo esc_url( $preview_url ); ?>" class="pvd-qlink">
+									<span class="dashicons dashicons-admin-customizer"></span><?php esc_html_e( 'Live Preview', 'pv-youtube-importer' ); ?>
+								</a>
+								<?php if ( $archive_url ) : ?>
+								<a href="<?php echo esc_url( $archive_url ); ?>" target="_blank" rel="noopener" class="pvd-qlink">
+									<span class="dashicons dashicons-video-alt3"></span><?php esc_html_e( 'View Archive', 'pv-youtube-importer' ); ?>
+								</a>
 								<?php endif; ?>
-								<a href="<?php echo esc_url( get_permalink( $rv->ID ) ); ?>" target="_blank" rel="noopener" title="<?php esc_attr_e( 'View post', 'pv-youtube-importer' ); ?>" class="pv-rv-view-link">
-									<span class="dashicons dashicons-visibility"></span>
+								<a href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ) ); ?>" class="pvd-qlink">
+									<span class="dashicons dashicons-category"></span><?php esc_html_e( 'Categories', 'pv-youtube-importer' ); ?>
+								</a>
+								<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-analytics' ) ); ?>" class="pvd-qlink">
+									<span class="dashicons dashicons-chart-bar"></span><?php esc_html_e( 'Analytics', 'pv-youtube-importer' ); ?>
 								</a>
 							</div>
 						</div>
-						<?php endforeach; ?>
 					</div>
-				</div>
-			</div>
-			<?php endif; ?>
 
-			<!-- ── Quick Links ────────────────────────────────────── -->
-			<div class="pv-quick-links">
-				<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=pv_youtube' ) ); ?>" class="pv-quick-link">
-					<span class="dashicons dashicons-plus-alt"></span>
-					<?php esc_html_e( 'Add Video', 'pv-youtube-importer' ); ?>
-				</a>
-				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ); ?>" class="pv-quick-link">
-					<span class="dashicons dashicons-admin-settings"></span>
-					<?php esc_html_e( 'Settings', 'pv-youtube-importer' ); ?>
-				</a>
-				<a href="<?php echo esc_url( $preview_url ); ?>" class="pv-quick-link">
-					<span class="dashicons dashicons-admin-customizer"></span>
-					<?php esc_html_e( 'Live Preview', 'pv-youtube-importer' ); ?>
-				</a>
-				<?php if ( $archive_url ) : ?>
-				<a href="<?php echo esc_url( $archive_url ); ?>" target="_blank" rel="noopener" class="pv-quick-link">
-					<span class="dashicons dashicons-video-alt3"></span>
-					<?php esc_html_e( 'View Archive', 'pv-youtube-importer' ); ?>
-				</a>
-				<?php endif; ?>
-				<a href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ) ); ?>" class="pv-quick-link">
-					<span class="dashicons dashicons-category"></span>
-					<?php esc_html_e( 'Categories', 'pv-youtube-importer' ); ?>
-				</a>
-				<a href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=pv_tag&post_type=pv_youtube' ) ); ?>" class="pv-quick-link">
-					<span class="dashicons dashicons-tag"></span>
-					<?php esc_html_e( 'Tags', 'pv-youtube-importer' ); ?>
-				</a>
-			</div>
+				</div><!-- /.pvd-col--left -->
 
-		</div>
+				<!-- Right: Recent Videos -->
+				<div class="pvd-col pvd-col--right">
+					<?php if ( ! empty( $recent_videos ) ) : ?>
+					<div class="pvd-card">
+						<div class="pvd-card__head">
+							<div class="pvd-card__icon"><span class="dashicons dashicons-clock"></span></div>
+							<div class="pvd-card__head-text">
+								<h2><?php esc_html_e( 'Recently Published', 'pv-youtube-importer' ); ?></h2>
+								<p><?php esc_html_e( 'Your latest imported videos at a glance.', 'pv-youtube-importer' ); ?></p>
+							</div>
+							<div class="pvd-card__head-action">
+								<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="button button-small"><?php esc_html_e( 'View All', 'pv-youtube-importer' ); ?></a>
+							</div>
+						</div>
+						<div class="pvd-card__body pvd-card__body--flush">
+							<div class="pv-recent-videos">
+								<?php foreach ( $recent_videos as $rv ) :
+									$rv_thumb  = get_the_post_thumbnail_url( $rv->ID, 'thumbnail' ) ?: '';
+									$rv_cats   = get_the_terms( $rv->ID, 'pv_category' );
+									$rv_cat    = ( $rv_cats && ! is_wp_error( $rv_cats ) ) ? $rv_cats[0]->name : '—';
+									$rv_dur    = get_post_meta( $rv->ID, '_pv_duration', true );
+									$rv_yt     = get_post_meta( $rv->ID, '_pv_youtube_id', true );
+									$rv_accent = pv_resolve_accent_color( $rv->ID );
+								?>
+								<div class="pv-rv-row">
+									<div class="pv-rv-thumb">
+										<?php if ( $rv_thumb ) : ?>
+											<img src="<?php echo esc_url( $rv_thumb ); ?>" alt="" loading="lazy" width="80" height="45">
+										<?php else : ?>
+											<div class="pv-rv-thumb__placeholder"><span class="dashicons dashicons-video-alt3"></span></div>
+										<?php endif; ?>
+										<?php if ( $rv_dur ) : ?>
+											<span class="pv-rv-dur"><?php echo esc_html( $rv_dur ); ?></span>
+										<?php endif; ?>
+									</div>
+									<div class="pv-rv-info">
+										<a href="<?php echo esc_url( get_edit_post_link( $rv->ID ) ); ?>" class="pv-rv-title"><?php echo esc_html( $rv->post_title ); ?></a>
+										<span class="pv-rv-meta">
+											<span class="pv-rv-cat" style="--pv-accent:<?php echo esc_attr( $rv_accent ); ?>;"><?php echo esc_html( $rv_cat ); ?></span>
+											<span class="pv-rv-date"><?php echo esc_html( get_the_date( 'M j, Y', $rv->ID ) ); ?></span>
+										</span>
+									</div>
+									<div class="pv-rv-actions">
+										<?php if ( $rv_yt ) : ?>
+											<a href="<?php echo esc_url( 'https://www.youtube.com/watch?v=' . $rv_yt ); ?>" target="_blank" rel="noopener" title="<?php esc_attr_e( 'View on YouTube', 'pv-youtube-importer' ); ?>" class="pv-rv-yt-link">
+												<span class="dashicons dashicons-external"></span>
+											</a>
+										<?php endif; ?>
+										<a href="<?php echo esc_url( get_permalink( $rv->ID ) ); ?>" target="_blank" rel="noopener" title="<?php esc_attr_e( 'View post', 'pv-youtube-importer' ); ?>" class="pv-rv-view-link">
+											<span class="dashicons dashicons-visibility"></span>
+										</a>
+									</div>
+								</div>
+								<?php endforeach; ?>
+							</div>
+						</div>
+					</div>
+					<?php endif; ?>
+				</div><!-- /.pvd-col--right -->
+
+			</div><!-- /.pvd-main -->
+
+		</div><!-- /.pvd-inner -->
+		</div><!-- /.pvd-wrap -->
 		<?php
 	}
 
