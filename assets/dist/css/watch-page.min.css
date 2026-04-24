@@ -109,7 +109,8 @@
 
 /* ── Live Now embed block ────────────────────────────────────────── */
 .pv-live-now {
-	padding: 32px 24px 0;
+	padding: 32px 24px;
+	margin-bottom: 48px;
 	box-sizing: border-box;
 }
 
