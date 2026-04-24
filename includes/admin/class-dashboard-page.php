@@ -11,6 +11,15 @@ class PV_Dashboard_Page {
 		add_action( 'admin_menu',                  [ $this, 'add_menu' ] );
 		add_action( 'manage_posts_extra_tablenav', [ $this, 'list_info_bar' ] );
 		add_action( 'admin_footer',                [ $this, 'print_js' ] );
+		add_filter( 'admin_body_class',            [ $this, 'body_class' ] );
+	}
+
+	public function body_class( string $classes ): string {
+		$screen = get_current_screen();
+		if ( $screen && str_contains( $screen->id, 'pv-youtube-importer-dashboard' ) ) {
+			$classes .= ' pvd-page';
+		}
+		return $classes;
 	}
 
 	public function add_menu(): void {

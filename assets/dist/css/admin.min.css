@@ -755,13 +755,22 @@
    Dashboard — full-width gradient redesign (pvd-*)
    ══════════════════════════════════════════════════════════════════ */
 
-/* Full-bleed wrapper — negates #wpbody-content padding + .wrap margins */
+/* Paint the full WP admin background on the dashboard page */
+body.pvd-page #wpwrap {
+	background: linear-gradient(155deg, #0f0c29 0%, #1e1b4b 22%, #312e81 52%, #4338ca 78%, #4f46e5 100%);
+}
+body.pvd-page #wpcontent,
+body.pvd-page #wpbody,
+body.pvd-page #wpbody-content {
+	background: transparent;
+}
+
+/* Dashboard wrapper — full width, transparent (gradient comes from #wpwrap) */
 .pvd-wrap {
 	max-width: none !important;
-	margin: 0 -15px !important;
+	margin: 0 !important;
 	padding: 0 !important;
-	background: linear-gradient(155deg, #0f0c29 0%, #1e1b4b 22%, #312e81 52%, #4338ca 78%, #4f46e5 100%);
-	min-height: calc(100vh - 32px);
+	background: transparent !important;
 }
 
 .pvd-inner {
