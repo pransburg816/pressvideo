@@ -12,8 +12,14 @@ $l_embed    = $l_yt ? 'https://www.youtube.com/embed/' . $l_yt . '?rel=0&modestb
 $l_dur      = get_post_meta( get_the_ID(), '_pv_duration', true );
 $l_cats     = get_the_terms( get_the_ID(), 'pv_category' );
 $l_cat_slug = ( $l_cats && ! is_wp_error( $l_cats ) ) ? $l_cats[0]->slug : '';
+$l_ts       = (int) get_the_date( 'U' );
+$l_views    = (int) get_post_meta( get_the_ID(), '_pv_view_count', true );
 ?>
-<div class="pv-list-item" data-category="<?php echo esc_attr( $l_cat_slug ); ?>" style="--pv-accent:<?php echo esc_attr( $l_accent ); ?>;">
+<div class="pv-list-item"
+     data-category="<?php echo esc_attr( $l_cat_slug ); ?>"
+     data-date="<?php echo esc_attr( $l_ts ); ?>"
+     data-views="<?php echo esc_attr( $l_views ); ?>"
+     style="--pv-accent:<?php echo esc_attr( $l_accent ); ?>;">
 	<div class="pv-list-thumb">
 		<?php if ( has_post_thumbnail() ) : the_post_thumbnail( 'medium' ); else : ?><div class="pv-card__no-thumb"><svg class="pv-play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><?php endif; ?>
 		<?php if ( $l_dur ) : ?><span class="pv-card__duration"><?php echo esc_html( $l_dur ); ?></span><?php endif; ?>

@@ -20,6 +20,8 @@ $cat_slug  = $cat ? $cat->slug : '';
 ?>
 <div class="pv-card <?php echo $thumb_url ? '' : 'pv-card--no-thumb'; ?>"
      data-category="<?php echo esc_attr( $cat_slug ); ?>"
+     data-date="<?php echo esc_attr( get_the_date( 'U' ) ); ?>"
+     data-views="<?php echo esc_attr( (int) get_post_meta( get_the_ID(), '_pv_view_count', true ) ); ?>"
      style="--pv-accent:<?php echo esc_attr( $accent ); ?>;<?php if ( $thumb_url ) : ?> background-image: linear-gradient(to top right,rgba(0,0,0,.75),rgba(0,0,0,.05)),url(<?php echo esc_url( $thumb_url ); ?>);<?php endif; ?>">
 	<?php if ( $pv_cards_cat && $cat_name ) : ?><span class="pv-card__cat"><?php echo esc_html( $cat_name ); ?></span><?php endif; ?>
 	<?php if ( $duration ) : ?><span class="pv-card__duration"><?php echo esc_html( $duration ); ?></span><?php endif; ?>

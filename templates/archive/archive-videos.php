@@ -83,6 +83,29 @@ $pv_filter_terms = [];
 $_terms = get_terms( [ 'taxonomy' => 'pv_category', 'hide_empty' => true, 'orderby' => 'count', 'order' => 'DESC' ] );
 if ( $_terms && ! is_wp_error( $_terms ) ) $pv_filter_terms = $_terms;
 
+// Playlist nav: IDs + titles for all layouts (lightweight — no post queries)
+$pv_nav_playlists  = [];
+$_pv_pl_raw        = $pv_settings['bc_playlists'] ?? '[]';
+$_pv_pl_items      = json_decode( is_string( $_pv_pl_raw ) ? $_pv_pl_raw : '[]', true );
+$_pv_pl_items      = is_array( $_pv_pl_items ) ? $_pv_pl_items : [];
+$_pv_pl_titles_raw = ! empty( $pv_settings['bc_playlist_titles'] ) ? ( json_decode( $pv_settings['bc_playlist_titles'], true ) ?: [] ) : [];
+$_pv_ch_pls_cache  = get_transient( 'pv_yt_ch_playlists_' . md5( $pv_settings['channel_id'] ?? '' ) );
+foreach ( $_pv_pl_items as $_pv_pl_item ) {
+	if ( strncmp( (string) $_pv_pl_item, 'yt:', 3 ) === 0 ) {
+		$_pv_pl_id    = substr( (string) $_pv_pl_item, 3 );
+		$_pv_pl_title = $_pv_pl_titles_raw[ $_pv_pl_id ] ?? '';
+		if ( ! $_pv_pl_title && is_array( $_pv_ch_pls_cache ) ) {
+			foreach ( $_pv_ch_pls_cache as $_cp ) {
+				if ( $_cp['id'] === $_pv_pl_id ) { $_pv_pl_title = $_cp['title']; break; }
+			}
+		}
+		$pv_nav_playlists[] = [
+			'id'    => $_pv_pl_id,
+			'title' => $_pv_pl_title ?: __( 'YouTube Playlist', 'pv-youtube-importer' ),
+		];
+	}
+}
+
 $pv_playlist_json = '[]';
 if ( 'offcanvas' === $pv_display && ! empty( $GLOBALS['wp_query']->posts ) ) {
 	$_pv_pl = [];
@@ -363,11 +386,40 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 				</div>
 				<?php endif; /* end toolbar */ ?>
 
-				<?php if ( $_pv_label_show ) : ?>
-				<div class="pv-section-label">
-					<h2 class="pv-section-label__title"><?php echo esc_html( $_pv_label_text ); ?></h2>
+				<?php if ( 'broadcast' !== $pv_layout ) : ?>
+				<!-- Section head: title + sort bar (always visible) -->
+				<div class="pv-section-head" data-default-title="<?php echo esc_attr( $_pv_label_text ); ?>">
+					<div class="pv-section-head__left">
+						<button class="pv-back-btn" type="button" hidden
+						        aria-label="<?php esc_attr_e( 'Back to latest videos', 'pv-youtube-importer' ); ?>">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+							<?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?>
+						</button>
+						<h2 class="pv-section-head__title"><?php echo esc_html( $_pv_label_text ); ?></h2>
+					</div>
+					<div class="pv-sort-bar">
+						<button class="pv-sort-btn pv-sort-btn--active" data-sort="latest" type="button"><?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?></button>
+						<button class="pv-sort-btn" data-sort="popular" type="button"><?php esc_html_e( 'Popular', 'pv-youtube-importer' ); ?></button>
+						<button class="pv-sort-btn" data-sort="oldest" type="button"><?php esc_html_e( 'Oldest', 'pv-youtube-importer' ); ?></button>
+					</div>
+				</div>
+
+				<?php if ( ! empty( $pv_nav_playlists ) ) : ?>
+				<!-- Playlist nav -->
+				<div class="pv-pl-nav" role="group" aria-label="<?php esc_attr_e( 'Browse playlists', 'pv-youtube-importer' ); ?>">
+					<button class="pv-pl-nav-btn pv-pl-nav-btn--active" data-pl-id="" type="button">
+						<?php esc_html_e( 'All Latest', 'pv-youtube-importer' ); ?>
+					</button>
+					<?php foreach ( $pv_nav_playlists as $_pnp ) : ?>
+					<button class="pv-pl-nav-btn" type="button"
+					        data-pl-id="<?php echo esc_attr( $_pnp['id'] ); ?>"
+					        data-pl-title="<?php echo esc_attr( $_pnp['title'] ); ?>">
+						<?php echo esc_html( $_pnp['title'] ); ?>
+					</button>
+					<?php endforeach; ?>
 				</div>
 				<?php endif; ?>
+				<?php endif; /* end non-broadcast control bar */ ?>
 
 				<div id="pv-layout-wrap">
 
@@ -689,30 +741,38 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 								</div>
 							</div>
 
-							<?php if ( ! empty( $bc_yt_sections ) ) : ?>
+							<!-- Section head: title + sort bar (always visible) -->
+							<div class="pv-section-head" data-default-title="<?php echo esc_attr( $_pv_label_text ); ?>">
+								<div class="pv-section-head__left">
+									<button class="pv-back-btn" type="button" hidden
+									        aria-label="<?php esc_attr_e( 'Back to latest videos', 'pv-youtube-importer' ); ?>">
+										<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+										<?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?>
+									</button>
+									<h2 class="pv-section-head__title"><?php echo esc_html( $_pv_label_text ); ?></h2>
+								</div>
+								<div class="pv-sort-bar">
+									<button class="pv-sort-btn pv-sort-btn--active" data-sort="latest" type="button"><?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?></button>
+									<button class="pv-sort-btn" data-sort="popular" type="button"><?php esc_html_e( 'Popular', 'pv-youtube-importer' ); ?></button>
+									<button class="pv-sort-btn" data-sort="oldest" type="button"><?php esc_html_e( 'Oldest', 'pv-youtube-importer' ); ?></button>
+								</div>
+							</div>
+
+							<?php if ( ! empty( $pv_nav_playlists ) ) : ?>
 							<!-- Playlist navigator (single-select: All Latest + each playlist) -->
-							<div class="pv-bc-pl-nav" role="group" aria-label="<?php esc_attr_e( 'Browse playlists', 'pv-youtube-importer' ); ?>">
-								<button class="pv-bc-pl-nav-btn pv-bc-pl-nav-btn--active" data-pl-id="" type="button">
+							<div class="pv-pl-nav" role="group" aria-label="<?php esc_attr_e( 'Browse playlists', 'pv-youtube-importer' ); ?>">
+								<button class="pv-pl-nav-btn pv-pl-nav-btn--active" data-pl-id="" type="button">
 									<?php esc_html_e( 'All Latest', 'pv-youtube-importer' ); ?>
 								</button>
-								<?php foreach ( $bc_yt_sections as $_yts ) : ?>
-								<button class="pv-bc-pl-nav-btn" type="button"
-								        data-pl-id="<?php echo esc_attr( $_yts['id'] ); ?>"
-								        data-pl-title="<?php echo esc_attr( $_yts['title'] ); ?>">
-									<?php echo esc_html( $_yts['title'] ); ?>
+								<?php foreach ( $pv_nav_playlists as $_pnp ) : ?>
+								<button class="pv-pl-nav-btn" type="button"
+								        data-pl-id="<?php echo esc_attr( $_pnp['id'] ); ?>"
+								        data-pl-title="<?php echo esc_attr( $_pnp['title'] ); ?>">
+									<?php echo esc_html( $_pnp['title'] ); ?>
 								</button>
 								<?php endforeach; ?>
 							</div>
 							<?php endif; ?>
-
-							<!-- Section heading: only visible when a specific playlist is active -->
-							<div class="pv-bc-home-section-head" hidden>
-								<button class="pv-bc-back-btn" type="button" aria-label="<?php esc_attr_e( 'Back to latest videos', 'pv-youtube-importer' ); ?>">
-									<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-									<?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?>
-								</button>
-								<h2 class="pv-bc-home-section-title"></h2>
-							</div>
 
 							<!-- Video grid: AJAX-loaded on activation -->
 							<div class="pv-bc-home-grid" data-bc-lazy="bc_home">
@@ -740,10 +800,10 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							</div>
 
 							<!-- Sort bar -->
-							<div class="pv-bc-sort-bar">
-								<button class="pv-bc-sort-btn pv-bc-sort-btn--active" data-sort="latest"><?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?></button>
-								<button class="pv-bc-sort-btn" data-sort="popular"><?php esc_html_e( 'Popular', 'pv-youtube-importer' ); ?></button>
-								<button class="pv-bc-sort-btn" data-sort="oldest"><?php esc_html_e( 'Oldest', 'pv-youtube-importer' ); ?></button>
+							<div class="pv-sort-bar pv-bc-sort-bar">
+								<button class="pv-sort-btn pv-sort-btn--active pv-bc-sort-btn pv-bc-sort-btn--active" data-sort="latest" type="button"><?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?></button>
+								<button class="pv-sort-btn pv-bc-sort-btn" data-sort="popular" type="button"><?php esc_html_e( 'Popular', 'pv-youtube-importer' ); ?></button>
+								<button class="pv-sort-btn pv-bc-sort-btn" data-sort="oldest" type="button"><?php esc_html_e( 'Oldest', 'pv-youtube-importer' ); ?></button>
 							</div>
 
 							<!-- Category chip filter -->

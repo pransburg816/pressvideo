@@ -116,8 +116,9 @@ class PV_Plugin {
 		$settings = get_option( 'pv_settings', [] );
 		$layout   = $settings['archive_layout'] ?? 'grid';
 		$display  = $settings['display_mode']   ?? 'offcanvas';
-		$page     = max( 1, (int) ( $_POST['page'] ?? 1 ) );      // phpcs:ignore
-		$per_page = sanitize_key( $_POST['per_page'] ?? '' );      // phpcs:ignore
+		$page      = max( 1, (int) ( $_POST['page'] ?? 1 ) );                                       // phpcs:ignore
+		$per_page  = sanitize_key( $_POST['per_page'] ?? '' );                                      // phpcs:ignore
+		$yt_pl_id  = preg_replace( '/[^A-Za-z0-9_\-]/', '', (string) ( $_POST['pv_yt_pl'] ?? '' ) ); // phpcs:ignore
 
 		if ( 'all' === $per_page ) {
 			$ppp      = -1;
@@ -128,7 +129,7 @@ class PV_Plugin {
 			$nopaging = false;
 		}
 
-		$q = new WP_Query( [
+		$q_args = [
 			'post_type'      => 'pv_youtube',
 			'post_status'    => 'publish',
 			'posts_per_page' => $ppp,
@@ -136,7 +137,39 @@ class PV_Plugin {
 			'nopaging'       => $nopaging,
 			'orderby'        => 'date',
 			'order'          => 'DESC',
-		] );
+		];
+
+		if ( $yt_pl_id ) {
+			$_pl_transient = 'pv_yt_pl_vids_' . md5( $yt_pl_id );
+			$_pl_vid_ids   = get_transient( $_pl_transient );
+			if ( ! is_array( $_pl_vid_ids ) ) {
+				$_api_key    = $settings['api_key'] ?? '';
+				$_pl_vid_ids = [];
+				if ( $_api_key ) {
+					$_yt_api    = new PV_YouTube_API( $_api_key );
+					$_pl_videos = $_yt_api->get_playlist_videos( $yt_pl_id, 200 );
+					if ( is_array( $_pl_videos ) ) {
+						$_pl_vid_ids = array_column( $_pl_videos, 'youtube_id' );
+					}
+					set_transient( $_pl_transient, $_pl_vid_ids, HOUR_IN_SECONDS );
+				}
+			}
+			if ( $_pl_vid_ids ) {
+				$q_args['meta_query'] = [ // phpcs:ignore
+					[ 'key' => '_pv_youtube_id', 'value' => $_pl_vid_ids, 'compare' => 'IN' ],
+				];
+			} else {
+				wp_send_json_success( [
+					'html'       => '<p class="pv-no-videos">' . esc_html__( 'No imported videos found for this playlist.', 'pv-youtube-importer' ) . '</p>',
+					'pagination' => '',
+					'max_pages'  => 0,
+					'page'       => 1,
+				] );
+				return;
+			}
+		}
+
+		$q = new WP_Query( $q_args );
 
 		// Build playlist JSON for offcanvas card buttons
 		$pv_playlist_json = '[]';
