@@ -357,16 +357,22 @@
 	});
 
 	// ── Broadcast playlists: event-delegated checkboxes → hidden JSON ──
-	var bcPlaylistsInput = document.getElementById('pvc-bc-playlists-val');
-	var bcField          = document.getElementById('pvc-broadcast-field');
+	var bcPlaylistsInput      = document.getElementById('pvc-bc-playlists-val');
+	var bcPlaylistTitlesInput = document.getElementById('pvc-bc-playlist-titles-val');
+	var bcField               = document.getElementById('pvc-broadcast-field');
 
 	function syncBcPlaylists() {
 		if (!bcPlaylistsInput) return;
 		var checked = [];
+		var titles  = {};
 		document.querySelectorAll('.pvc-bc-playlist-cb:checked').forEach(function (c) {
 			checked.push(c.value);
+			var plId    = c.value.replace(/^yt:/, '');
+			var plTitle = c.dataset.plTitle || '';
+			if (plId && plTitle) titles[plId] = plTitle;
 		});
 		bcPlaylistsInput.value = JSON.stringify(checked);
+		if (bcPlaylistTitlesInput) bcPlaylistTitlesInput.value = JSON.stringify(titles);
 		triggerSave(false);
 	}
 
@@ -380,13 +386,21 @@
 	var ytListEl  = document.getElementById('pvc-yt-playlists');
 	var ytFetched = false;
 
-	function renderYtPlaylists(playlists, savedArr) {
+	function renderYtPlaylists(playlists) {
+		// Read saved state fresh at render time so timing of the fetch doesn't matter.
+		var savedRaw = bcPlaylistsInput ? bcPlaylistsInput.value : '[]';
+		var savedArr = [];
+		try { savedArr = JSON.parse(savedRaw); } catch (e) {}
+
 		var html = '';
 		playlists.forEach(function (pl) {
 			if (!pl.count) return; // skip 0-item playlists
 			var checked = savedArr.indexOf('yt:' + pl.id) !== -1 ? ' checked' : '';
 			html += '<label class="pvc-bc-playlist-item">'
-				+ '<input type="checkbox" class="pvc-bc-playlist-cb" value="yt:' + escAttr(pl.id) + '"' + checked + '>'
+				+ '<input type="checkbox" class="pvc-bc-playlist-cb"'
+				+ ' value="yt:' + escAttr(pl.id) + '"'
+				+ ' data-pl-title="' + escAttr(pl.title) + '"'
+				+ checked + '>'
 				+ '<span class="pvc-bc-playlist-name">' + escAttr(pl.title) + ' (' + pl.count + ')</span>'
 				+ '</label>';
 		});
@@ -397,10 +411,6 @@
 		if (!ytListEl || ytFetched) return;
 		ytFetched = true;
 
-		var savedRaw = bcPlaylistsInput ? bcPlaylistsInput.value : '[]';
-		var savedArr = [];
-		try { savedArr = JSON.parse(savedRaw); } catch (e) {}
-
 		// Serve from sessionStorage if available (avoids repeat API round-trip)
 		var cacheKey = 'pv_yt_playlists';
 		try {
@@ -408,7 +418,7 @@
 			if (cached) {
 				var cachedList = JSON.parse(cached);
 				if (cachedList && cachedList.length) {
-					renderYtPlaylists(cachedList, savedArr);
+					renderYtPlaylists(cachedList);
 					return;
 				}
 			}
@@ -426,7 +436,7 @@
 					return;
 				}
 				try { sessionStorage.setItem(cacheKey, JSON.stringify(data.data)); } catch (e) {}
-				renderYtPlaylists(data.data, savedArr);
+				renderYtPlaylists(data.data);
 			})
 			.catch(function () {
 				ytListEl.innerHTML = '<span class="pvc-hint">Could not load YouTube playlists.</span>';

@@ -519,15 +519,21 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 					// Resolve YouTube playlist sections for Home tab (transient-cached API calls)
 					$bc_yt_sections = [];
 					if ( ! empty( $bc_yt_pl_ids ) ) {
-						$_yt_api_key = $pv_settings['api_key']    ?? '';
-						$_yt_ch_id   = $pv_settings['channel_id'] ?? '';
+						$_yt_api_key  = $pv_settings['api_key']    ?? '';
+						$_yt_ch_id    = $pv_settings['channel_id'] ?? '';
+						$_bc_pl_titles = [];
+						if ( ! empty( $pv_settings['bc_playlist_titles'] ) ) {
+							$_decoded = json_decode( $pv_settings['bc_playlist_titles'], true );
+							if ( is_array( $_decoded ) ) $_bc_pl_titles = $_decoded;
+						}
 						if ( $_yt_api_key ) {
 							$_yt_api  = new PV_YouTube_API( $_yt_api_key );
 							$_ch_pls  = get_transient( 'pv_yt_ch_playlists_' . md5( $_yt_ch_id ) );
 							foreach ( $bc_yt_pl_ids as $_yt_pl_id ) {
-								// Resolve playlist title from channel playlists transient
-								$_yt_pl_title = '';
-								if ( is_array( $_ch_pls ) ) {
+								// 1. Saved titles (set when user selects playlist in customizer)
+								$_yt_pl_title = $_bc_pl_titles[ $_yt_pl_id ] ?? '';
+								// 2. Channel playlists transient (set when customizer fetches playlists)
+								if ( ! $_yt_pl_title && is_array( $_ch_pls ) ) {
 									foreach ( $_ch_pls as $_cp ) {
 										if ( $_cp['id'] === $_yt_pl_id ) { $_yt_pl_title = $_cp['title']; break; }
 									}

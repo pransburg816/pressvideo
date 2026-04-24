@@ -53,6 +53,7 @@ $grid_label_text = $s['grid_label_text'] ?? 'Latest Videos';
 $bc_playlists_raw = $s['bc_playlists'] ?? '[]';
 $bc_playlists_arr = json_decode( is_string( $bc_playlists_raw ) ? $bc_playlists_raw : '[]', true );
 $bc_playlists_arr = is_array( $bc_playlists_arr ) ? $bc_playlists_arr : [];
+$bc_pl_titles_raw = is_string( $s['bc_playlist_titles'] ?? '' ) ? ( $s['bc_playlist_titles'] ?? '{}' ) : '{}';
 $all_series = get_terms( [ 'taxonomy' => 'pv_series', 'hide_empty' => true, 'orderby' => 'name' ] );
 $all_series = is_wp_error( $all_series ) ? [] : $all_series;
 
@@ -214,6 +215,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					<?php endif; ?>
 
 					<input type="hidden" id="pvc-bc-playlists-val" data-setting="bc_playlists" value="<?php echo esc_attr( wp_json_encode( $bc_playlists_arr ) ); ?>">
+					<input type="hidden" id="pvc-bc-playlist-titles-val" data-setting="bc_playlist_titles" value="<?php echo esc_attr( $bc_pl_titles_raw ); ?>">
 				</div>
 
 				<div class="pvc-field">

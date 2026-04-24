@@ -200,6 +200,19 @@ class PV_Customizer_Page {
 			);
 		}
 
+		if ( array_key_exists( 'bc_playlist_titles', $raw ) ) {
+			$_titles = json_decode( $raw['bc_playlist_titles'], true );
+			if ( is_array( $_titles ) ) {
+				$_clean_titles = [];
+				foreach ( $_titles as $_id => $_title ) {
+					$_clean_titles[ sanitize_text_field( $_id ) ] = sanitize_text_field( $_title );
+				}
+				$clean['bc_playlist_titles'] = wp_json_encode( $_clean_titles );
+			} else {
+				$clean['bc_playlist_titles'] = '{}';
+			}
+		}
+
 		foreach ( [
 			'aside_new_releases_count' => [ 3,  10  ],
 			'aside_tags_count'         => [ 6,  24  ],
