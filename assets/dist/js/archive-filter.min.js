@@ -357,6 +357,7 @@
 					var _matchBtn = bc.querySelector('.pv-pl-nav-btn[data-pl-id="' + _parsed.id + '"]');
 					if (_matchBtn) {
 						bcHomeSelectedPl = _parsed.id;
+						document.body.dataset.pvActivePl = _parsed.id;
 						bc.querySelectorAll('.pv-pl-nav-btn').forEach(function (btn) {
 							btn.classList.toggle('pv-pl-nav-btn--active', btn.dataset.plId === _parsed.id);
 						});
@@ -372,6 +373,7 @@
 
 		function goToLatest() {
 			bcHomeSelectedPl = '';
+			document.body.dataset.pvActivePl = '';
 			try { localStorage.removeItem(BC_PL_STORAGE_KEY); } catch (e) {}
 			if (bcHomeSectionTitle) bcHomeSectionTitle.textContent = bcHomeSectionHead ? (bcHomeSectionHead.dataset.defaultTitle || '') : '';
 			bc.querySelectorAll('.pv-pl-nav-btn').forEach(function (btn) {
@@ -382,6 +384,7 @@
 
 		function goToPlaylist(plId, plTitle) {
 			bcHomeSelectedPl = plId;
+			document.body.dataset.pvActivePl = plId;
 			try { localStorage.setItem(BC_PL_STORAGE_KEY, JSON.stringify({id: plId, title: plTitle})); } catch (e) {}
 			if (bcHomeSectionTitle) bcHomeSectionTitle.textContent = plTitle;
 			bc.querySelectorAll('.pv-pl-nav-btn').forEach(function (btn) {
@@ -823,6 +826,7 @@
 					var _matchBtn = plNav.querySelector('.pv-pl-nav-btn[data-pl-id="' + _parsed.id + '"]');
 					if (_matchBtn) {
 						pvCurrentPlaylist = _parsed.id;
+						document.body.dataset.pvActivePl = _parsed.id;
 						plNav.querySelectorAll('.pv-pl-nav-btn').forEach(function (btn) {
 							btn.classList.toggle('pv-pl-nav-btn--active', btn.dataset.plId === _parsed.id);
 						});
@@ -859,10 +863,12 @@
 				});
 				if (!plId) {
 					pvCurrentPlaylist = '';
+					document.body.dataset.pvActivePl = '';
 					try { localStorage.removeItem(STD_PL_KEY); } catch (e) {}
 					if (sectionTitle) sectionTitle.textContent = defaultTitle;
 				} else {
 					pvCurrentPlaylist = plId;
+					document.body.dataset.pvActivePl = plId;
 					try { localStorage.setItem(STD_PL_KEY, JSON.stringify({id: plId, title: plTitle})); } catch (e) {}
 					if (sectionTitle) sectionTitle.textContent = plTitle || defaultTitle;
 				}

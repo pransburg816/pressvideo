@@ -17,23 +17,50 @@ class PV_Offcanvas {
 	}
 
 	public function ajax_playlist_page(): void {
-		$page     = max( 1, (int) ( $_GET['page'] ?? 1 ) ); // phpcs:ignore
+		$page     = max( 1, (int) ( $_GET['page'] ?? 1 ) );                                         // phpcs:ignore
+		$yt_pl_id = preg_replace( '/[^A-Za-z0-9_\-]/', '', (string) ( $_GET['pv_yt_pl'] ?? '' ) ); // phpcs:ignore
 		$per_page = 24;
 
-		$posts = get_posts( [
+		$q_args = [
 			'post_type'      => 'pv_youtube',
 			'posts_per_page' => $per_page,
-			'offset'         => ( $page - 1 ) * $per_page,
+			'paged'          => $page,
 			'post_status'    => 'publish',
 			'orderby'        => 'date',
 			'order'          => 'DESC',
-		] );
+		];
 
-		$total     = (int) ( wp_count_posts( 'pv_youtube' )->publish ?? 0 );
-		$max_pages = max( 1, (int) ceil( $total / $per_page ) );
+		if ( $yt_pl_id ) {
+			$settings      = get_option( 'pv_settings', [] );
+			$_pl_transient = 'pv_yt_pl_vids_' . md5( $yt_pl_id );
+			$_pl_vid_ids   = get_transient( $_pl_transient );
+			if ( ! is_array( $_pl_vid_ids ) ) {
+				$_api_key    = $settings['api_key'] ?? '';
+				$_pl_vid_ids = [];
+				if ( $_api_key ) {
+					$_yt_api    = new PV_YouTube_API( $_api_key );
+					$_pl_videos = $_yt_api->get_playlist_videos( $yt_pl_id, 200 );
+					if ( is_array( $_pl_videos ) ) {
+						$_pl_vid_ids = array_column( $_pl_videos, 'youtube_id' );
+					}
+					set_transient( $_pl_transient, $_pl_vid_ids, HOUR_IN_SECONDS );
+				}
+			}
+			if ( ! $_pl_vid_ids ) {
+				wp_send_json_success( [ 'items' => [], 'page' => $page, 'maxPages' => 0, 'total' => 0 ] );
+				return;
+			}
+			$q_args['meta_query'] = [ // phpcs:ignore
+				[ 'key' => '_pv_youtube_id', 'value' => $_pl_vid_ids, 'compare' => 'IN' ],
+			];
+		}
+
+		$q         = new WP_Query( $q_args );
+		$total     = $q->found_posts;
+		$max_pages = max( 1, $q->max_num_pages );
 
 		$items = [];
-		foreach ( $posts as $p ) {
+		foreach ( $q->posts as $p ) {
 			$yt = get_post_meta( $p->ID, '_pv_youtube_id', true );
 			if ( ! $yt ) continue;
 			$items[] = [
@@ -47,6 +74,7 @@ class PV_Offcanvas {
 				'duration'  => get_post_meta( $p->ID, '_pv_duration', true ) ?: '',
 			];
 		}
+		wp_reset_postdata();
 
 		wp_send_json_success( [
 			'items'    => $items,
