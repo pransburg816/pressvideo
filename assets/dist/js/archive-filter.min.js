@@ -37,7 +37,6 @@
 		|| '';
 
 	function pvApplyCurrentSort() {
-		if (pvCurrentSort === 'latest') return;
 		var container = getContainer();
 		if (!container) return;
 		var items = Array.from(container.querySelectorAll('.pv-card, .pv-list-item'));
@@ -45,7 +44,7 @@
 		items.sort(function(a, b) {
 			if (pvCurrentSort === 'oldest')  return parseInt(a.dataset.date  || 0, 10) - parseInt(b.dataset.date  || 0, 10);
 			if (pvCurrentSort === 'popular') return parseInt(b.dataset.views || 0, 10) - parseInt(a.dataset.views || 0, 10);
-			return 0;
+			return parseInt(b.dataset.date || 0, 10) - parseInt(a.dataset.date || 0, 10); // latest
 		});
 		items.forEach(function(item) { container.appendChild(item); });
 	}
@@ -107,6 +106,9 @@
 				if (fb) fb.querySelectorAll('.pv-filter-btn').forEach(function(b) {
 					b.classList.toggle('pv-filter-btn--active', b.dataset.filter === '*');
 				});
+				// Hide Show: toggle when fewer than 20 items
+				var ppEl = main.querySelector('.pv-toolbar .pv-per-page');
+				if (ppEl) ppEl.hidden = ((d.found || 0) < 20);
 			})
 			.catch(function () {
 				pvLoading = false;
@@ -360,7 +362,6 @@
 						});
 						if (bcHomeSectionHead && bcHomeSectionTitle) {
 							bcHomeSectionTitle.textContent = _parsed.title || (_matchBtn.dataset.plTitle || '');
-							bc.querySelector('.pv-bc-panel[data-bc-panel="home"] .pv-back-btn').hidden = false;
 						}
 					} else {
 						localStorage.removeItem(BC_PL_STORAGE_KEY);
@@ -372,8 +373,6 @@
 		function goToLatest() {
 			bcHomeSelectedPl = '';
 			try { localStorage.removeItem(BC_PL_STORAGE_KEY); } catch (e) {}
-			var _bcBackBtn = bc.querySelector('.pv-bc-panel[data-bc-panel="home"] .pv-back-btn');
-			if (_bcBackBtn) _bcBackBtn.hidden = true;
 			if (bcHomeSectionTitle) bcHomeSectionTitle.textContent = bcHomeSectionHead ? (bcHomeSectionHead.dataset.defaultTitle || '') : '';
 			bc.querySelectorAll('.pv-pl-nav-btn').forEach(function (btn) {
 				btn.classList.toggle('pv-pl-nav-btn--active', btn.dataset.plId === '');
@@ -384,8 +383,6 @@
 		function goToPlaylist(plId, plTitle) {
 			bcHomeSelectedPl = plId;
 			try { localStorage.setItem(BC_PL_STORAGE_KEY, JSON.stringify({id: plId, title: plTitle})); } catch (e) {}
-			var _bcBackBtn2 = bc.querySelector('.pv-bc-panel[data-bc-panel="home"] .pv-back-btn');
-			if (_bcBackBtn2) _bcBackBtn2.hidden = false;
 			if (bcHomeSectionTitle) bcHomeSectionTitle.textContent = plTitle;
 			bc.querySelectorAll('.pv-pl-nav-btn').forEach(function (btn) {
 				btn.classList.toggle('pv-pl-nav-btn--active', btn.dataset.plId === plId);
@@ -418,6 +415,8 @@
 					var homePanel = bc.querySelector('.pv-bc-panel[data-bc-panel="home"]');
 					updateBcPerPageBtns(homePanel, perPage);
 					applyBcHomeSort();
+					var _hppp = homePanel ? homePanel.querySelector('.pv-per-page') : null;
+					if (_hppp) _hppp.hidden = (d.total || 0) < 20;
 				})
 				.catch(function () {
 					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>';
@@ -467,6 +466,8 @@
 					var homePanel = bc.querySelector('.pv-bc-panel[data-bc-panel="home"]');
 					updateBcPerPageBtns(homePanel, perPage);
 					applyBcHomeSort();
+					var _hppp = homePanel ? homePanel.querySelector('.pv-per-page') : null;
+					if (_hppp) _hppp.hidden = (d.total || 0) < 20;
 				})
 				.catch(function () {
 					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load videos.</p>';
@@ -503,6 +504,8 @@
 					if (bcVideosBotPag) bcVideosBotPag.innerHTML = d.pagination || '';
 					var videosPanel = bc.querySelector('.pv-bc-panel[data-bc-panel="videos"]');
 					updateBcPerPageBtns(videosPanel, perPage);
+					var _vppp = videosPanel ? videosPanel.querySelector('.pv-per-page') : null;
+					if (_vppp) _vppp.hidden = (d.total || 0) < 20;
 				})
 				.catch(function () {
 					bcVideosGrid.innerHTML = '<p class="pv-no-videos">Could not load videos.</p>';
@@ -824,8 +827,6 @@
 							btn.classList.toggle('pv-pl-nav-btn--active', btn.dataset.plId === _parsed.id);
 						});
 						if (sectionTitle) sectionTitle.textContent = _parsed.title || '';
-						var _backBtn = sectionHead.querySelector('.pv-back-btn');
-						if (_backBtn) _backBtn.hidden = false;
 					} else {
 						localStorage.removeItem(STD_PL_KEY);
 					}
@@ -856,36 +857,19 @@
 				plNav.querySelectorAll('.pv-pl-nav-btn').forEach(function (b) {
 					b.classList.toggle('pv-pl-nav-btn--active', b.dataset.plId === plId);
 				});
-				var backBtn = sectionHead.querySelector('.pv-back-btn');
 				if (!plId) {
 					pvCurrentPlaylist = '';
 					try { localStorage.removeItem(STD_PL_KEY); } catch (e) {}
 					if (sectionTitle) sectionTitle.textContent = defaultTitle;
-					if (backBtn) backBtn.hidden = true;
 				} else {
 					pvCurrentPlaylist = plId;
 					try { localStorage.setItem(STD_PL_KEY, JSON.stringify({id: plId, title: plTitle})); } catch (e) {}
 					if (sectionTitle) sectionTitle.textContent = plTitle || defaultTitle;
-					if (backBtn) backBtn.hidden = false;
 				}
 				pvLoadPage(1, pvCurrentPerPage);
 			});
 		}
 
-		// Back button handler
-		var backBtnEl = sectionHead.querySelector('.pv-back-btn');
-		if (backBtnEl) {
-			backBtnEl.addEventListener('click', function () {
-				pvCurrentPlaylist = '';
-				try { localStorage.removeItem(STD_PL_KEY); } catch (e) {}
-				if (plNav) plNav.querySelectorAll('.pv-pl-nav-btn').forEach(function (b) {
-					b.classList.toggle('pv-pl-nav-btn--active', b.dataset.plId === '');
-				});
-				if (sectionTitle) sectionTitle.textContent = defaultTitle;
-				backBtnEl.hidden = true;
-				pvLoadPage(1, pvCurrentPerPage);
-			});
-		}
 	}
 
 	/* ── Live customizer preview bridge ──────────────────────────────── */

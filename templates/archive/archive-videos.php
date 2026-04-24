@@ -366,6 +366,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 					<div id="pv-top-pagination" class="pv-pagination pv-pagination--top">
 					<?php if ( ! $_pv_show_all && $GLOBALS['wp_query']->max_num_pages > 1 ) : the_posts_pagination( [ 'prev_text' => '&#8592; ' . __( 'Prev', 'pv-youtube-importer' ), 'next_text' => __( 'Next', 'pv-youtube-importer' ) . ' &#8594;' ] ); endif; ?>
 				</div>
+					<?php if ( $GLOBALS['wp_query']->found_posts >= 20 ) : ?>
 					<div class="pv-per-page" role="group" aria-label="<?php esc_attr_e( 'Videos per page', 'pv-youtube-importer' ); ?>">
 						<span class="pv-per-page__label"><?php esc_html_e( 'Show:', 'pv-youtube-importer' ); ?></span>
 						<?php foreach ( $_pv_pp_allowed as $_n ) : ?>
@@ -383,6 +384,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							<?php esc_html_e( 'All', 'pv-youtube-importer' ); ?>
 						</a>
 					</div>
+					<?php endif; ?>
 				</div>
 				<?php endif; /* end toolbar */ ?>
 
@@ -390,11 +392,6 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 				<!-- Section head: title + sort bar (always visible) -->
 				<div class="pv-section-head" data-default-title="<?php echo esc_attr( $_pv_label_text ); ?>">
 					<div class="pv-section-head__left">
-						<button class="pv-back-btn" type="button" hidden
-						        aria-label="<?php esc_attr_e( 'Back to latest videos', 'pv-youtube-importer' ); ?>">
-							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-							<?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?>
-						</button>
 						<h2 class="pv-section-head__title"><?php echo esc_html( $_pv_label_text ); ?></h2>
 					</div>
 					<div class="pv-sort-bar">
@@ -744,11 +741,6 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							<!-- Section head: title + sort bar (always visible) -->
 							<div class="pv-section-head" data-default-title="<?php echo esc_attr( $_pv_label_text ); ?>">
 								<div class="pv-section-head__left">
-									<button class="pv-back-btn" type="button" hidden
-									        aria-label="<?php esc_attr_e( 'Back to latest videos', 'pv-youtube-importer' ); ?>">
-										<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-										<?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?>
-									</button>
 									<h2 class="pv-section-head__title"><?php echo esc_html( $_pv_label_text ); ?></h2>
 								</div>
 								<div class="pv-sort-bar">

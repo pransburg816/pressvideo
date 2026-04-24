@@ -254,6 +254,7 @@ class PV_Plugin {
 		wp_send_json_success( [
 			'html'       => $html,
 			'pagination' => $pagination,
+			'found'      => $q->found_posts,
 			'max_pages'  => $max_pages,
 			'page'       => $page,
 		] );

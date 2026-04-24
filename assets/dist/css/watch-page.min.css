@@ -2102,30 +2102,6 @@
 	margin: 0;
 }
 
-/* ── Shared: back button (← Latest) ─────────────────────────────── */
-.pv-back-btn {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	background: rgba(255,255,255,0.08);
-	border: 1.5px solid rgba(255,255,255,0.14);
-	border-radius: 20px;
-	color: rgba(255,255,255,0.7);
-	font-size: 0.78rem;
-	font-weight: 600;
-	padding: 5px 14px 5px 10px;
-	cursor: pointer;
-	transition: background 0.15s, color 0.15s, border-color 0.15s;
-	white-space: nowrap;
-	font-family: inherit;
-	flex-shrink: 0;
-}
-.pv-back-btn:hover {
-	background: rgba(255,255,255,0.14);
-	border-color: rgba(255,255,255,0.28);
-	color: #fff;
-}
-
 /* ── Shared: sort bar ────────────────────────────────────────────── */
 .pv-sort-bar {
 	display: flex;
