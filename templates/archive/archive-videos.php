@@ -251,9 +251,10 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 
 	<?php
 	// Live feed: check if enabled, or if admin is forcing a preview
-	$_pv_force_live = $pv_is_preview
+	$_pv_force_live    = $pv_is_preview
 		&& isset( $_GET['pv_force_live'] ) // phpcs:ignore
 		&& current_user_can( 'manage_options' );
+	$_pv_content_hidden = false;
 
 	if ( ! empty( $pv_settings['live_feed_enabled'] ) || $_pv_force_live ) :
 		$_pv_api_key    = $pv_settings['api_key']    ?? '';
@@ -276,6 +277,9 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 		$_pv_embed_domain = parse_url( home_url(), PHP_URL_HOST );
 
 		if ( $_pv_live && ! empty( $_pv_live['video_id'] ) ) :
+			if ( 'broadcast' === $pv_layout && ! empty( $pv_settings['live_hide_content'] ) ) {
+				$_pv_content_hidden = true;
+			}
 	?>
 	<div class="pv-live-now"<?php if ( $_pv_max_w ) echo ' style="max-width:' . esc_attr( $_pv_max_w ) . ';margin:0 auto;"'; // phpcs:ignore ?>>
 		<div class="pv-live-now__header">
@@ -325,6 +329,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 	endif;
 	?>
 
+	<?php if ( ! $_pv_content_hidden ) : ?>
 	<div class="pv-archive-content<?php echo $pv_hero_show ? '' : ' pv-archive-content--no-hero'; ?>"<?php echo $_pv_width_attr; // phpcs:ignore ?>>
 		<div class="pv-archive-layout">
 
@@ -898,6 +903,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 		</div>
 	</div>
 </div>
+<?php endif; // live_hide_content ?>
 
 <?php if ( $pv_is_preview ) : ?>
 <script>

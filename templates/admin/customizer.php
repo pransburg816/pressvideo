@@ -611,6 +611,11 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 							<span class="pvc-aside-toggle__label">Show Live Chat</span>
 						</label>
 						<span class="pvc-hint">Embeds YouTube&rsquo;s live chat panel alongside the video, sized to the container. Visitors can participate without leaving your site.</span>
+						<label class="pvc-aside-toggle pvc-aside-toggle--sub" style="margin-top:10px;">
+							<input type="checkbox" data-setting="live_hide_content" <?php checked( ! empty( $s['live_hide_content'] ) ); ?>>
+							<span class="pvc-aside-toggle__label">Hide Videos &amp; Sidebar While Live</span>
+						</label>
+						<span class="pvc-hint">Hides the video library and sidebar during a live broadcast — only the stream and chat are visible. Broadcast layout only. Use Test Mode above to preview.</span>
 					</div>
 				</div>
 
