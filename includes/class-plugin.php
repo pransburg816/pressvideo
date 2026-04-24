@@ -41,12 +41,16 @@ class PV_Plugin {
 			require_once PV_PLUGIN_DIR . 'includes/import/class-channel-importer.php';
 		}
 
+		// Analytics tracker (AJAX handlers needed on front end too for guest tracking).
+		require_once PV_PLUGIN_DIR . 'includes/analytics/class-analytics-tracker.php';
+
 		// Admin UI
 		if ( is_admin() ) {
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-settings-page.php';
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-import-ui.php';
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-dashboard-page.php';
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-customizer-page.php';
+			require_once PV_PLUGIN_DIR . 'includes/admin/class-analytics-page.php';
 		}
 	}
 
@@ -69,12 +73,16 @@ class PV_Plugin {
 		// Track latest published video timestamp for new-video notification
 		add_action( 'save_post_pv_youtube', [ $this, 'update_latest_video_ts' ], 10, 2 );
 
+		// Analytics (AJAX handlers needed for both guests and admins).
+		( new PV_Analytics_Tracker() )->register();
+
 		// Admin pages
 		if ( is_admin() ) {
 			( new PV_Settings_Page() )->register();
 			( new PV_Import_UI() )->register();
 			( new PV_Dashboard_Page() )->register();
 			( new PV_Customizer_Page() )->register();
+			( new PV_Analytics_Page() )->register();
 		}
 
 		// Archive page AJAX (pagination + per-page)
@@ -537,6 +545,17 @@ class PV_Plugin {
 			PV_VERSION,
 			true
 		);
+		wp_enqueue_script(
+			'pv-tracker',
+			PV_PLUGIN_URL . 'assets/dist/js/pv-tracker.min.js',
+			[],
+			PV_VERSION,
+			true
+		);
+		wp_localize_script( 'pv-tracker', 'pvTracker', [
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'pv_track' ),
+		] );
 
 		if ( is_post_type_archive( 'pv_youtube' ) ) {
 			wp_enqueue_script(

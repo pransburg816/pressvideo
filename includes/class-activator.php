@@ -17,6 +17,10 @@ class PV_Activator {
 
 		flush_rewrite_rules();
 
+		// Create analytics DB table.
+		require_once PV_PLUGIN_DIR . 'includes/analytics/class-analytics-tracker.php';
+		PV_Analytics_Tracker::create_table();
+
 		// Set default plugin options if not already set.
 		$defaults = [
 			'api_key'           => '',

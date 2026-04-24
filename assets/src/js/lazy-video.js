@@ -39,6 +39,7 @@
 		url.searchParams.set('rel',             '0');
 		url.searchParams.set('modestbranding',  '1');
 		url.searchParams.set('playsinline',     '1');
+		url.searchParams.set('enablejsapi',     '1');
 
 		const iframe = document.createElement('iframe');
 		iframe.src              = url.toString();
@@ -60,6 +61,13 @@
 		// Clear any existing iframe.
 		holder.innerHTML = '';
 		holder.appendChild(iframe);
+
+		// Extract YouTube ID from embed URL for the tracker.
+		const ytId = url.pathname.split('/').pop() || '';
+		canvas.dispatchEvent(new CustomEvent('pv:iframe-ready', {
+			bubbles: false,
+			detail:  { iframe: iframe, youtubeId: ytId },
+		}));
 	}
 
 	function onClose() {

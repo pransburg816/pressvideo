@@ -31,6 +31,7 @@ const FILES = [
 	// PHP — core
 	'pv-youtube-importer.php',
 	'includes/class-plugin.php',
+	'includes/class-activator.php',
 	'uninstall.php',
 	// PHP — CPT
 	'includes/cpt/class-videos-cpt.php',
@@ -61,6 +62,9 @@ const FILES = [
 	'includes/admin/class-import-ui.php',
 	'includes/admin/class-settings-page.php',
 	'includes/admin/class-customizer-page.php',
+	'includes/admin/class-analytics-page.php',
+	// PHP — analytics
+	'includes/analytics/class-analytics-tracker.php',
 	// Admin template
 	'templates/admin/customizer.php',
 	// PHP — import
@@ -75,6 +79,7 @@ const FILES = [
 	'assets/dist/css/grid.min.css',
 	'assets/dist/css/watch-page.min.css',
 	'assets/dist/css/admin-customizer.min.css',
+	'assets/dist/css/analytics.min.css',
 	// JS
 	'assets/dist/js/admin-color-picker.min.js',
 	'assets/dist/js/offcanvas.min.js',
@@ -82,6 +87,8 @@ const FILES = [
 	'assets/dist/js/archive-filter.min.js',
 	'assets/dist/js/admin-customizer.min.js',
 	'assets/dist/js/pv-notifications.js',
+	'assets/dist/js/pv-tracker.min.js',
+	'assets/dist/js/analytics-admin.min.js',
 ];
 
 async function main() {

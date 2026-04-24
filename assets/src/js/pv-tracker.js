@@ -1,0 +1,158 @@
+/**
+ * PressVideo — Frontend play tracker.
+ * Hooks the YouTube IFrame API to capture play events and watch-depth milestones.
+ * Sends events to WP via AJAX. Uses sessionStorage for session IDs (no PII).
+ */
+(function () {
+	'use strict';
+
+	var cfg     = window.pvTracker || {};
+	var ajaxUrl = cfg.ajaxUrl || '';
+	var nonce   = cfg.nonce   || '';
+
+	if (!ajaxUrl || !nonce) return;
+
+	var SESSION_KEY  = 'pv_sid';
+	var sessionId    = getSessionId();
+	var ytReady      = false;
+	var ytQueue      = [];
+	var activePlayer = null;
+	var pollInterval = null;
+
+	// ── Chain onto existing onYouTubeIframeAPIReady ───────────────────
+	var _prevReady = window.onYouTubeIframeAPIReady;
+	window.onYouTubeIframeAPIReady = function () {
+		if (typeof _prevReady === 'function') _prevReady();
+		ytReady = true;
+		ytQueue.forEach(function (fn) { fn(); });
+		ytQueue = [];
+	};
+
+	// ── Self-load the YouTube IFrame API ──────────────────────────────
+	(function () {
+		if (window.YT && window.YT.Player) {
+			ytReady = true;
+			return;
+		}
+		var s    = document.createElement('script');
+		s.src    = 'https://www.youtube.com/iframe_api';
+		s.async  = true;
+		document.head.appendChild(s);
+	}());
+
+	// ── Main init ─────────────────────────────────────────────────────
+	function init() {
+		var canvas = document.getElementById('pv-canvas');
+		if (!canvas) return;
+
+		canvas.addEventListener('pv:iframe-ready', onIframeReady);
+		canvas.addEventListener('pv:closed',       onClose);
+	}
+
+	function onIframeReady(e) {
+		var iframe    = e.detail && e.detail.iframe;
+		var youtubeId = e.detail && e.detail.youtubeId;
+
+		if (!iframe || !youtubeId) return;
+
+		// Reset per-video state
+		var playFired   = false;
+		var depthFired  = {};
+
+		cleanup();
+
+		function attachPlayer() {
+			activePlayer = new window.YT.Player(iframe, {
+				events: {
+					onReady: function () {
+						// Autoplay — fire play if already rolling
+						if (!playFired && activePlayer.getPlayerState() === 1) {
+							playFired = true;
+							sendEvent('play', youtubeId);
+						}
+
+						// Poll for depth milestones every 5 s
+						pollInterval = setInterval(function () {
+							if (!activePlayer) { clearInterval(pollInterval); return; }
+							try {
+								var state = activePlayer.getPlayerState();
+								if (state !== 1 && state !== 2) return; // playing or paused only
+
+								var cur = activePlayer.getCurrentTime();
+								var dur = activePlayer.getDuration();
+								if (!dur || dur <= 0) return;
+
+								var pct = (cur / dur) * 100;
+								if (pct >= 25  && !depthFired.d25)  { depthFired.d25  = true; sendEvent('d25',  youtubeId); }
+								if (pct >= 50  && !depthFired.d50)  { depthFired.d50  = true; sendEvent('d50',  youtubeId); }
+								if (pct >= 75  && !depthFired.d75)  { depthFired.d75  = true; sendEvent('d75',  youtubeId); }
+								if (pct >= 100 && !depthFired.d100) { depthFired.d100 = true; sendEvent('d100', youtubeId); }
+							} catch (_) {
+								clearInterval(pollInterval);
+							}
+						}, 5000);
+					},
+
+					onStateChange: function (event) {
+						// YT.PlayerState.PLAYING === 1
+						if (event.data === 1 && !playFired) {
+							playFired = true;
+							sendEvent('play', youtubeId);
+						}
+					},
+				},
+			});
+		}
+
+		if (ytReady) {
+			attachPlayer();
+		} else {
+			ytQueue.push(attachPlayer);
+		}
+	}
+
+	function onClose() {
+		cleanup();
+	}
+
+	function cleanup() {
+		if (pollInterval) {
+			clearInterval(pollInterval);
+			pollInterval = null;
+		}
+		if (activePlayer) {
+			try { activePlayer.destroy(); } catch (_) {}
+			activePlayer = null;
+		}
+	}
+
+	function sendEvent(event, youtubeId) {
+		var body = new URLSearchParams({
+			action:     'pv_track_event',
+			nonce:      nonce,
+			youtube_id: youtubeId,
+			event:      event,
+			session_id: sessionId,
+		});
+		fetch(ajaxUrl, { method: 'POST', body: body })
+			.catch(function () { /* fire-and-forget */ });
+	}
+
+	function getSessionId() {
+		try {
+			var existing = sessionStorage.getItem(SESSION_KEY);
+			if (existing) return existing;
+			var id = 'pv' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+			sessionStorage.setItem(SESSION_KEY, id);
+			return id;
+		} catch (_) {
+			return 'anon';
+		}
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
+}());

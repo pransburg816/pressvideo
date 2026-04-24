@@ -1,0 +1,438 @@
+/**
+ * PressVideo — Analytics admin dashboard.
+ * Requires Chart.js 4.x loaded as a dependency.
+ */
+(function () {
+	'use strict';
+
+	var cfg     = window.pvAnalytics || {};
+	var ajaxUrl = cfg.ajaxUrl || '';
+	var nonce   = cfg.nonce   || '';
+
+	var activeDays  = 30;
+	var trendChart  = null;
+	var topChart    = null;
+	var depthChart  = null;
+
+	// PressVideo brand palette
+	var C_INDIGO    = '#4f46e5';
+	var C_INDIGO_LT = '#818cf8';
+	var C_INDIGO_XL = '#c7d2fe';
+	var C_DARK      = '#1e1b4b';
+	var C_MUTED     = '#6b7280';
+	var C_GRID      = '#f0f0f1';
+	var TIP_BG      = '#1e1b4b';
+	var TIP_TITLE   = '#c7d2fe';
+
+	// ── Custom Chart.js plugin: donut center text ─────────────────────
+	var donutCenterPlugin = {
+		id: 'pvDonutCenter',
+		afterDraw: function (chart) {
+			if (chart.config.type !== 'doughnut') return;
+			var opts = (chart.config.options.plugins || {}).pvDonutCenter;
+			if (!opts || !opts.value) return;
+
+			var ctx = chart.ctx;
+			var cx  = (chart.chartArea.left + chart.chartArea.right)  / 2;
+			var cy  = (chart.chartArea.top  + chart.chartArea.bottom) / 2;
+
+			ctx.save();
+
+			ctx.font         = '800 26px -apple-system, BlinkMacSystemFont, sans-serif';
+			ctx.fillStyle    = C_DARK;
+			ctx.textAlign    = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(opts.value, cx, cy - 10);
+
+			ctx.font      = '600 11px -apple-system, BlinkMacSystemFont, sans-serif';
+			ctx.fillStyle = C_MUTED;
+			ctx.fillText('avg completion', cx, cy + 14);
+
+			ctx.restore();
+		},
+	};
+
+	// Register globally so it applies to every chart instance.
+	if (window.Chart) {
+		Chart.register(donutCenterPlugin);
+	}
+
+	// ── Boot ──────────────────────────────────────────────────────────
+	function init() {
+		bindPills();
+		fetchData(activeDays);
+	}
+
+	function bindPills() {
+		document.querySelectorAll('.pva-pill').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var days = parseInt(this.dataset.days, 10);
+				if (days === activeDays) return;
+
+				document.querySelectorAll('.pva-pill').forEach(function (b) {
+					b.classList.remove('pva-pill--active');
+				});
+				this.classList.add('pva-pill--active');
+				activeDays = days;
+				showLoading();
+				fetchData(days);
+			});
+		});
+	}
+
+	function showLoading() {
+		// Reset stat values
+		['pva-total-plays', 'pva-unique-videos', 'pva-avg-completion'].forEach(function (id) {
+			var el = document.getElementById(id);
+			if (el) el.textContent = '—';
+		});
+
+		// Show skeleton loaders, hide canvases
+		document.querySelectorAll('.pva-loading').forEach(function (el) {
+			el.removeAttribute('hidden');
+		});
+
+		// Reset table
+		var tbl = document.getElementById('pva-table-wrap');
+		if (tbl) {
+			tbl.innerHTML = '<div class="pva-loading" style="padding:16px">'
+				+ '<div class="pva-skeleton pva-skeleton--row"></div>'
+				+ '<div class="pva-skeleton pva-skeleton--row"></div>'
+				+ '<div class="pva-skeleton pva-skeleton--row"></div>'
+				+ '</div>';
+		}
+	}
+
+	function fetchData(days) {
+		var body = new URLSearchParams({
+			action: 'pv_analytics_data',
+			nonce:  nonce,
+			days:   days,
+		});
+
+		fetch(ajaxUrl, { method: 'POST', body: body })
+			.then(function (r) { return r.json(); })
+			.then(function (resp) {
+				if (resp && resp.success) render(resp.data);
+			})
+			.catch(function (err) {
+				console.error('[PressVideo Analytics]', err);
+			});
+	}
+
+	function render(data) {
+		var hasData = data.stats.total_plays > 0;
+
+		// ── Stats always visible ──────────────────────────────────────
+		setText('pva-total-plays',    fmt(data.stats.total_plays));
+		setText('pva-unique-videos',  fmt(data.stats.unique_videos));
+		setText('pva-avg-completion', data.stats.avg_completion + '%');
+
+		// ── Toggle sections ───────────────────────────────────────────
+		var chartsSection = document.getElementById('pva-charts-section');
+		var emptySection  = document.getElementById('pva-empty');
+
+		if (chartsSection) chartsSection.hidden = !hasData;
+		if (emptySection)  emptySection.hidden  = hasData;
+
+		if (!hasData) return;
+
+		renderTrend(data.trend);
+		renderTop(data.top_videos);
+		renderDepth(data.depth, data.stats.avg_completion);
+		renderTable(data.all_videos);
+	}
+
+	// ── Play Trend (line chart) ───────────────────────────────────────
+	function renderTrend(trend) {
+		hideLoader('pva-trend-loading');
+
+		var sub = document.getElementById('pva-trend-sub');
+		if (sub) {
+			var total = trend.values.reduce(function (a, b) { return a + b; }, 0);
+			sub.textContent = fmt(total) + ' plays this period';
+		}
+
+		var ctx = document.getElementById('pva-trend-chart');
+		if (!ctx) return;
+
+		var chart2d  = ctx.getContext('2d');
+		var gradient = chart2d.createLinearGradient(0, 0, 0, 280);
+		gradient.addColorStop(0,   'rgba(79, 70, 229, 0.22)');
+		gradient.addColorStop(0.7, 'rgba(79, 70, 229, 0.05)');
+		gradient.addColorStop(1,   'rgba(79, 70, 229, 0)');
+
+		var labels = trend.labels.map(function (d) {
+			var parts = d.split('-');
+			return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10))
+				.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+		});
+
+		if (trendChart) trendChart.destroy();
+		trendChart = new Chart(ctx, {
+			type: 'line',
+			data: {
+				labels: labels,
+				datasets: [{
+					label:               'Plays',
+					data:                trend.values,
+					borderColor:         C_INDIGO,
+					backgroundColor:     gradient,
+					tension:             0.4,
+					pointBackgroundColor: C_INDIGO,
+					pointBorderColor:    '#fff',
+					pointBorderWidth:    2,
+					pointRadius:         4,
+					pointHoverRadius:    7,
+					fill:                true,
+					borderWidth:         2.5,
+				}],
+			},
+			options: {
+				responsive:          true,
+				maintainAspectRatio: false,
+				interaction:         { mode: 'index', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: TIP_BG,
+						titleColor:      TIP_TITLE,
+						bodyColor:       '#fff',
+						padding:         12,
+						cornerRadius:    8,
+						callbacks: {
+							label: function (c) {
+								return '  ' + c.parsed.y + ' play' + (c.parsed.y !== 1 ? 's' : '');
+							},
+						},
+					},
+				},
+				scales: {
+					x: {
+						grid:  { display: false },
+						ticks: {
+							color:         C_MUTED,
+							maxRotation:   0,
+							maxTicksLimit: activeDays <= 7 ? 7 : activeDays <= 30 ? 10 : 13,
+							font:          { size: 11 },
+						},
+						border: { display: false },
+					},
+					y: {
+						grid:        { color: C_GRID, drawTicks: false },
+						border:      { display: false },
+						ticks:       { color: C_MUTED, precision: 0, font: { size: 11 }, padding: 6 },
+						beginAtZero: true,
+					},
+				},
+			},
+		});
+	}
+
+	// ── Top Videos (horizontal bar chart) ────────────────────────────
+	function renderTop(topVideos) {
+		hideLoader('pva-top-loading');
+
+		var ctx = document.getElementById('pva-top-chart');
+		if (!ctx) return;
+
+		if (!topVideos || !topVideos.length) {
+			ctx.parentNode.innerHTML = '<p class="pva-no-data">No plays recorded yet.</p>';
+			return;
+		}
+
+		var labels = topVideos.map(function (v) {
+			return v.title.length > 38 ? v.title.substring(0, 38) + '…' : v.title;
+		});
+		var values = topVideos.map(function (v) { return v.plays; });
+
+		// Indigo shades: full opacity for #1, fading to 40% for #10
+		var colors = topVideos.map(function (_, i) {
+			var alpha = 1 - (i / Math.max(topVideos.length, 1)) * 0.6;
+			return 'rgba(79, 70, 229, ' + alpha.toFixed(2) + ')';
+		});
+
+		if (topChart) topChart.destroy();
+		topChart = new Chart(ctx, {
+			type: 'bar',
+			data: {
+				labels: labels,
+				datasets: [{
+					label:           'Plays',
+					data:            values,
+					backgroundColor: colors,
+					borderRadius:    6,
+					borderSkipped:   false,
+				}],
+			},
+			options: {
+				indexAxis:           'y',
+				responsive:          true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: TIP_BG,
+						titleColor:      TIP_TITLE,
+						bodyColor:       '#fff',
+						padding:         12,
+						cornerRadius:    8,
+						callbacks: {
+							label: function (c) {
+								return '  ' + c.parsed.x + ' play' + (c.parsed.x !== 1 ? 's' : '');
+							},
+						},
+					},
+				},
+				scales: {
+					x: {
+						grid:        { color: C_GRID },
+						border:      { display: false },
+						ticks:       { color: C_MUTED, precision: 0, font: { size: 11 } },
+						beginAtZero: true,
+					},
+					y: {
+						grid:  { display: false },
+						ticks: { color: '#374151', font: { size: 12 }, padding: 4 },
+					},
+				},
+			},
+		});
+	}
+
+	// ── Watch Depth (doughnut) ────────────────────────────────────────
+	function renderDepth(depth, avgCompletion) {
+		hideLoader('pva-depth-loading');
+
+		var ctx = document.getElementById('pva-depth-chart');
+		if (!ctx) return;
+
+		var d25  = depth.d25  || 0;
+		var d50  = depth.d50  || 0;
+		var d75  = depth.d75  || 0;
+		var d100 = depth.d100 || 0;
+		var total = d25 + d50 + d75 + d100;
+
+		if (total === 0) {
+			ctx.parentNode.innerHTML = '<p class="pva-no-data">Depth tracking will appear once viewers watch past 25%.</p>';
+			return;
+		}
+
+		if (depthChart) depthChart.destroy();
+		depthChart = new Chart(ctx, {
+			type: 'doughnut',
+			data: {
+				labels: ['25% watched', '50% watched', '75% watched', '100% watched'],
+				datasets: [{
+					data:            [d25, d50, d75, d100],
+					backgroundColor: [C_INDIGO_XL, C_INDIGO_LT, '#6366f1', C_INDIGO],
+					borderWidth:     0,
+					hoverOffset:     8,
+				}],
+			},
+			options: {
+				responsive:          true,
+				maintainAspectRatio: false,
+				cutout:              '72%',
+				animation:           { animateRotate: true, duration: 700 },
+				plugins: {
+					legend: {
+						position: 'bottom',
+						labels: {
+							color:        '#374151',
+							padding:      16,
+							font:         { size: 12 },
+							boxWidth:     12,
+							boxHeight:    12,
+							borderRadius: 3,
+						},
+					},
+					tooltip: {
+						backgroundColor: TIP_BG,
+						titleColor:      TIP_TITLE,
+						bodyColor:       '#fff',
+						padding:         12,
+						cornerRadius:    8,
+						callbacks: {
+							label: function (c) {
+								var val = c.parsed;
+								var pct = total ? Math.round((val / total) * 100) : 0;
+								return '  ' + fmt(val) + ' sessions (' + pct + '%)';
+							},
+						},
+					},
+					pvDonutCenter: {
+						value: avgCompletion + '%',
+					},
+				},
+			},
+		});
+	}
+
+	// ── All Videos table ──────────────────────────────────────────────
+	function renderTable(allVideos) {
+		var wrap = document.getElementById('pva-table-wrap');
+		if (!wrap) return;
+
+		if (!allVideos || !allVideos.length) {
+			wrap.innerHTML = '<p class="pva-no-data" style="padding:32px 16px;">No data for this period.</p>';
+			return;
+		}
+
+		var rows = allVideos.map(function (v) {
+			var thumb = v.thumb
+				? '<img src="' + esc(v.thumb) + '" alt="" class="pva-thumb" loading="lazy">'
+				: '<span class="pva-thumb-empty"></span>';
+
+			var title = v.edit
+				? '<a href="' + esc(v.edit) + '" class="pva-title-link" title="' + esc(v.title) + '">' + esc(v.title) + '</a>'
+				: '<span class="pva-title-link" title="' + esc(v.title) + '">' + esc(v.title) + '</span>';
+
+			return '<tr>'
+				+ '<td class="pva-col-thumb">' + thumb + '</td>'
+				+ '<td>' + title + '</td>'
+				+ '<td class="pva-col-plays">' + fmt(v.plays) + '</td>'
+				+ '<td class="pva-col-last">'  + esc(v.last_played) + '</td>'
+				+ '</tr>';
+		}).join('');
+
+		wrap.innerHTML = '<table class="pva-table">'
+			+ '<thead><tr>'
+			+ '<th colspan="2">Video</th>'
+			+ '<th>Plays</th>'
+			+ '<th>Last Played</th>'
+			+ '</tr></thead>'
+			+ '<tbody>' + rows + '</tbody>'
+			+ '</table>';
+	}
+
+	// ── Utility ───────────────────────────────────────────────────────
+
+	function setText(id, val) {
+		var el = document.getElementById(id);
+		if (el) el.textContent = val;
+	}
+
+	function hideLoader(id) {
+		var el = document.getElementById(id);
+		if (el) el.hidden = true;
+	}
+
+	function fmt(n) {
+		return Number(n).toLocaleString();
+	}
+
+	function esc(str) {
+		return String(str || '')
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
+}());

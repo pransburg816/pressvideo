@@ -1,0 +1,226 @@
+<?php
+/**
+ * Analytics — DB schema, event recorder, and data queries.
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+class PV_Analytics_Tracker {
+
+	const DB_VERSION = '1.0';
+
+	public static function table(): string {
+		global $wpdb;
+		return $wpdb->prefix . 'pv_analytics';
+	}
+
+	public static function create_table(): void {
+		global $wpdb;
+		$table      = self::table();
+		$charset_db = $wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE {$table} (
+			id         bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			video_id   bigint(20) UNSIGNED NOT NULL,
+			event      varchar(20)         NOT NULL,
+			session_id varchar(40)         NOT NULL DEFAULT '',
+			created_at datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY video_id   (video_id),
+			KEY created_at (created_at),
+			KEY event      (event)
+		) {$charset_db};";
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
+		update_option( 'pv_analytics_db_version', self::DB_VERSION );
+	}
+
+	public function register(): void {
+		add_action( 'wp_ajax_pv_track_event',        [ $this, 'ajax_track' ] );
+		add_action( 'wp_ajax_nopriv_pv_track_event', [ $this, 'ajax_track' ] );
+		add_action( 'wp_ajax_pv_analytics_data',     [ $this, 'ajax_data'  ] );
+	}
+
+	public function ajax_track(): void {
+		check_ajax_referer( 'pv_track', 'nonce' );
+
+		$youtube_id = preg_replace( '/[^A-Za-z0-9_\-]/', '', (string) ( $_POST['youtube_id'] ?? '' ) ); // phpcs:ignore
+		$event      = sanitize_key( $_POST['event'] ?? '' );                                             // phpcs:ignore
+		$session_id = sanitize_text_field( substr( (string) ( $_POST['session_id'] ?? '' ), 0, 40 ) );  // phpcs:ignore
+
+		if ( ! $youtube_id || ! in_array( $event, [ 'play', 'd25', 'd50', 'd75', 'd100' ], true ) ) {
+			wp_send_json_error( 'invalid' );
+			return;
+		}
+
+		// Resolve YouTube ID → WP post ID.
+		$posts = get_posts( [
+			'post_type'      => 'pv_youtube',
+			'post_status'    => 'publish',
+			'posts_per_page' => 1,
+			'meta_key'       => '_pv_youtube_id',
+			'meta_value'     => $youtube_id,
+			'fields'         => 'ids',
+		] );
+
+		if ( empty( $posts ) ) {
+			wp_send_json_error( 'not_found' );
+			return;
+		}
+
+		$video_id = (int) $posts[0];
+
+		global $wpdb;
+		$wpdb->insert(  // phpcs:ignore
+			self::table(),
+			[
+				'video_id'   => $video_id,
+				'event'      => $event,
+				'session_id' => $session_id,
+				'created_at' => current_time( 'mysql' ),
+			],
+			[ '%d', '%s', '%s', '%s' ]
+		);
+
+		wp_send_json_success();
+	}
+
+	public function ajax_data(): void {
+		check_ajax_referer( 'pv_analytics_admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'forbidden' );
+			return;
+		}
+
+		$days = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
+		wp_send_json_success( self::get_dashboard_data( $days ) );
+	}
+
+	public static function get_dashboard_data( int $days = 30 ): array {
+		global $wpdb;
+		$table = self::table();
+		$from  = gmdate( 'Y-m-d H:i:s', strtotime( "-{$days} days" ) );
+
+		// ── Stat: Total plays ─────────────────────────────────────────
+		$total_plays = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table} WHERE event = 'play' AND created_at >= %s",
+			$from
+		) );
+
+		// ── Stat: Unique videos played ────────────────────────────────
+		$unique_videos = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(DISTINCT video_id) FROM {$table} WHERE event = 'play' AND created_at >= %s",
+			$from
+		) );
+
+		// ── Stat: Avg completion ──────────────────────────────────────
+		$depth_rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT MAX(CASE WHEN event='d100' THEN 100
+			               WHEN event='d75'  THEN 75
+			               WHEN event='d50'  THEN 50
+			               WHEN event='d25'  THEN 25
+			               ELSE 0 END) AS max_depth
+			 FROM {$table}
+			 WHERE created_at >= %s
+			 GROUP BY video_id, session_id",
+			$from
+		), ARRAY_A );
+
+		$avg_completion = 0;
+		if ( ! empty( $depth_rows ) ) {
+			$avg_completion = (int) round( array_sum( array_column( $depth_rows, 'max_depth' ) ) / count( $depth_rows ) );
+		}
+
+		// ── Daily trend ───────────────────────────────────────────────
+		$trend_rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT DATE(created_at) AS day, COUNT(*) AS plays
+			 FROM {$table}
+			 WHERE event = 'play' AND created_at >= %s
+			 GROUP BY day ORDER BY day ASC",
+			$from
+		), ARRAY_A );
+
+		$trend = [];
+		for ( $i = $days - 1; $i >= 0; $i-- ) {
+			$trend[ gmdate( 'Y-m-d', strtotime( "-{$i} days" ) ) ] = 0;
+		}
+		foreach ( $trend_rows as $row ) {
+			if ( isset( $trend[ $row['day'] ] ) ) {
+				$trend[ $row['day'] ] = (int) $row['plays'];
+			}
+		}
+
+		// ── Top 10 videos ─────────────────────────────────────────────
+		$top_rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT video_id, COUNT(*) AS plays
+			 FROM {$table} WHERE event = 'play' AND created_at >= %s
+			 GROUP BY video_id ORDER BY plays DESC LIMIT 10",
+			$from
+		), ARRAY_A );
+
+		$top_videos = [];
+		foreach ( $top_rows as $row ) {
+			$post = get_post( (int) $row['video_id'] );
+			if ( ! $post ) continue;
+			$top_videos[] = [
+				'id'    => (int) $row['video_id'],
+				'title' => $post->post_title,
+				'plays' => (int) $row['plays'],
+				'thumb' => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ) ?: '',
+				'edit'  => get_edit_post_link( $post->ID, 'raw' ) ?: '',
+			];
+		}
+
+		// ── Watch depth distribution ──────────────────────────────────
+		$depth = [];
+		foreach ( [ 'd25', 'd50', 'd75', 'd100' ] as $evt ) {
+			$depth[ $evt ] = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(DISTINCT CONCAT(video_id,'_',session_id))
+				 FROM {$table} WHERE event = %s AND created_at >= %s",
+				$evt,
+				$from
+			) );
+		}
+
+		// ── All videos table ──────────────────────────────────────────
+		$all_rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT video_id,
+			        SUM(event='play') AS plays,
+			        MAX(created_at)   AS last_played
+			 FROM {$table} WHERE created_at >= %s
+			 GROUP BY video_id ORDER BY plays DESC",
+			$from
+		), ARRAY_A );
+
+		$all_videos = [];
+		foreach ( $all_rows as $row ) {
+			$post = get_post( (int) $row['video_id'] );
+			if ( ! $post ) continue;
+			$all_videos[] = [
+				'id'          => (int) $row['video_id'],
+				'title'       => $post->post_title,
+				'plays'       => (int) $row['plays'],
+				'last_played' => human_time_diff( strtotime( $row['last_played'] ), time() ) . ' ago',
+				'thumb'       => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ) ?: '',
+				'edit'        => get_edit_post_link( $post->ID, 'raw' ) ?: '',
+			];
+		}
+
+		return [
+			'stats'      => [
+				'total_plays'    => $total_plays,
+				'unique_videos'  => $unique_videos,
+				'avg_completion' => $avg_completion,
+			],
+			'trend'      => [
+				'labels' => array_keys( $trend ),
+				'values' => array_values( $trend ),
+			],
+			'top_videos' => $top_videos,
+			'depth'      => $depth,
+			'all_videos' => $all_videos,
+		];
+	}
+}
