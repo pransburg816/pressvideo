@@ -1660,7 +1660,8 @@
 	justify-content: center;
 	margin: 0 0 28px;
 }
-
+.pv-bc-search-bar--left  { justify-content: flex-start; }
+.pv-bc-search-bar--right { justify-content: flex-end; }
 
 .pv-bc-search-wrap {
 	display: flex;

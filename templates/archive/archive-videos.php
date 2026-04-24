@@ -646,8 +646,8 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 				?>
 				<div class="pv-broadcast">
 
-					<!-- Search bar (50% wide, centered, with mic) -->
-					<div class="pv-bc-search-bar">
+					<!-- Search bar -->
+					<div class="pv-bc-search-bar<?php echo 'center' !== $pv_search_align ? ' pv-bc-search-bar--' . esc_attr( $pv_search_align ) : ''; ?>">
 						<div class="pv-bc-search-wrap">
 							<svg class="pv-bc-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
 							<input type="search" class="pv-bc-search-input"
