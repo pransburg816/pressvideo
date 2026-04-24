@@ -552,9 +552,30 @@ class PV_Plugin {
 			PV_VERSION,
 			true
 		);
+
+		$settings = get_option( 'pv_settings', [] );
+		$ga_id    = sanitize_text_field( $settings['ga_measurement_id'] ?? '' );
+
+		// Inject Google Analytics 4 if a Measurement ID is configured.
+		if ( $ga_id && preg_match( '/^G-[A-Z0-9]{4,15}$/i', $ga_id ) ) {
+			wp_enqueue_script(
+				'pv-gtag',
+				'https://www.googletagmanager.com/gtag/js?id=' . rawurlencode( $ga_id ),
+				[],
+				null,
+				false // load in <head> per GA best practice
+			);
+			wp_add_inline_script(
+				'pv-gtag',
+				"window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config'," . wp_json_encode( $ga_id ) . ',{"send_page_view":true});',
+				'after'
+			);
+		}
+
 		wp_localize_script( 'pv-tracker', 'pvTracker', [
 			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 			'nonce'   => wp_create_nonce( 'pv_track' ),
+			'gaId'    => $ga_id,
 		] );
 
 		if ( is_post_type_archive( 'pv_youtube' ) ) {

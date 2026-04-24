@@ -59,31 +59,66 @@ class PV_Analytics_Page {
 	}
 
 	public function render_page(): void {
+		$settings = get_option( 'pv_settings', [] );
+		$ga_id    = sanitize_text_field( $settings['ga_measurement_id'] ?? '' );
+		$settings_url = admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' );
 		?>
 		<div class="wrap pv-settings-wrap pv-analytics-wrap">
 
-			<!-- ── Header ─────────────────────────────────────── -->
-			<div class="pv-page-header">
-				<div class="pv-page-header__info">
-					<h1 class="pv-page-header__title">
-						<span class="pva-header-icon" aria-hidden="true">
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-								<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
-							</svg>
-						</span>
-						<?php esc_html_e( 'Analytics', 'pv-youtube-importer' ); ?>
-					</h1>
-					<p class="pva-header-sub">
-						<?php esc_html_e( 'See how your videos are performing.', 'pv-youtube-importer' ); ?>
+			<!-- ── Branded Hero ───────────────────────────────── -->
+			<div class="pva-hero">
+				<div class="pva-hero__orb pva-hero__orb--1"></div>
+				<div class="pva-hero__orb pva-hero__orb--2"></div>
+
+				<div class="pva-hero__content">
+					<p class="pva-hero__eyebrow">PressVideo</p>
+					<h1 class="pva-hero__title"><?php esc_html_e( 'Analytics', 'pv-youtube-importer' ); ?></h1>
+					<p class="pva-hero__sub">
+						<?php esc_html_e( 'Track plays, watch depth, and engagement across all your videos.', 'pv-youtube-importer' ); ?>
 					</p>
+					<div class="pva-range-pills" role="group" aria-label="<?php esc_attr_e( 'Date range', 'pv-youtube-importer' ); ?>">
+						<button class="pva-pill" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></button>
+						<button class="pva-pill pva-pill--active" data-days="30"><?php esc_html_e( 'Last 30 Days', 'pv-youtube-importer' ); ?></button>
+						<button class="pva-pill" data-days="90"><?php esc_html_e( 'Last 90 Days', 'pv-youtube-importer' ); ?></button>
+					</div>
 				</div>
 
-				<div class="pva-range-pills" role="group" aria-label="<?php esc_attr_e( 'Date range', 'pv-youtube-importer' ); ?>">
-					<button class="pva-pill" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></button>
-					<button class="pva-pill pva-pill--active" data-days="30"><?php esc_html_e( 'Last 30 Days', 'pv-youtube-importer' ); ?></button>
-					<button class="pva-pill" data-days="90"><?php esc_html_e( 'Last 90 Days', 'pv-youtube-importer' ); ?></button>
+				<div class="pva-hero__graphic" aria-hidden="true">
+					<svg viewBox="0 0 260 140" fill="none" xmlns="http://www.w3.org/2000/svg" width="260" height="140">
+						<!-- Grid lines -->
+						<line x1="0" y1="35"  x2="260" y2="35"  stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+						<line x1="0" y1="70"  x2="260" y2="70"  stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+						<line x1="0" y1="105" x2="260" y2="105" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+						<!-- Bars -->
+						<rect x="6"   y="95"  width="22" height="45"  rx="4" fill="rgba(255,255,255,0.10)"/>
+						<rect x="36"  y="65"  width="22" height="75"  rx="4" fill="rgba(255,255,255,0.15)"/>
+						<rect x="66"  y="80"  width="22" height="60"  rx="4" fill="rgba(255,255,255,0.10)"/>
+						<rect x="96"  y="35"  width="22" height="105" rx="4" fill="rgba(255,255,255,0.22)"/>
+						<rect x="126" y="55"  width="22" height="85"  rx="4" fill="rgba(255,255,255,0.17)"/>
+						<rect x="156" y="18"  width="22" height="122" rx="4" fill="rgba(255,255,255,0.35)"/>
+						<rect x="186" y="42"  width="22" height="98"  rx="4" fill="rgba(255,255,255,0.20)"/>
+						<rect x="216" y="60"  width="22" height="80"  rx="4" fill="rgba(255,255,255,0.13)"/>
+						<!-- Trend area -->
+						<path d="M17,90 L47,60 L77,75 L107,30 L137,50 L167,13 L197,38 L227,55 L260,55 L260,140 L0,140 Z" fill="rgba(255,255,255,0.04)"/>
+						<!-- Trend line -->
+						<polyline points="17,90 47,60 77,75 107,30 137,50 167,13 197,38 227,55" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<!-- Data points -->
+						<circle cx="17"  cy="90" r="3.5" fill="rgba(255,255,255,0.45)"/>
+						<circle cx="47"  cy="60" r="3.5" fill="rgba(255,255,255,0.45)"/>
+						<circle cx="77"  cy="75" r="3.5" fill="rgba(255,255,255,0.45)"/>
+						<circle cx="107" cy="30" r="3.5" fill="rgba(255,255,255,0.45)"/>
+						<circle cx="137" cy="50" r="3.5" fill="rgba(255,255,255,0.45)"/>
+						<circle cx="167" cy="13" r="5.5" fill="white"/>
+						<circle cx="197" cy="38" r="3.5" fill="rgba(255,255,255,0.45)"/>
+						<circle cx="227" cy="55" r="3.5" fill="rgba(255,255,255,0.45)"/>
+						<!-- Peak tooltip -->
+						<rect x="138" y="0" width="60" height="24" rx="5" fill="white" opacity="0.92"/>
+						<text x="168" y="10" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="7.5" fill="#4f46e5" text-anchor="middle" font-weight="700">Peak day</text>
+						<text x="168" y="20" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="7" fill="#6b7280" text-anchor="middle">↑ plays</text>
+						<line x1="167" y1="24" x2="167" y2="13" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-dasharray="2,2"/>
+					</svg>
 				</div>
-			</div>
+			</div><!-- .pva-hero -->
 
 			<!-- ── Stat Cards ─────────────────────────────────── -->
 			<div class="pva-stats-row">
@@ -118,12 +153,12 @@ class PV_Analytics_Page {
 					</div>
 				</div>
 
-			</div>
+			</div><!-- .pva-stats-row -->
 
-			<!-- ── Charts + Table section (hidden when empty) ─── -->
+			<!-- ── Charts + Table section ─────────────────────── -->
 			<div id="pva-charts-section">
 
-				<!-- Play Trend (line chart, full width) -->
+				<!-- Play Trend -->
 				<div class="pv-card pva-card-trend">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'Play Trend', 'pv-youtube-importer' ); ?></h2>
@@ -139,7 +174,7 @@ class PV_Analytics_Page {
 					</div>
 				</div>
 
-				<!-- Top Videos + Watch Depth (two-col) -->
+				<!-- Top Videos + Watch Depth -->
 				<div class="pva-two-col">
 
 					<div class="pv-card">
@@ -170,7 +205,7 @@ class PV_Analytics_Page {
 						</div>
 					</div>
 
-				</div>
+				</div><!-- .pva-two-col -->
 
 				<!-- All Videos Table -->
 				<div class="pv-card">
@@ -178,7 +213,7 @@ class PV_Analytics_Page {
 						<h2 class="pv-card__title"><?php esc_html_e( 'All Videos', 'pv-youtube-importer' ); ?></h2>
 					</div>
 					<div class="pva-table-wrap" id="pva-table-wrap">
-						<div class="pva-loading">
+						<div class="pva-loading" style="padding:16px">
 							<div class="pva-skeleton pva-skeleton--row"></div>
 							<div class="pva-skeleton pva-skeleton--row"></div>
 							<div class="pva-skeleton pva-skeleton--row"></div>
@@ -192,17 +227,93 @@ class PV_Analytics_Page {
 			<!-- ── Empty State ────────────────────────────────── -->
 			<div class="pva-empty" id="pva-empty" hidden>
 				<div class="pva-empty__graphic" aria-hidden="true">
-					<svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<circle cx="12" cy="12" r="11" fill="#eef2ff"/>
-						<path d="M9 8l8 4-8 4V8z" fill="#4f46e5" opacity=".4"/>
-						<path d="M9.5 9.2l5.6 2.8-5.6 2.8V9.2z" fill="#4f46e5"/>
+					<svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<circle cx="44" cy="44" r="44" fill="#eef2ff"/>
+						<rect x="24" y="54" width="10" height="20" rx="3" fill="#c7d2fe"/>
+						<rect x="39" y="40" width="10" height="34" rx="3" fill="#818cf8"/>
+						<rect x="54" y="28" width="10" height="46" rx="3" fill="#4f46e5"/>
+						<circle cx="56" cy="24" r="6" fill="#4f46e5" opacity=".2"/>
+						<path d="M22 50 L44 34 L66 22" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" opacity=".4"/>
 					</svg>
 				</div>
 				<h2 class="pva-empty__title"><?php esc_html_e( 'No plays recorded yet', 'pv-youtube-importer' ); ?></h2>
 				<p class="pva-empty__desc">
-					<?php esc_html_e( 'Share your videos with your audience and data will start appearing here as people watch.', 'pv-youtube-importer' ); ?>
+					<?php esc_html_e( 'Share your videos with your audience and data will appear here as people watch.', 'pv-youtube-importer' ); ?>
 				</p>
 			</div>
+
+			<!-- ── Google Analytics Card (always visible) ─────── -->
+			<div class="pva-ga-card <?php echo $ga_id ? 'pva-ga-card--connected' : 'pva-ga-card--disconnected'; ?>">
+
+				<div class="pva-ga-card__icon" aria-hidden="true">
+					<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<rect width="44" height="44" rx="10" fill="#fff5e6"/>
+						<!-- GA4-style bars -->
+						<rect x="9"  y="26" width="8" height="11" rx="2" fill="#F9AB00"/>
+						<rect x="21" y="18" width="8" height="19" rx="2" fill="#E37400"/>
+						<rect x="27" y="18" width="8" height="19" rx="2" fill="#E37400" opacity="0.4"/>
+						<rect x="9"  y="26" width="8" height="11" rx="2" fill="#F9AB00"/>
+						<!-- Trend sparkline -->
+						<polyline points="10,24 18,18 26,20 35,11" fill="none" stroke="#E37400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+						<circle cx="35" cy="11" r="2.5" fill="#E37400"/>
+					</svg>
+				</div>
+
+				<div class="pva-ga-card__body">
+					<div class="pva-ga-card__head-row">
+						<h3 class="pva-ga-card__title">Google Analytics 4</h3>
+						<?php if ( $ga_id ) : ?>
+							<span class="pva-ga-badge pva-ga-badge--on">
+								<span class="pva-ga-badge__dot"></span>
+								<?php esc_html_e( 'Active', 'pv-youtube-importer' ); ?>
+							</span>
+						<?php else : ?>
+							<span class="pva-ga-badge pva-ga-badge--off">
+								<?php esc_html_e( 'Not connected', 'pv-youtube-importer' ); ?>
+							</span>
+						<?php endif; ?>
+					</div>
+
+					<?php if ( $ga_id ) : ?>
+						<p class="pva-ga-card__id">
+							<?php esc_html_e( 'Measurement ID:', 'pv-youtube-importer' ); ?>
+							<code><?php echo esc_html( $ga_id ); ?></code>
+						</p>
+						<p class="pva-ga-card__desc">
+							<?php esc_html_e( 'PressVideo is automatically tracking the following events in your GA4 property:', 'pv-youtube-importer' ); ?>
+						</p>
+						<div class="pva-ga-events">
+							<span class="pva-ga-event">
+								<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+								pv_video_play
+							</span>
+							<span class="pva-ga-event">
+								<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+								pv_watch_depth (25 / 50 / 75 / 100%)
+							</span>
+						</div>
+					<?php else : ?>
+						<p class="pva-ga-card__desc">
+							<?php esc_html_e( 'Add your GA4 Measurement ID to automatically send video play events and watch depth milestones to Google Analytics.', 'pv-youtube-importer' ); ?>
+						</p>
+					<?php endif; ?>
+				</div>
+
+				<div class="pva-ga-card__action">
+					<?php if ( $ga_id ) : ?>
+						<a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer" class="pva-ga-btn pva-ga-btn--primary">
+							<?php esc_html_e( 'Open Google Analytics', 'pv-youtube-importer' ); ?>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+						</a>
+					<?php else : ?>
+						<a href="<?php echo esc_url( $settings_url ); ?>" class="pva-ga-btn pva-ga-btn--secondary">
+							<?php esc_html_e( 'Connect in Settings', 'pv-youtube-importer' ); ?>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+						</a>
+					<?php endif; ?>
+				</div>
+
+			</div><!-- .pva-ga-card -->
 
 		</div><!-- .wrap -->
 		<?php

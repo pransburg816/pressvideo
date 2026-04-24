@@ -127,6 +127,7 @@
 	}
 
 	function sendEvent(event, youtubeId) {
+		// Native PressVideo tracking
 		var body = new URLSearchParams({
 			action:     'pv_track_event',
 			nonce:      nonce,
@@ -136,6 +137,22 @@
 		});
 		fetch(ajaxUrl, { method: 'POST', body: body })
 			.catch(function () { /* fire-and-forget */ });
+
+		// Google Analytics 4 — only when an ID is configured and gtag is loaded.
+		if (cfg.gaId && typeof window.gtag === 'function') {
+			if (event === 'play') {
+				window.gtag('event', 'pv_video_play', {
+					video_id:        youtubeId,
+					non_interaction: false,
+				});
+			} else {
+				window.gtag('event', 'pv_watch_depth', {
+					video_id:        youtubeId,
+					depth_milestone: event,  // 'd25' | 'd50' | 'd75' | 'd100'
+					non_interaction: true,
+				});
+			}
+		}
 	}
 
 	function getSessionId() {

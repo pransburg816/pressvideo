@@ -61,6 +61,10 @@ class PV_Settings_Page {
 
 		$clean['import_playlists'] = $this->sanitize_playlist_ids( $input['import_playlists'] ?? '' );
 
+		// GA4 Measurement ID — format: G-XXXXXXXXXX
+		$raw_ga = strtoupper( sanitize_text_field( $input['ga_measurement_id'] ?? '' ) );
+		$clean['ga_measurement_id'] = preg_match( '/^G-[A-Z0-9]{4,15}$/', $raw_ga ) ? $raw_ga : '';
+
 		return $clean;
 	}
 
@@ -212,6 +216,46 @@ class PV_Settings_Page {
 									          placeholder="PLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"><?php echo esc_textarea( $settings['import_playlists'] ?? '' ); ?></textarea>
 									<p class="pv-field-row__desc">
 										<?php esc_html_e( 'One playlist ID or full playlist URL per line. Use this for private or unlisted playlists your channel auto-importer cannot discover. Already-imported videos are always skipped — re-running the importer with the same IDs is safe.', 'pv-youtube-importer' ); ?>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Google Analytics -->
+				<div class="pv-card">
+					<div class="pv-card__head">
+						<div class="pv-card__icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
+							<span class="dashicons dashicons-chart-area"></span>
+						</div>
+						<div class="pv-card__head-text">
+							<h2><?php esc_html_e( 'Google Analytics 4', 'pv-youtube-importer' ); ?></h2>
+							<p><?php esc_html_e( 'Automatically track video plays and watch depth in your GA4 property.', 'pv-youtube-importer' ); ?></p>
+						</div>
+					</div>
+					<div class="pv-card__body">
+						<div class="pv-field-rows">
+							<div class="pv-field-row">
+								<div class="pv-field-row__label">
+									<label for="pv_ga_measurement_id"><?php esc_html_e( 'Measurement ID', 'pv-youtube-importer' ); ?></label>
+								</div>
+								<div class="pv-field-row__control">
+									<input type="text"
+									       name="pv_settings[ga_measurement_id]"
+									       id="pv_ga_measurement_id"
+									       value="<?php echo esc_attr( $settings['ga_measurement_id'] ?? '' ); ?>"
+									       class="regular-text"
+									       placeholder="G-XXXXXXXXXX"
+									       autocomplete="off" />
+									<p class="pv-field-row__desc">
+										<?php printf(
+											wp_kses(
+												__( 'Found in <a href="%s" target="_blank" rel="noopener">Google Analytics → Admin → Data Streams</a>. Format: <code>G-XXXXXXXXXX</code>. Leave blank to disable.', 'pv-youtube-importer' ),
+												[ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ], 'code' => [] ]
+											),
+											'https://analytics.google.com/'
+										); ?>
 									</p>
 								</div>
 							</div>
