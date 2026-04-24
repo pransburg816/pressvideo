@@ -593,6 +593,12 @@
 						btn.classList.add('pvc-publish-btn--saved');
 						btn.textContent = '\u2713 Published';
 						showToast('Settings published successfully!', false);
+						// Reload iframe to the live archive URL (no preview params) so
+						// the user immediately sees the published state.
+						iframeReady = false;
+						frameLoader.classList.add('pvc-frame-loading--visible');
+						setStatus('loading', 'Loading live page\u2026');
+						iframe.src = cfg.archiveUrl + '?_r=' + Date.now();
 					} else {
 						btn.textContent = '\u2717 Error';
 						showToast('Something went wrong. Please try again.', true);

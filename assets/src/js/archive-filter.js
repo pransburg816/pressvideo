@@ -322,9 +322,11 @@
 
 		// Restore the previously selected playlist so the correct grid loads
 		// on the first tab activation — works across page navigations and
-		// customizer iframe reloads.
+		// customizer iframe reloads. localStorage is used (not sessionStorage)
+		// because sessionStorage is window-scoped: iframe reloads create a fresh
+		// context and lose any stored value.
 		try {
-			var _storedPl = sessionStorage.getItem(BC_PL_STORAGE_KEY);
+			var _storedPl = localStorage.getItem(BC_PL_STORAGE_KEY);
 			if (_storedPl) {
 				var _parsed = JSON.parse(_storedPl);
 				if (_parsed && _parsed.id) {
@@ -337,7 +339,7 @@
 						if (bcHomeSectionHead) bcHomeSectionHead.hidden = false;
 						if (bcHomeSectionTitle) bcHomeSectionTitle.textContent = _parsed.title || (_matchBtn.dataset.plTitle || '');
 					} else {
-						sessionStorage.removeItem(BC_PL_STORAGE_KEY);
+						localStorage.removeItem(BC_PL_STORAGE_KEY);
 					}
 				}
 			}
@@ -345,7 +347,7 @@
 
 		function goToLatest() {
 			bcHomeSelectedPl = '';
-			try { sessionStorage.removeItem(BC_PL_STORAGE_KEY); } catch (e) {}
+			try { localStorage.removeItem(BC_PL_STORAGE_KEY); } catch (e) {}
 			if (bcHomeSectionHead) bcHomeSectionHead.hidden = !bcHasLabel;
 			if (bcHasLabel && bcHomeSectionTitle) bcHomeSectionTitle.textContent = bcDefaultLabel;
 			bc.querySelectorAll('.pv-bc-pl-nav-btn').forEach(function (btn) {
@@ -356,7 +358,7 @@
 
 		function goToPlaylist(plId, plTitle) {
 			bcHomeSelectedPl = plId;
-			try { sessionStorage.setItem(BC_PL_STORAGE_KEY, JSON.stringify({id: plId, title: plTitle})); } catch (e) {}
+			try { localStorage.setItem(BC_PL_STORAGE_KEY, JSON.stringify({id: plId, title: plTitle})); } catch (e) {}
 			if (bcHomeSectionHead) bcHomeSectionHead.hidden = false;
 			if (bcHomeSectionTitle) bcHomeSectionTitle.textContent = plTitle;
 			bc.querySelectorAll('.pv-bc-pl-nav-btn').forEach(function (btn) {

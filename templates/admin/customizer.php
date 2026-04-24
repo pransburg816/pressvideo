@@ -607,7 +607,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					<span class="pvc-hint">Automatically shows a live stream embed at the top of your archive page when your YouTube channel is broadcasting live. Checked every 2 minutes.</span>
 					<div class="pvc-sub-fields<?php echo $live_feed_on ? '' : ' pvc-collapsed'; ?>" style="margin-top:10px;">
 						<label class="pvc-aside-toggle pvc-aside-toggle--sub">
-							<input type="checkbox" data-setting="live_chat_enabled" <?php checked( ! empty( $pv_settings['live_chat_enabled'] ) ); ?>>
+							<input type="checkbox" data-setting="live_chat_enabled" <?php checked( ! empty( $s['live_chat_enabled'] ) ); ?>>
 							<span class="pvc-aside-toggle__label">Show Live Chat</span>
 						</label>
 						<span class="pvc-hint">Embeds YouTube&rsquo;s live chat panel alongside the video, sized to the container. Visitors can participate without leaving your site.</span>
