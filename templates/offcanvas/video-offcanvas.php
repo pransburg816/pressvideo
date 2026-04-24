@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		</div>
 
 		<div class="pv-meta">
-			<p class="pv-badge pv-rail__heading"></p>
+			<p class="pv-rail__heading pv-playlist-label"></p>
 			<h3 class="pv-title"></h3>
 			<p class="pv-desc"></p>
 		</div>
