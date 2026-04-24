@@ -33,13 +33,21 @@ class PV_Settings_Page {
 
 	public function sanitize_settings( array $input ): array {
 		$existing = get_option( 'pv_settings', [] );
-		// Start from existing so customizer-managed keys (hero, aside, etc.) are never wiped by this form.
+		// Start from existing so keys absent from this particular submission are preserved.
 		$clean = is_array( $existing ) ? $existing : [];
 
+		// Pass every incoming value through so that direct update_option() calls from the
+		// customizer's Publish action are not silently reverted to the old stored value.
+		// Settings page form submissions only include their own keys, so unrelated keys
+		// are untouched (they keep the $existing value set above).
+		foreach ( $input as $key => $value ) {
+			$clean[ $key ] = $value;
+		}
+
+		// Re-sanitize the keys this Settings page owns with strict validation.
 		$clean['api_key']    = sanitize_text_field( $input['api_key']    ?? '' );
 		$clean['channel_id'] = sanitize_text_field( $input['channel_id'] ?? '' );
 
-		// Overwrite only the keys that this settings page owns (sent via hidden inputs).
 		$clean['default_accent']    = sanitize_hex_color( $input['default_accent'] ?? '' ) ?: ( $existing['default_accent'] ?? '#4f46e5' );
 		$clean['display_mode']      = in_array( $input['display_mode'] ?? '', [ 'offcanvas', 'page' ], true )
 			? $input['display_mode'] : ( $existing['display_mode'] ?? 'offcanvas' );
@@ -47,8 +55,9 @@ class PV_Settings_Page {
 			? $input['watch_page_layout'] : ( $existing['watch_page_layout'] ?? 'hero-top' );
 		$clean['archive_layout']    = in_array( $input['archive_layout'] ?? '', [ 'grid', 'list', 'featured', 'compact', 'wall', 'spotlight', 'broadcast' ], true )
 			? $input['archive_layout'] : ( $existing['archive_layout'] ?? 'grid' );
-		$clean['content_width']     = in_array( $input['content_width'] ?? '', [ 'full', 'wide', 'medium', 'narrow' ], true )
-			? $input['content_width'] : ( $existing['content_width'] ?? 'full' );
+		// '' means "default / no max-width" — must be in the allowed list alongside named widths.
+		$clean['content_width']     = in_array( $input['content_width'] ?? '', [ 'full', 'wide', 'medium', 'narrow', '' ], true )
+			? $input['content_width'] : ( $existing['content_width'] ?? '' );
 
 		$clean['import_playlists'] = $this->sanitize_playlist_ids( $input['import_playlists'] ?? '' );
 
