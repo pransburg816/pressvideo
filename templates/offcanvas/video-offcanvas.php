@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		</div>
 
 		<div class="pv-meta">
-			<span class="pv-badge"></span>
+			<p class="pv-badge pv-rail__heading"></p>
 			<h3 class="pv-title"></h3>
 			<p class="pv-desc"></p>
 		</div>
