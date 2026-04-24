@@ -316,8 +316,6 @@
 		var bcHomePerPage      = '24';
 		var bcHomePage         = 1;
 		var bcHomeSelectedPl   = '';
-		var bcHasLabel         = bcHomeSectionHead ? bcHomeSectionHead.dataset.hasLabel === '1' : false;
-		var bcDefaultLabel     = bcHomeSectionHead ? (bcHomeSectionHead.dataset.defaultLabel || '') : '';
 		var BC_PL_STORAGE_KEY  = 'pv_bc_selected_pl';
 
 		// Restore the previously selected playlist so the correct grid loads
@@ -348,8 +346,7 @@
 		function goToLatest() {
 			bcHomeSelectedPl = '';
 			try { localStorage.removeItem(BC_PL_STORAGE_KEY); } catch (e) {}
-			if (bcHomeSectionHead) bcHomeSectionHead.hidden = !bcHasLabel;
-			if (bcHasLabel && bcHomeSectionTitle) bcHomeSectionTitle.textContent = bcDefaultLabel;
+			if (bcHomeSectionHead) bcHomeSectionHead.hidden = true;
 			bc.querySelectorAll('.pv-bc-pl-nav-btn').forEach(function (btn) {
 				btn.classList.toggle('pv-bc-pl-nav-btn--active', btn.dataset.plId === '');
 			});
@@ -576,6 +573,12 @@
 					if (pk === 'videos') loadBcVideosGrid(pg, bcVideosPerPage, bcVideosCategory, bcVideosYtPl);
 					return;
 				}
+			}
+
+			// Back button → return to All Latest view
+			if (e.target.closest('.pv-bc-back-btn')) {
+				goToLatest();
+				return;
 			}
 
 			// Playlist nav button (home panel — single-select)

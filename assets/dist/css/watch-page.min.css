@@ -2080,8 +2080,37 @@
 }
 
 /* ── Home panel: section heading ─────────────────────────────────── */
-.pv-bc-home-section-head { margin: 0 0 16px; }
-.pv-bc-home-section-title { color: #fff; font-size: 1rem; font-weight: 700; margin: 0; }
+.pv-bc-home-section-head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0 0 16px;
+}
+.pv-bc-home-section-title { color: #fff; font-size: 1rem; font-weight: 700; margin: 0; flex: 1; }
+
+/* ── Back button (← Latest) ─────────────────────────────────────── */
+.pv-bc-back-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(255,255,255,0.08);
+	border: 1.5px solid rgba(255,255,255,0.14);
+	border-radius: 20px;
+	color: rgba(255,255,255,0.7);
+	font-size: 0.78rem;
+	font-weight: 600;
+	padding: 5px 14px 5px 10px;
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s, border-color 0.15s;
+	white-space: nowrap;
+	font-family: inherit;
+	flex-shrink: 0;
+}
+.pv-bc-back-btn:hover {
+	background: rgba(255,255,255,0.14);
+	border-color: rgba(255,255,255,0.28);
+	color: #fff;
+}
 
 /* ── Home panel: video grid ──────────────────────────────────────── */
 .pv-bc-home-grid {

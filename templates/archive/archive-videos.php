@@ -705,12 +705,13 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							</div>
 							<?php endif; ?>
 
-							<!-- Section heading: shows label (Latest Videos) or selected playlist title -->
-							<div class="pv-bc-home-section-head"
-							     <?php echo ! $_pv_label_show ? 'hidden' : ''; ?>
-							     data-has-label="<?php echo esc_attr( $_pv_label_show ? '1' : '0' ); ?>"
-							     data-default-label="<?php echo esc_attr( $_pv_label_text ); ?>">
-								<h2 class="pv-bc-home-section-title"><?php echo esc_html( $_pv_label_show ? $_pv_label_text : '' ); ?></h2>
+							<!-- Section heading: only visible when a specific playlist is active -->
+							<div class="pv-bc-home-section-head" hidden>
+								<button class="pv-bc-back-btn" type="button" aria-label="<?php esc_attr_e( 'Back to latest videos', 'pv-youtube-importer' ); ?>">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+									<?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?>
+								</button>
+								<h2 class="pv-bc-home-section-title"></h2>
 							</div>
 
 							<!-- Video grid: AJAX-loaded on activation -->
