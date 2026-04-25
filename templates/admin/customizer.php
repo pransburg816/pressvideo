@@ -187,10 +187,10 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					</div>
 				</div>
 
-				<!-- Broadcast: playlist selector (only visible when broadcast is selected) -->
-				<div class="pvc-field pvc-sublayout <?php echo 'broadcast' !== $layout ? 'pvc-collapsed' : ''; ?>" id="pvc-broadcast-field">
+				<!-- Playlist selector: always visible — drives the playlist nav in all layouts -->
+				<div class="pvc-field pvc-sublayout" id="pvc-broadcast-field">
 					<span class="pvc-label">Featured Playlists</span>
-					<span class="pvc-hint" style="display:block;margin:4px 0 14px;">Choose which playlists and series appear in the Broadcast layout.</span>
+					<span class="pvc-hint" style="display:block;margin:4px 0 14px;">Choose which playlists and series appear in the playlist navigation bar across all layouts.</span>
 
 					<!-- YouTube playlists (fetched dynamically) -->
 					<span class="pvc-bc-source-label">Playlists From YouTube</span>

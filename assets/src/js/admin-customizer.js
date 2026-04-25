@@ -347,12 +347,10 @@
 		});
 	});
 
-	// ── Archive layout: show/hide broadcast playlist section ──
+	// ── Archive layout: refresh playlist list when layout changes ──
 	document.querySelectorAll('[data-setting="archive_layout"]').forEach(function (radio) {
 		radio.addEventListener('change', function () {
-			var _bcField = document.getElementById('pvc-broadcast-field');
-			if (_bcField) _bcField.classList.toggle('pvc-collapsed', this.value !== 'broadcast');
-			if (this.value === 'broadcast') fetchYtPlaylists();
+			fetchYtPlaylists();
 		});
 	});
 
@@ -447,8 +445,8 @@
 		return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 	}
 
-	// Fetch when broadcast layout is already active on load
-	if (bcField && !bcField.classList.contains('pvc-collapsed')) {
+	// Fetch playlists on load (section is always visible now)
+	if (bcField) {
 		fetchYtPlaylists();
 	}
 
