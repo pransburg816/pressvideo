@@ -73,7 +73,11 @@ class PV_Analytics_Page {
 	private function has_any_data(): bool {
 		global $wpdb;
 		$table = $wpdb->prefix . 'pv_analytics';
-		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore
+		$from  = gmdate( 'Y-m-d H:i:s', strtotime( '-30 days' ) );
+		$count = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table} WHERE event = 'play' AND created_at >= %s",
+			$from
+		) );
 		return $count > 0;
 	}
 
