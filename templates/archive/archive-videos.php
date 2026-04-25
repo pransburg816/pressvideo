@@ -235,6 +235,11 @@ $_pv_wrap_style = '--pv-accent:' . esc_attr( $pv_accent );
 if ( $_pv_page_bg ) {
 	$_pv_wrap_style .= ';background-color:' . esc_attr( $_pv_page_bg );
 }
+$_pv_btn_radius_map = [ 'pill' => '999px', 'radius' => '8px', 'square' => '0' ];
+$_pv_btn_radius = $_pv_btn_radius_map[ $pv_settings['button_shape'] ?? '' ] ?? '';
+if ( $_pv_btn_radius ) {
+	$_pv_wrap_style .= ';--pv-btn-radius:' . $_pv_btn_radius;
+}
 
 // Build content div style now that $_pv_page_bg is available
 $_pv_content_style = $_pv_max_w ? 'max-width:' . esc_attr( $_pv_max_w ) . ';margin:0 auto;' : '';

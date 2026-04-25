@@ -8,6 +8,7 @@ $s             = $settings;
 $layout        = $s['archive_layout']      ?? 'grid';
 $width         = $s['content_width']       ?? '';
 $mode          = $s['display_mode']        ?? 'offcanvas';
+$btn_shape     = $s['button_shape']        ?? '';
 $watch_layout  = $s['watch_page_layout']   ?? 'hero-top';
 $accent        = $s['default_accent']      ?? '#4f46e5';
 $page_bg       = $s['page_bg_color']       ?? '';
@@ -565,6 +566,17 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					<span class="pvc-label">Sidebar Panel Background</span>
 					<input type="text" class="pvc-color-picker" data-setting="sidebar_bg_color" value="<?php echo esc_attr( $sidebar_bg ?: '#0f0f1e' ); ?>">
 					<span class="pvc-hint">Background color for the New Releases, Browse Topics, and Explore Tags panels. Default is <code style="color:rgba(255,255,255,.55);font-size:.78rem;">#0f0f1e</code>. Type a hex value for instant preview, or click the refresh button after choosing a swatch.</span>
+				</div>
+			<div class="pvc-divider"></div>
+				<div class="pvc-field">
+					<span class="pvc-label">Button Shape</span>
+					<div class="pvc-segment" data-for="pvc-btn-shape-val">
+						<button class="pvc-seg-btn <?php echo 'pill'   === $btn_shape ? 'pvc-seg-btn--active' : ''; ?>" data-value="pill">Pill</button>
+						<button class="pvc-seg-btn <?php echo 'radius' === $btn_shape ? 'pvc-seg-btn--active' : ''; ?>" data-value="radius">Simple Radius</button>
+						<button class="pvc-seg-btn <?php echo 'square' === $btn_shape ? 'pvc-seg-btn--active' : ''; ?>" data-value="square">No Radius</button>
+					</div>
+					<input type="hidden" data-setting="button_shape" id="pvc-btn-shape-val" value="<?php echo esc_attr( $btn_shape ); ?>">
+					<span class="pvc-hint">Applies to filter chips, sort buttons, playlist nav, and per-page selectors.</span>
 				</div>
 			</div><!-- /#pvc-panel-style -->
 
