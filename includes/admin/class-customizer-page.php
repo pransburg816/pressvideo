@@ -144,7 +144,7 @@ class PV_Customizer_Page {
 		$map_enum = [
 			'archive_layout'    => [ 'grid', 'list', 'featured', 'compact', 'wall', 'spotlight', 'broadcast' ],
 			'content_width'     => [ 'wide', 'medium', 'narrow', '' ],
-			'display_mode'      => [ 'offcanvas', 'page' ],
+			'display_mode'      => [ 'offcanvas', 'page', 'pip' ],
 			'watch_page_layout' => [ 'hero-top', 'hero-split', 'theater' ],
 			'hero_title_size'   => [ '', 'lg', 'xl' ],
 			'hero_overlay'      => [ 'light', 'medium', 'dark' ],
@@ -188,7 +188,7 @@ class PV_Customizer_Page {
 			$clean['hero_bg_image'] = esc_url_raw( $raw['hero_bg_image'] );
 		}
 
-		foreach ( [ 'aside_new_releases', 'aside_topics', 'aside_tags', 'cards_show_excerpt', 'cards_show_category', 'aside_cat_on', 'aside_tag_on', 'hero_show', 'live_feed_enabled', 'live_chat_enabled', 'live_hide_content', 'live_banner_enabled', 'new_video_notify', 'grid_label_show', 'pip_enabled' ] as $k ) {
+		foreach ( [ 'aside_new_releases', 'aside_topics', 'aside_tags', 'cards_show_excerpt', 'cards_show_category', 'aside_cat_on', 'aside_tag_on', 'hero_show', 'live_feed_enabled', 'live_chat_enabled', 'live_hide_content', 'live_banner_enabled', 'new_video_notify', 'grid_label_show' ] as $k ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$clean[ $k ] = (bool) $raw[ $k ];
 			}

@@ -343,7 +343,7 @@
 	document.querySelectorAll('[data-setting="display_mode"]').forEach(function (radio) {
 		radio.addEventListener('change', function () {
 			var watchField = document.getElementById('pvc-watch-layout-field');
-			if (watchField) watchField.classList.toggle('pvc-collapsed', this.value !== 'page');
+			if (watchField) watchField.classList.toggle('pvc-collapsed', this.value !== 'page' && this.value !== 'pip');
 		});
 	});
 

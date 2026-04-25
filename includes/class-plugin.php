@@ -578,8 +578,8 @@ class PV_Plugin {
 			'gaId'    => $ga_id,
 		] );
 
-		// PIP mini-player — single video pages only, when creator has it enabled.
-		if ( is_singular( 'pv_youtube' ) && ! empty( $settings['pip_enabled'] ) ) {
+		// PIP mini-player — single video pages only when Watch Page + PIP mode is selected.
+		if ( is_singular( 'pv_youtube' ) && 'pip' === ( $settings['display_mode'] ?? '' ) ) {
 			wp_enqueue_script(
 				'pv-pip',
 				PV_PLUGIN_URL . 'assets/dist/js/pv-pip.min.js',
