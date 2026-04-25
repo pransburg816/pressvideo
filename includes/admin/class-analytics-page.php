@@ -100,17 +100,10 @@ class PV_Analytics_Page {
 					<p class="pva-hero__sub">
 						<?php esc_html_e( 'Track plays, watch depth, and engagement across all your videos.', 'pv-youtube-importer' ); ?>
 					</p>
-					<div class="pva-hero__bottom">
-					<div class="pva-range-pills" role="group" aria-label="<?php esc_attr_e( 'Date range', 'pv-youtube-importer' ); ?>">
-						<button class="pva-pill" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></button>
-						<button class="pva-pill pva-pill--active" data-days="30"><?php esc_html_e( 'Last 30 Days', 'pv-youtube-importer' ); ?></button>
-						<button class="pva-pill" data-days="90"><?php esc_html_e( 'Last 90 Days', 'pv-youtube-importer' ); ?></button>
-					</div>
 					<button class="pva-demo-btn" id="pva-demo-toggle" type="button">
 						<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
 						<?php esc_html_e( 'Preview sample data', 'pv-youtube-importer' ); ?>
 					</button>
-				</div>
 				</div>
 
 			</div><!-- .pva-hero -->
@@ -135,6 +128,11 @@ class PV_Analytics_Page {
 						<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 5h-3v5.5a2.5 2.5 0 01-5 0 2.5 2.5 0 012.5-2.5c.46 0 .89.13 1.25.34V5h4v2zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>
 						<?php esc_html_e( 'Download Report', 'pv-youtube-importer' ); ?>
 					</button>
+				</div>
+				<div class="pva-range-pills" role="group" aria-label="<?php esc_attr_e( 'Date range', 'pv-youtube-importer' ); ?>">
+					<button class="pva-pill" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></button>
+					<button class="pva-pill pva-pill--active" data-days="30"><?php esc_html_e( 'Last 30 Days', 'pv-youtube-importer' ); ?></button>
+					<button class="pva-pill" data-days="90"><?php esc_html_e( 'Last 90 Days', 'pv-youtube-importer' ); ?></button>
 				</div>
 			</div><!-- .pva-export-bar -->
 

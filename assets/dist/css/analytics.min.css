@@ -548,6 +548,26 @@ body.pva-page .pva-stat-label {
 	letter-spacing: 0.08em;
 }
 
+/* ── Range pills (dark page context) ─────────────────────── */
+body.pva-page .pva-pill {
+	background: rgba(255,255,255,0.06);
+	border-color: rgba(255,255,255,0.14);
+	color: rgba(255,255,255,0.65);
+}
+body.pva-page .pva-pill:hover {
+	background: rgba(255,255,255,0.12);
+	border-color: rgba(255,255,255,0.30);
+	color: #fff;
+	box-shadow: none;
+}
+body.pva-page .pva-pill--active,
+body.pva-page .pva-pill--active:hover {
+	background: rgba(255,255,255,0.18);
+	border-color: rgba(255,255,255,0.42);
+	color: #fff;
+	box-shadow: none;
+}
+
 /* ── Chart / content cards ────────────────────────────────── */
 body.pva-page .pv-card {
 	background: rgba(255,255,255,0.04);
@@ -665,6 +685,10 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	gap: 10px;
 	margin-bottom: 24px;
 	flex-wrap: wrap;
+}
+
+.pva-export-bar .pva-range-pills {
+	margin-left: auto;
 }
 .pva-export-bar__label {
 	display: flex;
@@ -979,11 +1003,18 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	margin-bottom: 10px;
 }
 .pva-pick__meta strong { color: rgba(255,255,255,0.72); }
+.pva-pick__body {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
 .pva-pick__actions {
 	display: flex;
 	gap: 6px;
 	flex-wrap: wrap;
 	margin-top: auto;
+	padding-top: 10px;
 }
 .pva-pick__action {
 	display: inline-flex;
