@@ -940,82 +940,149 @@ body.pva-page .pva-empty__graphic circle:first-child {
 .pva-demo-exit:hover { background: rgba(255,255,255,0.25); }
 
 /* ══════════════════════════════════════════════════════════
+   All Videos + Coach side-by-side grid
+   ══════════════════════════════════════════════════════════ */
+
+.pva-grid-lower {
+	display: grid;
+	grid-template-columns: 55fr 45fr;
+	gap: 20px;
+	margin-bottom: 20px;
+	align-items: start;
+}
+
+.pva-grid-lower__table .pva-table-wrap {
+	max-height: 520px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255,255,255,0.12) transparent;
+}
+
+.pva-grid-lower__coach { }
+
+/* ══════════════════════════════════════════════════════════
    Creator Growth Coach
    ══════════════════════════════════════════════════════════ */
 
-.pva-coach { }
-
+/* Coach is now a .pv-card — body has vertical stack */
 .pva-coach__body {
-	display: grid;
-	grid-template-columns: 280px 1fr;
-	gap: 0;
+	padding: 0;
 }
 
-/* ── Gauge column ─────────────────────────────────────────── */
-.pva-coach__gauge-col {
-	padding: 22px 24px 24px;
-	border-right: 1px solid rgba(255,255,255,0.07);
+/* ── Benchmark comparison chips ───────────────────────────── */
+.pva-coach__benchmarks {
 	display: flex;
-	flex-direction: column;
+	gap: 6px;
+	flex-wrap: wrap;
+	padding: 12px 18px;
+	border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.pva-bench {
+	display: inline-flex;
 	align-items: center;
+	gap: 4px;
+	font-size: 0.69rem;
+	font-weight: 500;
+	padding: 3px 8px;
+	border-radius: 20px;
+	border: 1px solid;
+	white-space: nowrap;
+}
+
+.pva-bench strong {
+	font-weight: 700;
+}
+
+.pva-bench--good {
+	background: rgba(16,185,129,0.12);
+	color: #34d399;
+	border-color: rgba(16,185,129,0.3);
+}
+
+.pva-bench--warn {
+	background: rgba(245,158,11,0.12);
+	color: #fbbf24;
+	border-color: rgba(245,158,11,0.3);
+}
+
+.pva-bench--neutral {
+	background: rgba(255,255,255,0.06);
+	color: rgba(255,255,255,0.5);
+	border-color: rgba(255,255,255,0.12);
+}
+
+.pva-bench svg { flex-shrink: 0; }
+
+/* ── Gauge + aside horizontal row ─────────────────────────── */
+.pva-coach__gauge-row {
+	display: flex;
+	align-items: flex-start;
 	gap: 14px;
+	padding: 16px 18px 14px;
+	border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .pva-coach__gauge {
-	width: 100%;
-	max-width: 200px;
+	width: 150px;
+	flex-shrink: 0;
 	display: block;
 	overflow: visible;
 }
 
 .pva-coach__arc {
-	stroke-dashoffset: 251.3; /* animated via JS */
+	stroke-dashoffset: 251.3;
+}
+
+.pva-coach__gauge-aside {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding-top: 4px;
 }
 
 .pva-coach__narrative {
 	margin: 0;
-	font-size: 0.78rem;
+	font-size: 0.77rem;
 	color: rgba(255,255,255,0.52);
 	line-height: 1.55;
-	text-align: center;
 }
 
 .pva-coach__subbars {
-	width: 100%;
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 9px;
 }
-
-.pva-coach-subbar { }
 
 .pva-coach-subbar__row {
 	display: flex;
 	justify-content: space-between;
 	align-items: baseline;
-	margin-bottom: 5px;
+	margin-bottom: 4px;
 }
 
 .pva-coach-subbar__label {
-	font-size: 0.72rem;
+	font-size: 0.7rem;
 	font-weight: 600;
-	color: rgba(255,255,255,0.55);
+	color: rgba(255,255,255,0.52);
 }
 
 .pva-coach-subbar__val {
-	font-size: 0.78rem;
+	font-size: 0.75rem;
 	font-weight: 700;
 	color: rgba(255,255,255,0.82);
 }
 
 .pva-coach-subbar__max {
-	font-size: 0.68rem;
+	font-size: 0.65rem;
 	font-weight: 500;
-	color: rgba(255,255,255,0.35);
+	color: rgba(255,255,255,0.32);
 }
 
 .pva-coach-subbar__track {
-	height: 5px;
+	height: 4px;
 	background: rgba(255,255,255,0.08);
 	border-radius: 3px;
 	overflow: hidden;
@@ -1029,23 +1096,20 @@ body.pva-page .pva-empty__graphic circle:first-child {
 
 /* ── Playbook column ──────────────────────────────────────── */
 .pva-coach__playbook {
-	padding: 22px 24px 0;
-	display: flex;
-	flex-direction: column;
-	gap: 0;
+	padding: 16px 18px 0;
 }
 
 .pva-coach__playbook-title {
-	margin: 0 0 4px;
-	font-size: 0.9rem;
+	margin: 0 0 3px;
+	font-size: 0.85rem;
 	font-weight: 700;
 	color: rgba(255,255,255,0.9);
 }
 
 .pva-coach__playbook-sub {
-	margin: 0 0 18px;
-	font-size: 0.75rem;
-	color: rgba(255,255,255,0.35);
+	margin: 0 0 14px;
+	font-size: 0.72rem;
+	color: rgba(255,255,255,0.32);
 	line-height: 1.5;
 }
 
@@ -1187,13 +1251,14 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-hero__graphic { display: none; }
 }
 
+@media (max-width: 1100px) {
+	.pva-grid-lower { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 900px) {
-	.pva-coach__body { grid-template-columns: 1fr; }
-	.pva-coach__gauge-col {
-		border-right: none;
-		border-bottom: 1px solid rgba(255,255,255,0.07);
-		padding-bottom: 20px;
-	}
+	.pva-coach__gauge-row { flex-direction: column; align-items: center; }
+	.pva-coach__gauge { width: 180px; }
+	.pva-coach__gauge-aside { width: 100%; }
 }
 
 @media (max-width: 782px) {

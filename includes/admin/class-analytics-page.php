@@ -255,8 +255,12 @@ class PV_Analytics_Page {
 
 				</div><!-- .pva-two-col -->
 
-				<!-- All Videos Table -->
-				<div class="pv-card">
+			</div><!-- #pva-charts-section -->
+
+			<!-- ── All Videos + Growth Coach side by side ────────── -->
+			<div class="pva-grid-lower" id="pva-grid-lower" hidden>
+
+				<div class="pv-card pva-grid-lower__table">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'All Videos', 'pv-youtube-importer' ); ?></h2>
 					</div>
@@ -270,9 +274,11 @@ class PV_Analytics_Page {
 					</div>
 				</div>
 
-			</div><!-- #pva-charts-section -->
+				<div class="pva-grid-lower__coach" id="pva-coach-col"></div>
 
-			<!-- ── Insights + Feature Picks (JS-rendered) ───────── -->
+			</div><!-- #pva-grid-lower -->
+
+			<!-- ── Feature Picks + Insights (JS-rendered) ────────── -->
 			<div id="pva-insights-section" hidden></div>
 
 			<!-- ── Empty State ────────────────────────────────── -->
