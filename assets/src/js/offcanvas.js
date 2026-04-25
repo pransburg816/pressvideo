@@ -111,7 +111,8 @@
 
 		railBusy = true;
 
-		fetch(ajaxUrl + '?action=pv_playlist_page&page=' + page)
+		var activePl = document.body.dataset.pvActivePl || '';
+		fetch(ajaxUrl + '?action=pv_playlist_page&page=' + page + (activePl ? '&pv_yt_pl=' + encodeURIComponent(activePl) : ''))
 			.then(function (r) { return r.json(); })
 			.then(function (data) {
 				if (!data || !data.success) return;
