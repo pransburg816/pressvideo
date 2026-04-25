@@ -3,7 +3,7 @@
  * Plugin Name: PressVideo
  * Plugin URI:  https://pressvideo.com
  * Description: Auto-import YouTube videos into a custom post type with an offcanvas player, color tagging, shortcodes, and multiple display layouts.
- * Version:     1.0.7
+ * Version:     1.0.8
  * Author:      Phillip Tyrone Ransburg
  * Author URI:  https://pressvideo.com
  * License:     GPL-2.0-or-later
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PV_VERSION',     '1.0.7' );
+define( 'PV_VERSION',     '1.0.8' );
 define( 'PV_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'PV_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 define( 'PV_PLUGIN_FILE', __FILE__ );
