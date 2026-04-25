@@ -247,17 +247,10 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 								<span class="pvc-mode-card__name">Watch Page<span class="pvc-mode-card__desc">Navigates to a dedicated video page</span></span>
 							</label>
 						</div>
-						<div class="pvc-mode-card">
-							<input type="radio" name="pvc_mode" id="pvcm-pip" value="pip" data-setting="display_mode" <?php checked( $mode, 'pip' ); ?>>
-							<label class="pvc-mode-card__label" for="pvcm-pip">
-								<span class="pvc-mode-card__preview"><?php echo PV_Settings_Page::svg_pip(); // phpcs:ignore ?></span>
-								<span class="pvc-mode-card__name">Watch Page + PIP<span class="pvc-mode-card__desc">Mini-player floats when viewer scrolls</span></span>
-							</label>
-						</div>
-					</div>
 				</div>
+			</div>
 
-				<div class="pvc-field pvc-sublayout <?php echo ! in_array( $mode, [ 'page', 'pip' ], true ) ? 'pvc-collapsed' : ''; ?>" id="pvc-watch-layout-field">
+				<div class="pvc-field pvc-sublayout <?php echo 'page' !== $mode ? 'pvc-collapsed' : ''; ?>" id="pvc-watch-layout-field">
 					<span class="pvc-label">Watch Page Layout</span>
 					<div class="pvc-mode-cards pvc-mode-cards--sm">
 						<div class="pvc-mode-card">

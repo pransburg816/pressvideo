@@ -49,7 +49,7 @@ class PV_Settings_Page {
 		$clean['channel_id'] = sanitize_text_field( $input['channel_id'] ?? '' );
 
 		$clean['default_accent']    = sanitize_hex_color( $input['default_accent'] ?? '' ) ?: ( $existing['default_accent'] ?? '#4f46e5' );
-		$clean['display_mode']      = in_array( $input['display_mode'] ?? '', [ 'offcanvas', 'page', 'pip' ], true )
+		$clean['display_mode']      = in_array( $input['display_mode'] ?? '', [ 'offcanvas', 'page' ], true )
 			? $input['display_mode'] : ( $existing['display_mode'] ?? 'offcanvas' );
 		$clean['watch_page_layout'] = in_array( $input['watch_page_layout'] ?? '', [ 'hero-top', 'hero-split', 'theater' ], true )
 			? $input['watch_page_layout'] : ( $existing['watch_page_layout'] ?? 'hero-top' );
@@ -299,26 +299,6 @@ class PV_Settings_Page {
 			. '</svg>';
 	}
 
-	public static function svg_pip(): string {
-		return '<svg viewBox="0 0 180 112" fill="none" xmlns="http://www.w3.org/2000/svg">'
-			. '<rect width="180" height="112" rx="5" fill="#f1f5f9"/>'
-			. '<rect width="180" height="20" rx="5" fill="#e2e8f0"/>'
-			. '<circle cx="12" cy="10" r="3" fill="#fca5a5"/>'
-			. '<circle cx="22" cy="10" r="3" fill="#fcd34d"/>'
-			. '<circle cx="32" cy="10" r="3" fill="#86efac"/>'
-			. '<rect x="52" y="7" width="76" height="7" rx="3.5" fill="#fff" opacity=".7"/>'
-			. '<rect x="0" y="20" width="180" height="56" fill="#111827"/>'
-			. '<polygon points="66,43 66,59 81,51" fill="#4f46e5"/>'
-			. '<rect x="28" y="84" width="124" height="6" rx="2" fill="#334155"/>'
-			. '<rect x="40" y="96" width="100" height="4" rx="2" fill="#e2e8f0"/>'
-			. '<rect x="52" y="105" width="76" height="4" rx="2" fill="#e2e8f0"/>'
-			. '<rect x="111" y="58" width="55" height="30" rx="3" fill="#0f172a" stroke="#4f46e5" stroke-width="1.5"/>'
-			. '<polygon points="126,68 126,78 136,73" fill="#4f46e5"/>'
-			. '<rect x="139" y="62" width="3" height="3" rx="1" fill="#94a3b8"/>'
-			. '<rect x="144" y="62" width="3" height="3" rx="1" fill="#94a3b8"/>'
-			. '</svg>';
-	}
-
 	public static function svg_watch_page(): string {
 		return '<svg viewBox="0 0 180 112" fill="none" xmlns="http://www.w3.org/2000/svg">'
 			. '<rect width="180" height="112" rx="5" fill="#f1f5f9"/>'
@@ -421,19 +401,9 @@ class PV_Settings_Page {
 				</span>
 			</label>
 
-			<label class="pv-pick-card <?php echo esc_attr( $mode === 'pip' ? 'is-selected' : '' ); ?>">
-				<input type="radio" name="pv_settings[display_mode]" value="pip" <?php checked( $mode, 'pip' ); ?>>
-				<span class="pv-pick-card__check"></span>
-				<span class="pv-pick-card__preview"><?php echo self::svg_pip(); // phpcs:ignore ?></span>
-				<span class="pv-pick-card__body">
-					<span class="pv-pick-card__label"><?php esc_html_e( 'Watch Page + PIP', 'pv-youtube-importer' ); ?></span>
-					<span class="pv-pick-card__desc"><?php esc_html_e( 'Mini-player floats when viewer scrolls', 'pv-youtube-importer' ); ?></span>
-				</span>
-			</label>
-
 		</div>
 
-		<div class="pv-sublayout <?php echo esc_attr( ! in_array( $mode, [ 'page', 'pip' ], true ) ? 'is-hidden' : '' ); ?>" data-for="display-mode">
+		<div class="pv-sublayout <?php echo esc_attr( $mode !== 'page' ? 'is-hidden' : '' ); ?>" data-for="display-mode">
 			<p class="pv-sublayout__label"><?php esc_html_e( 'Watch Page Layout', 'pv-youtube-importer' ); ?></p>
 			<div class="pv-visual-picker pv-visual-picker--sm">
 

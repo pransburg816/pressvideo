@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node deploy-ui.js)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(node deploy.js)",
+      "Bash(grep -n \"^</div>$\\\\|^\t</div>$\" templates/archive/archive-videos.php)",
+      "Bash(node -e ' *)",
+      "Bash(rm \"C:/Users/pransburg/iac-dev/plugins/pressvideo/.git/index.lock\")",
+      "WebSearch",
+      "Bash(rm -f .git/index.lock)",
+      "Bash(node --check assets/dist/js/analytics-admin.min.js)",
+      "Bash(echo \"Exit code: $?\")"
+    ]
+  }
+}
