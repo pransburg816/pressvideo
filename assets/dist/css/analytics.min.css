@@ -498,16 +498,138 @@
 	border-color: #4338ca;
 }
 
-/* ── Cards on dark gradient background ───────────────────── */
+/* ══════════════════════════════════════════════════════════
+   Dark analytics theme — all scoped to body.pva-page
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Stat cards ───────────────────────────────────────────── */
 body.pva-page .pva-stat-card {
-	box-shadow: 0 4px 24px rgba(0,0,0,0.22);
-	border-color: rgba(255,255,255,0.06);
+	background: rgba(255,255,255,0.05);
+	border: 1px solid rgba(255,255,255,0.09);
+	box-shadow: 0 2px 20px rgba(0,0,0,0.4);
 }
+body.pva-page .pva-stat-card:hover {
+	background: rgba(255,255,255,0.08);
+	box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+	transform: translateY(-2px);
+}
+body.pva-page .pva-stat-value {
+	color: #fff;
+	letter-spacing: -0.03em;
+}
+body.pva-page .pva-stat-label {
+	color: rgba(255,255,255,0.42);
+	letter-spacing: 0.08em;
+}
+
+/* ── Chart / content cards ────────────────────────────────── */
 body.pva-page .pv-card {
-	box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+	background: rgba(255,255,255,0.04);
+	border: 1px solid rgba(255,255,255,0.08);
+	box-shadow: 0 2px 20px rgba(0,0,0,0.35);
 }
+body.pva-page .pv-card__head {
+	background: rgba(255,255,255,0.04);
+	border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+body.pva-page .pv-card__title,
+body.pva-page .pv-card__head h2 {
+	color: rgba(255,255,255,0.9);
+	font-size: 0.88rem;
+	font-weight: 700;
+	margin: 0;
+}
+body.pva-page .pva-chart-sub {
+	color: rgba(255,255,255,0.35);
+}
+
+/* ── Skeleton loaders ─────────────────────────────────────── */
+body.pva-page .pva-skeleton {
+	background: linear-gradient(
+		90deg,
+		rgba(255,255,255,0.05) 25%,
+		rgba(255,255,255,0.10) 50%,
+		rgba(255,255,255,0.05) 75%
+	);
+	background-size: 200% 100%;
+	animation: pva-shimmer 1.5s infinite linear;
+}
+
+/* ── All Videos table ─────────────────────────────────────── */
+body.pva-page .pva-table thead th {
+	background: rgba(255,255,255,0.04);
+	color: rgba(255,255,255,0.38);
+	border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+body.pva-page .pva-table tbody tr {
+	border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+body.pva-page .pva-table tbody tr:last-child { border-bottom: none; }
+body.pva-page .pva-table tbody tr:hover {
+	background: rgba(255,255,255,0.04);
+}
+body.pva-page .pva-table td {
+	color: rgba(255,255,255,0.75);
+}
+body.pva-page .pva-title-link {
+	color: rgba(255,255,255,0.88);
+}
+body.pva-page .pva-title-link:hover {
+	color: #a5b4fc;
+	text-decoration: none;
+}
+body.pva-page .pva-col-plays {
+	color: #818cf8;
+}
+body.pva-page .pva-col-last {
+	color: rgba(255,255,255,0.33);
+}
+body.pva-page .pva-thumb-empty {
+	background: rgba(255,255,255,0.10);
+}
+
+/* ── Google Analytics card ────────────────────────────────── */
 body.pva-page .pva-ga-card {
-	box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+	background: rgba(255,255,255,0.04);
+	border: 1px solid rgba(255,255,255,0.08);
+	box-shadow: 0 2px 20px rgba(0,0,0,0.35);
+}
+body.pva-page .pva-ga-card--connected {
+	border-left: 3px solid #10b981;
+}
+body.pva-page .pva-ga-card--disconnected {
+	background: rgba(255,255,255,0.02);
+	border-left: 3px solid rgba(255,255,255,0.08);
+}
+body.pva-page .pva-ga-card:hover {
+	box-shadow: 0 6px 28px rgba(0,0,0,0.5);
+}
+body.pva-page .pva-ga-card__title {
+	color: rgba(255,255,255,0.9);
+}
+body.pva-page .pva-ga-card__desc,
+body.pva-page .pva-ga-card__id {
+	color: rgba(255,255,255,0.52);
+}
+body.pva-page .pva-ga-card__id code {
+	background: rgba(255,255,255,0.08);
+	color: rgba(255,255,255,0.72);
+}
+body.pva-page .pva-ga-event {
+	background: rgba(99,102,241,0.18);
+	color: #a5b4fc;
+	border-color: rgba(99,102,241,0.35);
+}
+body.pva-page .pva-ga-event svg { color: #a5b4fc; }
+
+/* ── No-data / empty states ───────────────────────────────── */
+body.pva-page .pva-no-data {
+	color: rgba(255,255,255,0.38);
+}
+body.pva-page .pva-empty__title { color: rgba(255,255,255,0.9); }
+body.pva-page .pva-empty__desc  { color: rgba(255,255,255,0.48); }
+body.pva-page .pva-empty__graphic circle:first-child {
+	fill: rgba(255,255,255,0.07);
 }
 
 /* ── Demo toggle button (lives in hero) ──────────────────── */
