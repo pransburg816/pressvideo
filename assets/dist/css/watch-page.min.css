@@ -2162,6 +2162,18 @@
 /* ── Broadcast Videos tab standalone sort bar (margin spacing) ────── */
 .pv-bc-sort-bar { margin: 0 0 18px; }
 
+/* ── Videos tab: playlist context heading ──────────────────────── */
+.pv-bc-pl-context {
+	font-size: 1rem;
+	font-weight: 700;
+	color: #fff;
+	margin: 0 0 16px;
+	padding: 10px 14px;
+	background: rgba(79,70,229,0.18);
+	border-left: 3px solid var(--pv-accent, #4f46e5);
+	border-radius: 0 6px 6px 0;
+}
+
 /* ── Home panel: video grid ──────────────────────────────────────── */
 .pv-bc-home-grid {
 	display: grid;

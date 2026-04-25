@@ -426,7 +426,7 @@ class PV_Plugin {
 		$pl_svg_lg = '<svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg>';
 
 		$render_pl_card = function( string $title, int $count, string $thumb, string $link, string $yt_pl_id = '' ) use ( $pl_svg_sm, $pl_svg_lg ): string {
-			$extra_attr = $yt_pl_id ? ' data-pv-yt-pl="' . esc_attr( $yt_pl_id ) . '"' : '';
+			$extra_attr = $yt_pl_id ? ' data-pv-yt-pl="' . esc_attr( $yt_pl_id ) . '" data-pv-yt-pl-title="' . esc_attr( $title ) . '"' : '';
 			$no_thumb = '<div class="pv-bc-pl-list-card__no-thumb">' . $pl_svg_lg . '</div>';
 			$thumb_html = $thumb
 				? '<img src="' . esc_url( $thumb ) . '" alt="' . esc_attr( $title ) . '" loading="lazy">'

@@ -818,6 +818,9 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 								<button class="pv-sort-btn pv-bc-sort-btn" data-sort="oldest" type="button"><?php esc_html_e( 'Oldest', 'pv-youtube-importer' ); ?></button>
 							</div>
 
+							<!-- Playlist context heading (shown when arriving via View All on a playlist card) -->
+							<p class="pv-bc-pl-context" id="pv-bc-videos-pl-context" hidden></p>
+
 							<!-- Category chip filter -->
 							<?php if ( count( $pv_filter_terms ) > 1 ) : ?>
 							<div class="pv-bc-chips" role="navigation" aria-label="<?php esc_attr_e( 'Filter by category', 'pv-youtube-importer' ); ?>">
