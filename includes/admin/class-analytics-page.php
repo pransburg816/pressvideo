@@ -10,6 +10,15 @@ class PV_Analytics_Page {
 	public function register(): void {
 		add_action( 'admin_menu',            [ $this, 'add_menu'       ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_filter( 'admin_body_class',      [ $this, 'body_class'     ] );
+	}
+
+	public function body_class( string $classes ): string {
+		$screen = get_current_screen();
+		if ( $screen && str_contains( $screen->id, 'pv-analytics' ) ) {
+			$classes .= ' pva-page';
+		}
+		return $classes;
 	}
 
 	public function add_menu(): void {
@@ -53,9 +62,16 @@ class PV_Analytics_Page {
 			true
 		);
 		wp_localize_script( 'pv-analytics-admin', 'pvAnalytics', [
-			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'pv_analytics_admin' ),
+			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
+			'nonce'    => wp_create_nonce( 'pv_analytics_admin' ),
+			'hasData'  => $this->has_any_data(),
 		] );
+	}
+
+	private function has_any_data(): bool {
+		global $wpdb;
+		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = '_pv_play_count' AND meta_value > 0" );
+		return $count > 0;
 	}
 
 	public function render_page(): void {
@@ -63,7 +79,8 @@ class PV_Analytics_Page {
 		$ga_id    = sanitize_text_field( $settings['ga_measurement_id'] ?? '' );
 		$settings_url = admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' );
 		?>
-		<div class="wrap pv-settings-wrap pv-analytics-wrap">
+		<div class="wrap pva-wrap">
+		<div class="pva-inner">
 
 			<!-- ── Branded Hero ───────────────────────────────── -->
 			<div class="pva-hero">
@@ -76,11 +93,17 @@ class PV_Analytics_Page {
 					<p class="pva-hero__sub">
 						<?php esc_html_e( 'Track plays, watch depth, and engagement across all your videos.', 'pv-youtube-importer' ); ?>
 					</p>
+					<div class="pva-hero__bottom">
 					<div class="pva-range-pills" role="group" aria-label="<?php esc_attr_e( 'Date range', 'pv-youtube-importer' ); ?>">
 						<button class="pva-pill" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></button>
 						<button class="pva-pill pva-pill--active" data-days="30"><?php esc_html_e( 'Last 30 Days', 'pv-youtube-importer' ); ?></button>
 						<button class="pva-pill" data-days="90"><?php esc_html_e( 'Last 90 Days', 'pv-youtube-importer' ); ?></button>
 					</div>
+					<button class="pva-demo-btn" id="pva-demo-toggle" type="button">
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+						<?php esc_html_e( 'Preview sample data', 'pv-youtube-importer' ); ?>
+					</button>
+				</div>
 				</div>
 
 				<div class="pva-hero__graphic" aria-hidden="true">
@@ -315,7 +338,8 @@ class PV_Analytics_Page {
 
 			</div><!-- .pva-ga-card -->
 
-		</div><!-- .wrap -->
+		</div><!-- .pva-inner -->
+		</div><!-- .pva-wrap -->
 		<?php
 	}
 }

@@ -755,14 +755,36 @@
    Dashboard — full-width gradient redesign (pvd-*)
    ══════════════════════════════════════════════════════════════════ */
 
+/* ── PressVideo gradient definition (shared) ────────────────────── */
+:root {
+	--pv-admin-gradient: linear-gradient(155deg, #0f0c29 0%, #1e1b4b 22%, #312e81 52%, #4338ca 78%, #4f46e5 100%);
+}
+
 /* Paint the full WP admin background on the dashboard page */
-body.pvd-page #wpwrap {
-	background: linear-gradient(155deg, #0f0c29 0%, #1e1b4b 22%, #312e81 52%, #4338ca 78%, #4f46e5 100%);
+body.pvd-page #wpwrap,
+body.pva-page #wpwrap {
+	background: var(--pv-admin-gradient);
 }
 body.pvd-page #wpcontent,
 body.pvd-page #wpbody,
-body.pvd-page #wpbody-content {
+body.pvd-page #wpbody-content,
+body.pva-page #wpcontent,
+body.pva-page #wpbody,
+body.pva-page #wpbody-content {
 	background: transparent;
+}
+
+/* Analytics wrapper — full width, transparent (gradient comes from #wpwrap) */
+.pva-wrap {
+	max-width: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	background: transparent !important;
+}
+.pva-inner {
+	padding: 0 32px 48px;
+	max-width: 1400px;
+	margin: 0 auto;
 }
 
 /* Dashboard wrapper — full width, transparent (gradient comes from #wpwrap) */

@@ -4,45 +4,33 @@
 
 /* ── Hero banner ──────────────────────────────────────────── */
 .pva-hero {
-	background: linear-gradient(135deg, #0f0c29 0%, #1e1b4b 30%, #312e81 65%, #4f46e5 100%);
-	border-radius: 14px;
-	padding: 36px 32px 40px;
+	padding: 36px 0 32px;
 	margin-bottom: 24px;
 	position: relative;
-	overflow: hidden;
+	overflow: visible;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	min-height: 185px;
+	min-height: 160px;
 	gap: 16px;
 }
 
-.pva-hero__orb {
-	position: absolute;
-	border-radius: 50%;
-	pointer-events: none;
-}
-
-.pva-hero__orb--1 {
-	width: 320px;
-	height: 320px;
-	background: radial-gradient(circle, rgba(139, 92, 246, 0.32) 0%, transparent 65%);
-	top: -100px;
-	right: 240px;
-}
-
-.pva-hero__orb--2 {
-	width: 220px;
-	height: 220px;
-	background: radial-gradient(circle, rgba(79, 70, 229, 0.38) 0%, transparent 65%);
-	bottom: -70px;
-	left: -50px;
-}
+.pva-hero__orb { display: none; }
 
 .pva-hero__content {
 	position: relative;
 	z-index: 2;
-	flex-shrink: 0;
+	flex: 1;
+	min-width: 0;
+}
+
+/* hero bottom row: range pills + demo button side-by-side */
+.pva-hero__bottom {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-top: 0;
 }
 
 .pva-hero__eyebrow {
@@ -510,6 +498,82 @@
 	border-color: #4338ca;
 }
 
+/* ── Cards on dark gradient background ───────────────────── */
+body.pva-page .pva-stat-card {
+	box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+	border-color: rgba(255,255,255,0.06);
+}
+body.pva-page .pv-card {
+	box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+}
+body.pva-page .pva-ga-card {
+	box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+}
+
+/* ── Demo toggle button (lives in hero) ──────────────────── */
+.pva-demo-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 14px;
+	background: rgba(255,255,255,0.08);
+	border: 1px solid rgba(255,255,255,0.22);
+	border-radius: 999px;
+	color: rgba(255,255,255,0.65);
+	font-size: 0.78rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s;
+	backdrop-filter: blur(8px);
+	line-height: 1;
+	white-space: nowrap;
+}
+.pva-demo-btn:hover {
+	background: rgba(255,255,255,0.15);
+	border-color: rgba(255,255,255,0.4);
+	color: #fff;
+}
+.pva-demo-btn--active {
+	background: rgba(255,255,255,0.2);
+	border-color: rgba(255,255,255,0.55);
+	color: #fff;
+}
+.pva-demo-btn svg { flex-shrink: 0; }
+
+/* ── Demo mode notice banner ─────────────────────────────── */
+.pva-demo-notice {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	background: rgba(255,255,255,0.12);
+	border: 1px solid rgba(255,255,255,0.28);
+	border-radius: 10px;
+	padding: 12px 16px;
+	margin-bottom: 20px;
+	backdrop-filter: blur(8px);
+	color: rgba(255,255,255,0.9);
+	font-size: 0.83rem;
+	flex-wrap: wrap;
+}
+.pva-demo-notice svg { flex-shrink: 0; color: #a5b4fc; }
+.pva-demo-notice__text { flex: 1; min-width: 0; }
+.pva-demo-notice__text strong { color: #fff; }
+.pva-demo-exit {
+	display: inline-flex;
+	align-items: center;
+	padding: 5px 12px;
+	background: rgba(255,255,255,0.15);
+	border: 1px solid rgba(255,255,255,0.3);
+	border-radius: 6px;
+	color: #fff;
+	font-size: 0.75rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.15s;
+	flex-shrink: 0;
+}
+.pva-demo-exit:hover { background: rgba(255,255,255,0.25); }
+
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 1100px) {
 	.pva-two-col { grid-template-columns: 1fr; }
@@ -520,7 +584,7 @@
 }
 
 @media (max-width: 782px) {
-	.pva-hero { padding: 28px 20px 32px; min-height: auto; }
+	.pva-hero { padding: 24px 0 20px; min-height: auto; }
 	.pva-hero__title { font-size: 1.875rem; }
 
 	.pva-stats-row { grid-template-columns: 1fr; }
@@ -535,4 +599,6 @@
 	.pva-ga-card { flex-direction: column; }
 	.pva-ga-card__action { width: 100%; }
 	.pva-ga-btn { width: 100%; justify-content: center; }
+
+	.pva-inner { padding: 0 16px 32px; }
 }
