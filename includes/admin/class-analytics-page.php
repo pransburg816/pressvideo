@@ -72,7 +72,8 @@ class PV_Analytics_Page {
 
 	private function has_any_data(): bool {
 		global $wpdb;
-		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = '_pv_play_count' AND meta_value > 0" );
+		$table = $wpdb->prefix . 'pv_analytics';
+		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore
 		return $count > 0;
 	}
 
