@@ -113,41 +113,6 @@ class PV_Analytics_Page {
 				</div>
 				</div>
 
-				<div class="pva-hero__graphic" aria-hidden="true">
-					<svg viewBox="0 0 260 140" fill="none" xmlns="http://www.w3.org/2000/svg" width="260" height="140">
-						<!-- Grid lines -->
-						<line x1="0" y1="35"  x2="260" y2="35"  stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-						<line x1="0" y1="70"  x2="260" y2="70"  stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-						<line x1="0" y1="105" x2="260" y2="105" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-						<!-- Bars -->
-						<rect x="6"   y="95"  width="22" height="45"  rx="4" fill="rgba(255,255,255,0.10)"/>
-						<rect x="36"  y="65"  width="22" height="75"  rx="4" fill="rgba(255,255,255,0.15)"/>
-						<rect x="66"  y="80"  width="22" height="60"  rx="4" fill="rgba(255,255,255,0.10)"/>
-						<rect x="96"  y="35"  width="22" height="105" rx="4" fill="rgba(255,255,255,0.22)"/>
-						<rect x="126" y="55"  width="22" height="85"  rx="4" fill="rgba(255,255,255,0.17)"/>
-						<rect x="156" y="18"  width="22" height="122" rx="4" fill="rgba(255,255,255,0.35)"/>
-						<rect x="186" y="42"  width="22" height="98"  rx="4" fill="rgba(255,255,255,0.20)"/>
-						<rect x="216" y="60"  width="22" height="80"  rx="4" fill="rgba(255,255,255,0.13)"/>
-						<!-- Trend area -->
-						<path d="M17,90 L47,60 L77,75 L107,30 L137,50 L167,13 L197,38 L227,55 L260,55 L260,140 L0,140 Z" fill="rgba(255,255,255,0.04)"/>
-						<!-- Trend line -->
-						<polyline points="17,90 47,60 77,75 107,30 137,50 167,13 197,38 227,55" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-						<!-- Data points -->
-						<circle cx="17"  cy="90" r="3.5" fill="rgba(255,255,255,0.45)"/>
-						<circle cx="47"  cy="60" r="3.5" fill="rgba(255,255,255,0.45)"/>
-						<circle cx="77"  cy="75" r="3.5" fill="rgba(255,255,255,0.45)"/>
-						<circle cx="107" cy="30" r="3.5" fill="rgba(255,255,255,0.45)"/>
-						<circle cx="137" cy="50" r="3.5" fill="rgba(255,255,255,0.45)"/>
-						<circle cx="167" cy="13" r="5.5" fill="white"/>
-						<circle cx="197" cy="38" r="3.5" fill="rgba(255,255,255,0.45)"/>
-						<circle cx="227" cy="55" r="3.5" fill="rgba(255,255,255,0.45)"/>
-						<!-- Peak tooltip -->
-						<rect x="138" y="0" width="60" height="24" rx="5" fill="white" opacity="0.92"/>
-						<text x="168" y="10" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="7.5" fill="#4f46e5" text-anchor="middle" font-weight="700">Peak day</text>
-						<text x="168" y="20" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="7" fill="#6b7280" text-anchor="middle">↑ plays</text>
-						<line x1="167" y1="24" x2="167" y2="13" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-dasharray="2,2"/>
-					</svg>
-				</div>
 			</div><!-- .pva-hero -->
 
 			<!-- ── Export bar ────────────────────────────────────── -->
@@ -207,6 +172,9 @@ class PV_Analytics_Page {
 				</div>
 
 			</div><!-- .pva-stats-row -->
+
+			<!-- ── Dynamic Analytics Summary (JS-rendered) ──────── -->
+			<div id="pva-summary-section" hidden></div>
 
 			<!-- ── Charts + Table section ─────────────────────── -->
 			<div id="pva-charts-section">
