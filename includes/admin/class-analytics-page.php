@@ -65,6 +65,8 @@ class PV_Analytics_Page {
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'pv_analytics_admin' ),
 			'hasData'  => $this->has_any_data(),
+			'siteName' => get_bloginfo( 'name' ),
+			'siteUrl'  => home_url(),
 		] );
 	}
 
@@ -142,6 +144,29 @@ class PV_Analytics_Page {
 					</svg>
 				</div>
 			</div><!-- .pva-hero -->
+
+			<!-- ── Export bar ────────────────────────────────────── -->
+			<div class="pva-export-bar">
+				<span class="pva-export-bar__label">
+					<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+					<?php esc_html_e( 'Export', 'pv-youtube-importer' ); ?>
+				</span>
+				<div class="pva-export-bar__actions">
+					<button class="pva-export-btn" id="pva-export-csv" type="button" disabled>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-5 4h8v1H8v-1zm0 3h8v1H8v-1zm0-6h3v1H8v-1z"/></svg>
+						CSV
+					</button>
+					<button class="pva-export-btn" id="pva-export-json" type="button" disabled>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h2v2H5v5a2 2 0 01-2 2 2 2 0 012 2v5h2v2H5c-1.07-.27-2-.9-2-2v-4a2 2 0 00-2-2H0v-2h1a2 2 0 002-2V5a2 2 0 012-2zm14 0c1.07.27 2 .9 2 2v4a2 2 0 002 2h1v2h-1a2 2 0 00-2 2v4a2 2 0 01-2 2h-2v-2h2v-5a2 2 0 012-2 2 2 0 01-2-2V5h-2V3h2z"/></svg>
+						JSON
+					</button>
+					<div class="pva-export-sep" aria-hidden="true"></div>
+					<button class="pva-export-btn pva-export-btn--report" id="pva-report-btn" type="button" disabled>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 5h-3v5.5a2.5 2.5 0 01-5 0 2.5 2.5 0 012.5-2.5c.46 0 .89.13 1.25.34V5h4v2zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z"/></svg>
+						<?php esc_html_e( 'Download Report', 'pv-youtube-importer' ); ?>
+					</button>
+				</div>
+			</div><!-- .pva-export-bar -->
 
 			<!-- ── Stat Cards ─────────────────────────────────── -->
 			<div class="pva-stats-row">
@@ -246,6 +271,9 @@ class PV_Analytics_Page {
 				</div>
 
 			</div><!-- #pva-charts-section -->
+
+			<!-- ── Insights + Feature Picks (JS-rendered) ───────── -->
+			<div id="pva-insights-section" hidden></div>
 
 			<!-- ── Empty State ────────────────────────────────── -->
 			<div class="pva-empty" id="pva-empty" hidden>

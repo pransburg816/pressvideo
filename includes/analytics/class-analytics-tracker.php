@@ -164,12 +164,15 @@ class PV_Analytics_Tracker {
 		foreach ( $top_rows as $row ) {
 			$post = get_post( (int) $row['video_id'] );
 			if ( ! $post ) continue;
+			$yt_id = get_post_meta( $post->ID, '_pv_youtube_id', true );
 			$top_videos[] = [
-				'id'    => (int) $row['video_id'],
-				'title' => $post->post_title,
-				'plays' => (int) $row['plays'],
-				'thumb' => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ) ?: '',
-				'edit'  => get_edit_post_link( $post->ID, 'raw' ) ?: '',
+				'id'        => (int) $row['video_id'],
+				'title'     => $post->post_title,
+				'plays'     => (int) $row['plays'],
+				'thumb'     => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ) ?: '',
+				'edit'      => get_edit_post_link( $post->ID, 'raw' ) ?: '',
+				'permalink' => get_permalink( $post->ID ) ?: '',
+				'yt_id'     => $yt_id ?: '',
 			];
 		}
 
@@ -198,6 +201,7 @@ class PV_Analytics_Tracker {
 		foreach ( $all_rows as $row ) {
 			$post = get_post( (int) $row['video_id'] );
 			if ( ! $post ) continue;
+			$yt_id = get_post_meta( $post->ID, '_pv_youtube_id', true );
 			$all_videos[] = [
 				'id'          => (int) $row['video_id'],
 				'title'       => $post->post_title,
@@ -205,6 +209,8 @@ class PV_Analytics_Tracker {
 				'last_played' => human_time_diff( strtotime( $row['last_played'] ), time() ) . ' ago',
 				'thumb'       => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ) ?: '',
 				'edit'        => get_edit_post_link( $post->ID, 'raw' ) ?: '',
+				'permalink'   => get_permalink( $post->ID ) ?: '',
+				'yt_id'       => $yt_id ?: '',
 			];
 		}
 

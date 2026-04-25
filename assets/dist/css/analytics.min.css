@@ -632,6 +632,249 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	fill: rgba(255,255,255,0.07);
 }
 
+/* ── Export bar ───────────────────────────────────────────── */
+.pva-export-bar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 24px;
+	flex-wrap: wrap;
+}
+.pva-export-bar__label {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	color: rgba(255,255,255,0.42);
+	text-transform: uppercase;
+	letter-spacing: 0.09em;
+	flex-shrink: 0;
+}
+.pva-export-bar__actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+.pva-export-sep {
+	width: 1px;
+	height: 20px;
+	background: rgba(255,255,255,0.14);
+	margin: 0 2px;
+}
+.pva-export-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 6px 13px;
+	background: rgba(255,255,255,0.06);
+	border: 1px solid rgba(255,255,255,0.14);
+	border-radius: 6px;
+	color: rgba(255,255,255,0.7);
+	font-size: 0.77rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+	backdrop-filter: blur(8px);
+	line-height: 1.2;
+}
+.pva-export-btn:hover:not(:disabled) {
+	background: rgba(255,255,255,0.12);
+	border-color: rgba(255,255,255,0.3);
+	color: #fff;
+}
+.pva-export-btn:disabled {
+	opacity: 0.38;
+	cursor: not-allowed;
+}
+.pva-export-btn--report {
+	background: rgba(129,140,248,0.15);
+	border-color: rgba(129,140,248,0.35);
+	color: #a5b4fc;
+	font-weight: 600;
+}
+.pva-export-btn--report:hover:not(:disabled) {
+	background: rgba(129,140,248,0.25);
+	border-color: rgba(165,180,252,0.55);
+	color: #c7d2fe;
+}
+.pva-export-btn svg { flex-shrink: 0; }
+
+/* ── Insights section wrapper ─────────────────────────────── */
+#pva-insights-section {
+	margin-bottom: 20px;
+}
+.pva-insights-section {
+	background: rgba(255,255,255,0.04);
+	border: 1px solid rgba(255,255,255,0.08);
+	border-radius: 14px;
+	margin-bottom: 16px;
+	overflow: hidden;
+}
+.pva-insights-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 16px 22px;
+	border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.pva-insights-header svg {
+	color: #818cf8;
+	flex-shrink: 0;
+}
+.pva-insights-header h3 {
+	margin: 0;
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: rgba(255,255,255,0.9);
+}
+.pva-insights-header p {
+	margin: 0 0 0 auto;
+	font-size: 0.75rem;
+	color: rgba(255,255,255,0.35);
+}
+
+/* ── Feature picks grid ───────────────────────────────────── */
+.pva-picks-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 0;
+}
+.pva-pick {
+	display: flex;
+	flex-direction: column;
+	padding: 18px 20px;
+	border-right: 1px solid rgba(255,255,255,0.06);
+	transition: background 0.15s;
+}
+.pva-pick:last-child { border-right: none; }
+.pva-pick:hover { background: rgba(255,255,255,0.04); }
+
+.pva-pick__thumb {
+	width: 100%;
+	aspect-ratio: 16/9;
+	object-fit: cover;
+	border-radius: 8px;
+	display: block;
+	margin-bottom: 12px;
+	background: rgba(255,255,255,0.06);
+}
+.pva-pick__thumb--empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: rgba(255,255,255,0.2);
+}
+.pva-pick__label {
+	display: inline-block;
+	font-size: 0.67rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: #818cf8;
+	margin-bottom: 6px;
+}
+.pva-pick__title {
+	margin: 0 0 6px;
+	font-size: 0.84rem;
+	font-weight: 600;
+	color: rgba(255,255,255,0.88);
+	line-height: 1.35;
+}
+.pva-pick__meta {
+	font-size: 0.75rem;
+	color: rgba(255,255,255,0.38);
+	margin-bottom: 10px;
+}
+.pva-pick__meta strong { color: rgba(255,255,255,0.72); }
+.pva-pick__actions {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+	margin-top: auto;
+}
+.pva-pick__action {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 10px;
+	border-radius: 5px;
+	font-size: 0.72rem;
+	font-weight: 600;
+	text-decoration: none;
+	background: rgba(129,140,248,0.14);
+	color: #a5b4fc;
+	border: 1px solid rgba(129,140,248,0.28);
+	transition: background 0.15s, color 0.15s;
+}
+.pva-pick__action:hover { background: rgba(129,140,248,0.25); color: #c7d2fe; }
+.pva-pick__action--edit {
+	background: rgba(255,255,255,0.06);
+	color: rgba(255,255,255,0.55);
+	border-color: rgba(255,255,255,0.12);
+}
+.pva-pick__action--edit:hover {
+	background: rgba(255,255,255,0.12);
+	color: rgba(255,255,255,0.85);
+}
+
+/* ── Performance insight items ────────────────────────────── */
+.pva-insights-list { padding: 0 22px; }
+.pva-insight-item {
+	display: flex;
+	gap: 14px;
+	padding: 16px 0;
+	border-bottom: 1px solid rgba(255,255,255,0.06);
+	align-items: flex-start;
+}
+.pva-insight-item:last-child { border-bottom: none; }
+.pva-insight-icon {
+	width: 34px;
+	height: 34px;
+	border-radius: 9px;
+	background: rgba(255,255,255,0.06);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+.pva-insight-body { flex: 1; min-width: 0; }
+.pva-insight-meta { margin-bottom: 5px; }
+.pva-insight-badge {
+	display: inline-block;
+	font-size: 0.68rem;
+	font-weight: 700;
+	padding: 2px 9px;
+	border-radius: 20px;
+	border: 1px solid;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+.pva-insight-title {
+	margin: 0 0 4px;
+	font-size: 0.86rem;
+	font-weight: 600;
+	color: rgba(255,255,255,0.9);
+	line-height: 1.3;
+}
+.pva-insight-desc {
+	margin: 0 0 6px;
+	font-size: 0.78rem;
+	color: rgba(255,255,255,0.48);
+	line-height: 1.55;
+}
+.pva-insight__action {
+	display: inline-flex;
+	align-items: center;
+	font-size: 0.74rem;
+	font-weight: 600;
+	color: #818cf8;
+	text-decoration: none;
+	transition: color 0.15s;
+}
+.pva-insight__action:hover { color: #a5b4fc; }
+
 /* ── Demo toggle button (lives in hero) ──────────────────── */
 .pva-demo-btn {
 	display: inline-flex;
@@ -723,4 +966,17 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-ga-btn { width: 100%; justify-content: center; }
 
 	.pva-inner { padding: 0 16px 32px; }
+	.pva-picks-grid { grid-template-columns: 1fr; }
+	.pva-pick { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+	.pva-pick:last-child { border-bottom: none; }
+	.pva-export-bar { gap: 8px; }
+}
+
+@media (max-width: 900px) {
+	.pva-picks-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 600px) {
+	.pva-picks-grid { grid-template-columns: 1fr; }
+	.pva-pick { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+	.pva-pick:last-child { border-bottom: none; }
 }
