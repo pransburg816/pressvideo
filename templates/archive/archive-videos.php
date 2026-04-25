@@ -90,6 +90,8 @@ $_pv_pl_items      = json_decode( is_string( $_pv_pl_raw ) ? $_pv_pl_raw : '[]',
 $_pv_pl_items      = is_array( $_pv_pl_items ) ? $_pv_pl_items : [];
 $_pv_pl_titles_raw = ! empty( $pv_settings['bc_playlist_titles'] ) ? ( json_decode( $pv_settings['bc_playlist_titles'], true ) ?: [] ) : [];
 $_pv_ch_pls_cache  = get_transient( 'pv_yt_ch_playlists_' . md5( $pv_settings['channel_id'] ?? '' ) );
+
+// First pass: user-curated bc_playlists (yt: prefixed items only)
 foreach ( $_pv_pl_items as $_pv_pl_item ) {
 	if ( strncmp( (string) $_pv_pl_item, 'yt:', 3 ) === 0 ) {
 		$_pv_pl_id    = substr( (string) $_pv_pl_item, 3 );
@@ -102,6 +104,19 @@ foreach ( $_pv_pl_items as $_pv_pl_item ) {
 		$pv_nav_playlists[] = [
 			'id'    => $_pv_pl_id,
 			'title' => $_pv_pl_title ?: __( 'YouTube Playlist', 'pv-youtube-importer' ),
+		];
+	}
+}
+
+// Fallback: if no curated playlists, use all channel playlists from the cached transient.
+// The transient is populated whenever the broadcast Playlists tab or the customizer
+// playlist picker is used — no extra API call here.
+if ( empty( $pv_nav_playlists ) && is_array( $_pv_ch_pls_cache ) ) {
+	foreach ( $_pv_ch_pls_cache as $_cp ) {
+		if ( empty( $_cp['id'] ) || empty( $_cp['title'] ) ) continue;
+		$pv_nav_playlists[] = [
+			'id'    => $_cp['id'],
+			'title' => $_cp['title'],
 		];
 	}
 }
