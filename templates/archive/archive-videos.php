@@ -237,7 +237,7 @@ if ( $_pv_page_bg ) {
 }
 $_pv_btn_radius_map = [ 'pill' => '999px', 'radius' => '8px', 'square' => '0' ];
 $_pv_btn_radius = $_pv_btn_radius_map[ $pv_settings['button_shape'] ?? '' ] ?? '';
-if ( $_pv_btn_radius ) {
+if ( '' !== $_pv_btn_radius ) {
 	$_pv_wrap_style .= ';--pv-btn-radius:' . $_pv_btn_radius;
 }
 
