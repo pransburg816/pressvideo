@@ -939,6 +939,245 @@ body.pva-page .pva-empty__graphic circle:first-child {
 }
 .pva-demo-exit:hover { background: rgba(255,255,255,0.25); }
 
+/* ══════════════════════════════════════════════════════════
+   Creator Growth Coach
+   ══════════════════════════════════════════════════════════ */
+
+.pva-coach { }
+
+.pva-coach__body {
+	display: grid;
+	grid-template-columns: 280px 1fr;
+	gap: 0;
+}
+
+/* ── Gauge column ─────────────────────────────────────────── */
+.pva-coach__gauge-col {
+	padding: 22px 24px 24px;
+	border-right: 1px solid rgba(255,255,255,0.07);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+}
+
+.pva-coach__gauge {
+	width: 100%;
+	max-width: 200px;
+	display: block;
+	overflow: visible;
+}
+
+.pva-coach__arc {
+	stroke-dashoffset: 251.3; /* animated via JS */
+}
+
+.pva-coach__narrative {
+	margin: 0;
+	font-size: 0.78rem;
+	color: rgba(255,255,255,0.52);
+	line-height: 1.55;
+	text-align: center;
+}
+
+.pva-coach__subbars {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.pva-coach-subbar { }
+
+.pva-coach-subbar__row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 5px;
+}
+
+.pva-coach-subbar__label {
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: rgba(255,255,255,0.55);
+}
+
+.pva-coach-subbar__val {
+	font-size: 0.78rem;
+	font-weight: 700;
+	color: rgba(255,255,255,0.82);
+}
+
+.pva-coach-subbar__max {
+	font-size: 0.68rem;
+	font-weight: 500;
+	color: rgba(255,255,255,0.35);
+}
+
+.pva-coach-subbar__track {
+	height: 5px;
+	background: rgba(255,255,255,0.08);
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.pva-coach-subbar__fill {
+	height: 100%;
+	border-radius: 3px;
+	transition: width 1s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Playbook column ──────────────────────────────────────── */
+.pva-coach__playbook {
+	padding: 22px 24px 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.pva-coach__playbook-title {
+	margin: 0 0 4px;
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: rgba(255,255,255,0.9);
+}
+
+.pva-coach__playbook-sub {
+	margin: 0 0 18px;
+	font-size: 0.75rem;
+	color: rgba(255,255,255,0.35);
+	line-height: 1.5;
+}
+
+/* ── Move cards ───────────────────────────────────────────── */
+.pva-coach-move {
+	padding: 18px 0 18px;
+	border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.pva-coach-move:last-child {
+	border-bottom: none;
+	padding-bottom: 22px;
+}
+
+.pva-coach-move__header {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	margin-bottom: 10px;
+}
+
+.pva-coach-move__icon {
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	background: color-mix(in srgb, var(--move-clr, #818cf8) 18%, transparent);
+	border: 1px solid color-mix(in srgb, var(--move-clr, #818cf8) 35%, transparent);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	color: var(--move-clr, #818cf8);
+}
+
+/* Fallback for browsers without color-mix */
+@supports not (background: color-mix(in srgb, red 10%, blue)) {
+	.pva-coach-move__icon {
+		background: rgba(129,140,248,0.18);
+		border-color: rgba(129,140,248,0.35);
+	}
+}
+
+.pva-coach-move__meta { flex: 1; min-width: 0; }
+
+.pva-coach-move__type {
+	display: block;
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--move-clr, #818cf8);
+	margin-bottom: 3px;
+	opacity: 0.85;
+}
+
+.pva-coach-move__title {
+	margin: 0;
+	font-size: 0.875rem;
+	font-weight: 700;
+	color: rgba(255,255,255,0.9);
+	line-height: 1.35;
+}
+
+.pva-coach-move__edge {
+	margin: 0 0 12px;
+	font-size: 0.78rem;
+	color: rgba(255,255,255,0.48);
+	line-height: 1.6;
+}
+
+/* ── Script box ───────────────────────────────────────────── */
+.pva-coach-script-wrap {
+	background: rgba(0,0,0,0.25);
+	border: 1px solid rgba(255,255,255,0.09);
+	border-radius: 8px;
+	overflow: hidden;
+	margin-bottom: 10px;
+}
+
+.pva-coach-script-label {
+	padding: 7px 12px 6px;
+	font-size: 0.68rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: rgba(255,255,255,0.38);
+	border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.pva-coach-script {
+	padding: 12px 14px;
+	font-size: 0.8rem;
+	color: rgba(255,255,255,0.75);
+	line-height: 1.65;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.pva-coach-copy {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	padding: 7px 12px;
+	background: rgba(255,255,255,0.04);
+	border: none;
+	border-top: 1px solid rgba(255,255,255,0.07);
+	color: rgba(255,255,255,0.45);
+	font-size: 0.73rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+}
+
+.pva-coach-copy:hover {
+	background: rgba(255,255,255,0.09);
+	color: rgba(255,255,255,0.85);
+}
+
+.pva-coach-copy svg { flex-shrink: 0; }
+
+.pva-coach-move__impact {
+	margin: 0;
+	font-size: 0.73rem;
+	color: rgba(255,255,255,0.38);
+	line-height: 1.5;
+}
+
+.pva-coach-move__impact strong {
+	color: rgba(255,255,255,0.58);
+}
+
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 1100px) {
 	.pva-two-col { grid-template-columns: 1fr; }
@@ -946,6 +1185,15 @@ body.pva-page .pva-empty__graphic circle:first-child {
 
 @media (max-width: 900px) {
 	.pva-hero__graphic { display: none; }
+}
+
+@media (max-width: 900px) {
+	.pva-coach__body { grid-template-columns: 1fr; }
+	.pva-coach__gauge-col {
+		border-right: none;
+		border-bottom: 1px solid rgba(255,255,255,0.07);
+		padding-bottom: 20px;
+	}
 }
 
 @media (max-width: 782px) {
