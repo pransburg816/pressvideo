@@ -9,6 +9,7 @@ $layout        = $s['archive_layout']      ?? 'grid';
 $width         = $s['content_width']       ?? '';
 $mode          = $s['display_mode']        ?? 'offcanvas';
 $btn_shape     = $s['button_shape']        ?? '';
+$pip_enabled   = isset( $s['pip_enabled'] ) ? (bool) $s['pip_enabled'] : false;
 $watch_layout  = $s['watch_page_layout']   ?? 'hero-top';
 $accent        = $s['default_accent']      ?? '#4f46e5';
 $page_bg       = $s['page_bg_color']       ?? '';
@@ -577,6 +578,16 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					</div>
 					<input type="hidden" data-setting="button_shape" id="pvc-btn-shape-val" value="<?php echo esc_attr( $btn_shape ); ?>">
 					<span class="pvc-hint">Applies to filter chips, sort buttons, playlist nav, and per-page selectors.</span>
+				</div>
+				<div class="pvc-divider"></div>
+				<div class="pvc-aside-section">
+					<div class="pvc-aside-section__head">
+						<div>
+							<span style="font-size:.78rem;color:rgba(255,255,255,.65);font-weight:600;display:block;">Picture-in-Picture</span>
+							<span class="pvc-hint" style="margin:2px 0 0;">Float a mini-player in the corner when viewers scroll past the video</span>
+						</div>
+						<label class="pvc-toggle"><input type="checkbox" data-setting="pip_enabled" <?php checked( $pip_enabled ); ?>><span class="pvc-toggle__track"></span></label>
+					</div>
 				</div>
 			</div><!-- /#pvc-panel-style -->
 

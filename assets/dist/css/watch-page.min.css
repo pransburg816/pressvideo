@@ -2386,3 +2386,101 @@
 	font-size: 0.78rem;
 	color: rgba(255, 255, 255, 0.75);
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   PICTURE-IN-PICTURE (PIP)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Placeholder holds the page space when the embed wrap is fixed. */
+.pv-pip-placeholder {
+	height: 0;
+	width: 100%;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.03);
+	transition: height 0.25s ease;
+}
+
+/* Floating mini-player */
+.pv-watch-embed-wrap.pv-pip-active {
+	position: fixed !important;
+	bottom: 24px;
+	right: 24px;
+	width: 320px;
+	padding-bottom: 0 !important;
+	height: 180px;
+	z-index: 99999;
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow:
+		0 20px 60px rgba(0, 0, 0, 0.7),
+		0 6px 16px rgba(0, 0, 0, 0.45),
+		0 0 0 1px rgba(255, 255, 255, 0.08);
+	animation: pv-pip-enter 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes pv-pip-enter {
+	from { opacity: 0; transform: translateX(24px) scale(0.85); }
+	to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Chrome — hover-revealed controls over the mini-player */
+.pv-pip-chrome {
+	display: flex;
+	position: absolute;
+	inset: 0;
+	z-index: 100000;
+	align-items: flex-start;
+	justify-content: flex-end;
+	padding: 8px;
+	background: linear-gradient(160deg, rgba(0, 0, 0, 0.6) 0%, transparent 55%);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+}
+
+.pv-pip-active:hover .pv-pip-chrome {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.pv-pip-btns {
+	display: flex;
+	gap: 5px;
+}
+
+.pv-pip-btn {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	border: none;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	color: #fff;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	flex-shrink: 0;
+	transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.pv-pip-btn:hover {
+	background: rgba(0, 0, 0, 0.85);
+	transform: scale(1.12);
+}
+
+.pv-pip-btn:active {
+	transform: scale(0.94);
+}
+
+@media (max-width: 480px) {
+	.pv-watch-embed-wrap.pv-pip-active {
+		width: 240px;
+		height: 135px;
+		bottom: 16px;
+		right: 16px;
+		border-radius: 8px;
+	}
+}
