@@ -535,6 +535,10 @@
 				return;
 			}
 			if (type === 'videos') {
+				// Fresh Videos tab load — clear any playlist context set by "View All"
+				document.body.dataset.pvActivePl = '';
+				document.body.dataset.pvActivePlTitle = '';
+				setBcVideosPlContext('');
 				loadBcVideosGrid(1, bcVideosPerPage, '', '');
 				return;
 			}
@@ -644,6 +648,9 @@
 				e.preventDefault();
 				var ytPl2      = ytPlLink.dataset.pvYtPl;
 				var ytPl2Title = ytPlLink.dataset.pvYtPlTitle || '';
+				// Set pvActivePl so offcanvas fetchRailPage scopes the rail to this playlist
+				document.body.dataset.pvActivePl = ytPl2;
+				document.body.dataset.pvActivePlTitle = ytPl2Title;
 				if (bcVideosGrid) bcVideosGrid.dataset.bcLoaded = 'true';
 				var vTab2 = bc.querySelector('.pv-bc-tab[data-bc-tab="videos"]');
 				if (vTab2) activateBcTab(vTab2);
@@ -724,6 +731,8 @@
 				bcChips.querySelectorAll('.pv-bc-chip').forEach(function (c) {
 					c.classList.toggle('pv-bc-chip--active', c === chip);
 				});
+				document.body.dataset.pvActivePl = '';
+				document.body.dataset.pvActivePlTitle = '';
 				setBcVideosPlContext('');
 				loadBcVideosGrid(1, bcVideosPerPage, filter === '*' ? '' : filter, '');
 			});
