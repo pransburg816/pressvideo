@@ -1387,6 +1387,13 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	color: var(--move-clr, #818cf8);
 }
 
+/* Force SVG fill inside icon bubble — WP admin can reset fill to none */
+.pva-coach-move__icon svg {
+	fill: currentColor;
+	display: block;
+	flex-shrink: 0;
+}
+
 /* Fallback for browsers without color-mix */
 @supports not (background: color-mix(in srgb, red 10%, blue)) {
 	.pva-coach-move__icon {
