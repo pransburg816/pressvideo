@@ -10,8 +10,17 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class PV_Settings_Page {
 
 	public function register(): void {
-		add_action( 'admin_menu', [ $this, 'add_menu' ] );
-		add_action( 'admin_init', [ $this, 'register_settings' ] );
+		add_action( 'admin_menu',         [ $this, 'add_menu' ] );
+		add_action( 'admin_init',         [ $this, 'register_settings' ] );
+		add_filter( 'admin_body_class',   [ $this, 'body_class' ] );
+	}
+
+	public function body_class( string $classes ): string {
+		$screen = get_current_screen();
+		if ( $screen && str_contains( $screen->id, 'pv-youtube-importer-settings' ) ) {
+			$classes .= ' pvs-page';
+		}
+		return $classes;
 	}
 
 	public function add_menu(): void {

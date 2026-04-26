@@ -757,7 +757,7 @@
 
 /* ── Dashboard: vivid indigo gradient ───────────────────────────── */
 body.pvd-page #wpwrap {
-	background: linear-gradient(155deg, #0f0c29 0%, #1e1b4b 22%, #312e81 52%, #4338ca 78%, #4f46e5 100%);
+	background: radial-gradient(ellipse at 30% 0%, #13103a 0%, #0c0c1a 55%, #080810 100%);
 }
 body.pvd-page #wpcontent,
 body.pvd-page #wpbody,
@@ -1074,4 +1074,411 @@ body.pva-page #wpbody-content {
 	.pvd-hero  { padding: 24px 0 20px; }
 	.pvd-hero__brand h1 { font-size: 1.45rem; }
 	.pvd-qlinks { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PressVideo Fullscreen Shell — aside nav + loader
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Reset WP admin bar spacing — modern WP uses padding-top on html.wp-toolbar via CSS var */
+html:has(body.pv-fullscreen-ui) { margin-top: 0 !important; padding-top: 0 !important; }
+body.pv-fullscreen-ui { margin-top: 0 !important; padding-top: 0 !important; }
+
+/* Hide WP chrome */
+body.pv-fullscreen-ui #wpadminbar,
+body.pv-fullscreen-ui #adminmenuwrap,
+body.pv-fullscreen-ui #adminmenuback,
+body.pv-fullscreen-ui #wpfooter { display: none !important; }
+
+/* Content area: full width minus the aside, no default WP padding */
+body.pv-fullscreen-ui #wpcontent {
+	margin-left: 240px !important;
+	padding: 0 !important;
+}
+body.pv-fullscreen-ui #wpbody,
+body.pv-fullscreen-ui #wpbody-content {
+	padding: 0 !important;
+	margin: 0 !important;
+	float: none;
+}
+/* Zero out every element WP injects before page content inside #wpbody-content */
+body.pv-fullscreen-ui .wp-header-end,
+body.pv-fullscreen-ui hr.wp-header-end {
+	display: block !important;
+	height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	clear: none !important;
+}
+body.pv-fullscreen-ui h1.screen-reader-text,
+body.pv-fullscreen-ui h2.screen-reader-text {
+	position: absolute !important;
+	height: 1px !important;
+	width: 1px !important;
+	overflow: hidden !important;
+	margin: 0 !important;
+}
+
+/* Full-height gradient backgrounds fill the whole viewport */
+body.pv-fullscreen-ui #wpwrap,
+body.pv-fullscreen-ui #wpcontent {
+	min-height: 100vh;
+}
+
+/* Customizer needs fixed height + overflow:hidden for the split panel */
+body.pv-fullscreen-ui.pv-customizer-fullscreen #wpcontent {
+	height: 100vh !important;
+	min-height: unset;
+	overflow: hidden;
+}
+body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
+	height: 100%;
+	overflow: hidden;
+}
+
+/* ── PV Aside ───────────────────────────────────────────────────── */
+#pv-aside {
+	position: fixed;
+	top: 0; left: 0; bottom: 0;
+	width: 240px;
+	z-index: 99999;
+	background: rgba(11,9,32,.98);
+	border-right: 1px solid rgba(255,255,255,.07);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.pv-aside__brand {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	padding: 20px 20px 18px;
+	color: #fff;
+	font-size: .9rem;
+	font-weight: 800;
+	letter-spacing: -.02em;
+	border-bottom: 1px solid rgba(255,255,255,.07);
+	flex-shrink: 0;
+}
+.pv-aside__brand svg { color: #818cf8; flex-shrink: 0; }
+
+/* Sub-header for drill-down pages (Live Preview) */
+.pv-aside__sub-header {
+	padding: 16px 18px 14px;
+	border-bottom: 1px solid rgba(255,255,255,.07);
+	flex-shrink: 0;
+}
+.pv-aside__back {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: .75rem;
+	color: rgba(255,255,255,.4);
+	text-decoration: none;
+	transition: color .14s;
+	margin-bottom: 10px;
+}
+.pv-aside__back:hover { color: rgba(255,255,255,.8); }
+.pv-aside__section-label {
+	font-size: .7rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .09em;
+	color: rgba(255,255,255,.28);
+}
+
+/* Nav list */
+.pv-aside__nav {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	padding: 10px 10px;
+	flex: 1;
+	overflow-y: auto;
+}
+.pv-aside__nav-item {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 10px 12px;
+	border-radius: 7px;
+	font-size: .82rem;
+	font-weight: 500;
+	color: rgba(255,255,255,.52);
+	text-decoration: none;
+	background: none;
+	border: none;
+	cursor: pointer;
+	width: 100%;
+	text-align: left;
+	line-height: 1.2;
+	transition: background .14s, color .14s;
+	box-sizing: border-box;
+}
+.pv-aside__nav-item:hover {
+	background: rgba(255,255,255,.08);
+	color: rgba(255,255,255,.9);
+}
+.pv-aside__nav-item.is-active {
+	background: rgba(79,70,229,.22);
+	color: #c7d2fe;
+	font-weight: 600;
+}
+.pv-aside__nav-item .dashicons {
+	font-size: 17px;
+	width: 17px;
+	height: 17px;
+	flex-shrink: 0;
+	color: rgba(255,255,255,.35);
+	transition: color .14s;
+	line-height: 1;
+}
+.pv-aside__nav-item:hover .dashicons { color: rgba(255,255,255,.65); }
+.pv-aside__nav-item.is-active .dashicons { color: #818cf8; }
+
+/* Footer / Exit */
+.pv-aside__footer {
+	padding: 10px 10px 14px;
+	border-top: 1px solid rgba(255,255,255,.06);
+	flex-shrink: 0;
+}
+.pv-aside__exit {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 9px 12px;
+	border-radius: 7px;
+	font-size: .78rem;
+	color: rgba(255,255,255,.28);
+	text-decoration: none;
+	transition: background .14s, color .14s;
+}
+.pv-aside__exit:hover {
+	background: rgba(255,255,255,.06);
+	color: rgba(255,255,255,.6);
+}
+
+/* ── App Loader ─────────────────────────────────────────────────── */
+#pv-app-loader {
+	position: fixed;
+	inset: 0;
+	z-index: 999999;
+	background: #1a1740;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: opacity .45s ease;
+}
+#pv-app-loader.pv-loader--done {
+	opacity: 0;
+	pointer-events: none;
+}
+.pv-app-loader__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 26px;
+}
+.pv-app-loader__wordmark {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	color: #fff;
+	font-size: 1.75rem;
+	font-weight: 800;
+	letter-spacing: -.03em;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+.pv-app-loader__wordmark svg { color: #818cf8; }
+.pv-app-loader__bar {
+	width: 180px;
+	height: 3px;
+	background: rgba(255,255,255,.1);
+	border-radius: 99px;
+	overflow: hidden;
+}
+.pv-app-loader__bar-fill {
+	height: 100%;
+	width: 0;
+	background: linear-gradient(90deg, #4f46e5, #818cf8);
+	border-radius: 99px;
+	animation: pv-load-bar .65s cubic-bezier(.4,0,.2,1) .08s forwards;
+}
+@keyframes pv-load-bar { to { width: 100%; } }
+
+/* ══════════════════════════════════════════════════════════════════
+   Dashboard dark card overrides — scoped to body.pvd-page
+   ══════════════════════════════════════════════════════════════════ */
+
+body.pvd-page .pvd-card {
+	background: rgba(255,255,255,0.05);
+	border: 1px solid rgba(255,255,255,0.09);
+	box-shadow: 0 4px 28px rgba(0,0,0,0.4);
+}
+body.pvd-page .pvd-card__head {
+	background: rgba(255,255,255,0.04);
+	border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+body.pvd-page .pvd-card__head-text h2 { color: rgba(255,255,255,0.9); }
+body.pvd-page .pvd-card__head-text p  { color: rgba(255,255,255,0.42); }
+
+body.pvd-page .pvd-card__head-action .button,
+body.pvd-page .pvd-card__head-action .button-small {
+	background: rgba(255,255,255,0.08);
+	border-color: rgba(255,255,255,0.15);
+	color: rgba(255,255,255,0.7);
+	box-shadow: none;
+	text-shadow: none;
+}
+body.pvd-page .pvd-card__head-action .button:hover,
+body.pvd-page .pvd-card__head-action .button-small:hover {
+	background: rgba(255,255,255,0.14);
+	color: #fff;
+}
+
+body.pvd-page .pvd-qlink {
+	background: rgba(255,255,255,0.04);
+	border-color: rgba(255,255,255,0.09);
+	color: rgba(255,255,255,0.65);
+}
+body.pvd-page .pvd-qlink:hover {
+	background: rgba(79,70,229,0.2);
+	border-color: rgba(99,102,241,0.4);
+	color: #c7d2fe;
+	box-shadow: none;
+}
+body.pvd-page .pvd-qlink .dashicons { color: #818cf8; }
+
+body.pvd-page .pv-rv-row { border-bottom-color: rgba(255,255,255,0.07); }
+body.pvd-page .pv-rv-row:hover { background: rgba(255,255,255,0.04); }
+body.pvd-page .pv-rv-title { color: rgba(255,255,255,0.85); }
+body.pvd-page .pv-rv-title:hover { color: #a5b4fc; }
+body.pvd-page .pv-rv-date { color: rgba(255,255,255,0.35); }
+body.pvd-page .pv-rv-yt-link,
+body.pvd-page .pv-rv-view-link { color: rgba(255,255,255,0.3); }
+body.pvd-page .pv-rv-yt-link:hover  { background: rgba(239,68,68,0.18);  color: #fca5a5; }
+body.pvd-page .pv-rv-view-link:hover { background: rgba(79,70,229,0.2);  color: #a5b4fc; }
+body.pvd-page .pv-rv-thumb__placeholder { color: rgba(255,255,255,0.2); }
+
+body.pvd-page #pv-run-import.button-primary,
+body.pvd-page .pvd-card__body .button-primary {
+	background: #4f46e5;
+	border-color: #4338ca;
+	color: #fff;
+	box-shadow: 0 1px 8px rgba(79,70,229,0.35);
+	text-shadow: none;
+}
+body.pvd-page #pv-run-import.button-primary:hover,
+body.pvd-page .pvd-card__body .button-primary:hover {
+	background: #4338ca;
+	border-color: #3730a3;
+}
+body.pvd-page .spinner { filter: invert(1) brightness(2); }
+
+body.pvd-page .pv-mode-status--ok  { color: #6ee7b7; }
+body.pvd-page .pv-mode-status--err { color: #fca5a5; }
+
+/* ══════════════════════════════════════════════════════════════════
+   Settings dark theme — body.pvs-page
+   ══════════════════════════════════════════════════════════════════ */
+
+body.pvs-page #wpwrap {
+	background: radial-gradient(ellipse at 30% 0%, #13103a 0%, #0c0c1a 55%, #080810 100%);
+}
+body.pvs-page #wpcontent,
+body.pvs-page #wpbody,
+body.pvs-page #wpbody-content { background: transparent; }
+
+body.pvs-page .pv-settings-wrap {
+	max-width: none !important;
+	margin: 0 !important;
+	padding: 0 32px 48px !important;
+	background: transparent !important;
+}
+
+/* Page header */
+body.pvs-page .pv-page-header {
+	border-bottom-color: rgba(255,255,255,0.09);
+	padding-top: 32px;
+}
+body.pvs-page .pv-page-header h1 { color: #fff; }
+body.pvs-page .pv-page-header h1 .dashicons { color: #818cf8; }
+
+/* Tier badge — glass pill */
+body.pvs-page .pv-tier-badge {
+	background: rgba(255,255,255,0.1);
+	border-color: rgba(255,255,255,0.22);
+	color: rgba(255,255,255,0.9);
+}
+body.pvs-page .pv-tier-badge a { color: #a5b4fc; }
+body.pvs-page .pv-tier-badge a:hover { color: #fff; }
+
+/* Settings cards — dark glass */
+body.pvs-page .pv-card {
+	background: rgba(255,255,255,0.05);
+	border-color: rgba(255,255,255,0.09);
+	box-shadow: 0 4px 28px rgba(0,0,0,0.4);
+}
+body.pvs-page .pv-card__head {
+	background: rgba(255,255,255,0.04);
+	border-bottom-color: rgba(255,255,255,0.08);
+}
+body.pvs-page .pv-card__head-text h2 { color: rgba(255,255,255,0.9); }
+body.pvs-page .pv-card__head-text p  { color: rgba(255,255,255,0.42); }
+
+/* API instructions — dark glass with sky-blue tint */
+body.pvs-page .pv-api-instructions {
+	background: rgba(14,165,233,0.08);
+	border-color: rgba(14,165,233,0.25);
+}
+body.pvs-page .pv-api-instructions__head { color: #7dd3fc; }
+body.pvs-page .pv-api-instructions__head .dashicons { color: #38bdf8; }
+body.pvs-page .pv-api-instructions__steps { color: rgba(255,255,255,0.65); }
+body.pvs-page .pv-api-instructions__steps a { color: #38bdf8; }
+body.pvs-page .pv-api-instructions__steps a:hover { color: #7dd3fc; }
+
+/* Field rows */
+body.pvs-page .pv-field-row { border-bottom-color: rgba(255,255,255,0.07); }
+body.pvs-page .pv-field-row__label { color: rgba(255,255,255,0.75); }
+body.pvs-page .pv-field-row__desc { color: rgba(255,255,255,0.38); }
+body.pvs-page .pv-field-row__desc a { color: #7dd3fc; }
+body.pvs-page .pv-field-row__desc code {
+	background: rgba(255,255,255,0.08);
+	color: #c7d2fe;
+	padding: 1px 5px;
+	border-radius: 4px;
+}
+
+/* Form inputs */
+body.pvs-page .pv-field-row__control input[type="text"],
+body.pvs-page .pv-field-row__control input[type="password"],
+body.pvs-page .pv-field-row__control textarea {
+	background: rgba(255,255,255,0.07) !important;
+	border-color: rgba(255,255,255,0.14) !important;
+	color: rgba(255,255,255,0.85) !important;
+	box-shadow: none !important;
+}
+body.pvs-page .pv-field-row__control input[type="text"]:focus,
+body.pvs-page .pv-field-row__control input[type="password"]:focus,
+body.pvs-page .pv-field-row__control textarea:focus {
+	border-color: #6366f1 !important;
+	box-shadow: 0 0 0 2px rgba(99,102,241,0.28) !important;
+	outline: none;
+}
+body.pvs-page .pv-field-row__control input::placeholder,
+body.pvs-page .pv-field-row__control textarea::placeholder { color: rgba(255,255,255,0.25); }
+
+/* Submit button */
+body.pvs-page .submit .button-primary {
+	background: #4f46e5;
+	border-color: #4338ca;
+	color: #fff;
+	box-shadow: 0 1px 8px rgba(79,70,229,0.35);
+	text-shadow: none;
+}
+body.pvs-page .submit .button-primary:hover {
+	background: #4338ca;
+	border-color: #3730a3;
 }
