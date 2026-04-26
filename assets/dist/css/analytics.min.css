@@ -1493,6 +1493,25 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	color: rgba(255,255,255,0.75);
 }
 
+.pva-ai-status--demo {
+	background: linear-gradient(90deg, rgba(245,158,11,0.12) 0%, rgba(251,191,36,0.06) 100%);
+	border-bottom-color: rgba(245,158,11,0.2);
+}
+
+.pva-ai-status--demo .pva-ai-status__dot {
+	background: #f59e0b;
+	box-shadow: 0 0 0 0 rgba(245,158,11,0.5);
+	animation: pva-ai-pulse-demo 2s ease-in-out infinite;
+}
+
+@keyframes pva-ai-pulse-demo {
+	0%   { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
+	60%  { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+	100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+}
+
+.pva-ai-status--demo .pva-ai-status__text strong { color: #fbbf24; }
+
 .pva-ai-status--off {
 	background: rgba(255,255,255,0.03);
 	border-bottom-color: rgba(255,255,255,0.06);
