@@ -9,8 +9,30 @@ body.pv-customizer-fullscreen {
 body.pv-customizer-fullscreen #wpcontent {
 	padding-left: 0 !important;
 	margin-left: 0;
-	height: calc(100vh - 32px);
+	height: calc(100vh - 32px); /* WP admin bar */
 	overflow: hidden;
+}
+/* When PV aside shell is active: full height, aside handles the left offset */
+body.pv-fullscreen-ui.pv-customizer-fullscreen #wpcontent {
+	height: 100vh;
+	margin-left: 240px !important;
+}
+/* Hide the internal nav rail — pv-aside provides navigation */
+body.pv-fullscreen-ui.pv-customizer-fullscreen .pvc-nav-rail {
+	display: none !important;
+}
+/* Reclaim the nav rail width for panel content */
+body.pv-fullscreen-ui.pv-customizer-fullscreen .pvc-sidebar {
+	width: 300px;
+}
+/* Anchor pvc-wrap to the true top of its container regardless of any WP-injected
+   elements (hr.wp-header-end, screen-reader headings) that add phantom spacing */
+body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody-content {
+	position: relative;
+}
+body.pv-fullscreen-ui.pv-customizer-fullscreen .pvc-wrap {
+	position: absolute;
+	inset: 0;
 }
 body.pv-customizer-fullscreen #wpbody-content {
 	padding: 0 !important;
@@ -56,7 +78,7 @@ body.pv-customizer-fullscreen .wrap {
 .pvc-header {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	justify-content: flex-start;
 	padding: 14px 16px;
 	border-bottom: 1px solid rgba(255,255,255,0.07);
 	flex-shrink: 0;
