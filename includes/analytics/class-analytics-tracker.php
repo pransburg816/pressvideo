@@ -37,9 +37,10 @@ class PV_Analytics_Tracker {
 	}
 
 	public function register(): void {
-		add_action( 'wp_ajax_pv_track_event',        [ $this, 'ajax_track' ] );
-		add_action( 'wp_ajax_nopriv_pv_track_event', [ $this, 'ajax_track' ] );
-		add_action( 'wp_ajax_pv_analytics_data',     [ $this, 'ajax_data'  ] );
+		add_action( 'wp_ajax_pv_track_event',           [ $this, 'ajax_track'           ] );
+		add_action( 'wp_ajax_nopriv_pv_track_event',    [ $this, 'ajax_track'           ] );
+		add_action( 'wp_ajax_pv_analytics_data',        [ $this, 'ajax_data'            ] );
+		add_action( 'wp_ajax_pv_refresh_ai_insights',   [ $this, 'ajax_refresh_ai'      ] );
 	}
 
 	public function ajax_track(): void {
@@ -228,5 +229,101 @@ class PV_Analytics_Tracker {
 			'depth'      => $depth,
 			'all_videos' => $all_videos,
 		];
+	}
+
+	// ── AJAX: force-refresh AI insights ──────────────────────────────────
+
+	public function ajax_refresh_ai(): void {
+		check_ajax_referer( 'pv_analytics_admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'forbidden' );
+			return;
+		}
+
+		$settings = get_option( 'pv_settings', [] );
+		$api_key  = sanitize_text_field( $settings['anthropic_api_key'] ?? '' );
+
+		if ( empty( $api_key ) ) {
+			wp_send_json_error( 'no_api_key' );
+			return;
+		}
+
+		$days  = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
+		$data  = self::get_dashboard_data( $days );
+		$moves = $this->get_ai_insights( $data, $api_key, $days );
+
+		$transient = 'pv_ai_insights_' . get_current_user_id() . '_' . $days;
+		set_transient( $transient, $moves, DAY_IN_SECONDS );
+
+		wp_send_json_success( $moves );
+	}
+
+	// ── AI coaching via Claude API ────────────────────────────────────────
+
+	public function get_ai_insights( array $data, string $api_key, int $days = 30 ): array {
+		$stats     = $data['stats']      ?? [];
+		$depth     = $data['depth']      ?? [];
+		$top_vids  = $data['top_videos'] ?? [];
+		$trend     = $data['trend']      ?? [ 'values' => [] ];
+
+		$top_title  = sanitize_text_field( $top_vids[0]['title'] ?? 'your top video' );
+		$top_plays  = (int) ( $top_vids[0]['plays'] ?? 0 );
+		$trend_vals = implode( ',', array_map( 'intval', $trend['values'] ?? [] ) );
+
+		$prompt = "You are a video content growth coach for a WordPress creator who embeds their YouTube videos on their own site.\n\n"
+			. "Analyze these {$days}-day analytics and provide exactly 3 specific, actionable recommendations.\n\n"
+			. "Data:\n"
+			. '- Total plays: ' . (int) ( $stats['total_plays'] ?? 0 )
+				. ' | Unique videos: ' . (int) ( $stats['unique_videos'] ?? 0 )
+				. ' | Avg completion: ' . (int) ( $stats['avg_completion'] ?? 0 ) . "%\n"
+			. '- Watch depth: 25%=' . (int) ( $depth['d25'] ?? 0 )
+				. ' sessions, 50%=' . (int) ( $depth['d50'] ?? 0 )
+				. ', 75%=' . (int) ( $depth['d75'] ?? 0 )
+				. ', 100%=' . (int) ( $depth['d100'] ?? 0 ) . "\n"
+			. '- Top video: "' . $top_title . '" (' . $top_plays . " plays)\n"
+			. '- Daily trend (' . $days . ' days): [' . $trend_vals . "]\n\n"
+			. "Respond ONLY with valid JSON — no markdown, no backticks, no extra text:\n"
+			. '{"moves":[{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
+			. "title: 5 words max, action-oriented verb phrase\n"
+			. "edge: one sentence — the specific insight from their data\n"
+			. "script: 2-3 sentences — exactly what to do or say\n"
+			. "impact: one sentence — expected measurable outcome";
+
+		$response = wp_remote_post( 'https://api.anthropic.com/v1/messages', [
+			'timeout' => 15,
+			'headers' => [
+				'x-api-key'         => $api_key,
+				'anthropic-version' => '2023-06-01',
+				'content-type'      => 'application/json',
+			],
+			'body' => wp_json_encode( [
+				'model'      => 'claude-haiku-4-5-20251001',
+				'max_tokens' => 600,
+				'messages'   => [
+					[ 'role' => 'user', 'content' => $prompt ],
+				],
+			] ),
+		] );
+
+		if ( is_wp_error( $response ) ) return [];
+
+		$body   = wp_remote_retrieve_body( $response );
+		$json   = json_decode( $body, true );
+
+		if ( ! $json || ! isset( $json['content'][0]['text'] ) ) return [];
+
+		$parsed = json_decode( $json['content'][0]['text'], true );
+
+		if ( ! $parsed || ! isset( $parsed['moves'] ) || ! is_array( $parsed['moves'] ) ) return [];
+
+		return array_map( function ( $move ) {
+			return [
+				'title'  => sanitize_text_field( $move['title']  ?? '' ),
+				'edge'   => sanitize_textarea_field( $move['edge']   ?? '' ),
+				'script' => sanitize_textarea_field( $move['script'] ?? '' ),
+				'impact' => sanitize_textarea_field( $move['impact'] ?? '' ),
+			];
+		}, array_slice( $parsed['moves'], 0, 3 ) );
 	}
 }

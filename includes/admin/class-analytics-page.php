@@ -61,12 +61,34 @@ class PV_Analytics_Page {
 			PV_VERSION,
 			true
 		);
+		// ── AI Coach: fetch cached insights or generate on first load ────
+		$settings    = get_option( 'pv_settings', [] );
+		$api_key     = sanitize_text_field( $settings['anthropic_api_key'] ?? '' );
+		$has_ai_key  = ! empty( $api_key );
+		$ai_moves    = [];
+
+		if ( $has_ai_key ) {
+			$transient = 'pv_ai_insights_' . get_current_user_id() . '_30';
+			$cached    = get_transient( $transient );
+			if ( false === $cached ) {
+				$tracker  = new PV_Analytics_Tracker();
+				$data     = PV_Analytics_Tracker::get_dashboard_data( 30 );
+				$ai_moves = $tracker->get_ai_insights( $data, $api_key, 30 );
+				set_transient( $transient, $ai_moves, DAY_IN_SECONDS );
+			} else {
+				$ai_moves = is_array( $cached ) ? $cached : [];
+			}
+		}
+
 		wp_localize_script( 'pv-analytics-admin', 'pvAnalytics', [
-			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
-			'nonce'    => wp_create_nonce( 'pv_analytics_admin' ),
-			'hasData'  => $this->has_any_data(),
-			'siteName' => get_bloginfo( 'name' ),
-			'siteUrl'  => home_url(),
+			'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+			'nonce'       => wp_create_nonce( 'pv_analytics_admin' ),
+			'hasData'     => $this->has_any_data(),
+			'siteName'    => get_bloginfo( 'name' ),
+			'siteUrl'     => home_url(),
+			'aiMoves'     => $ai_moves,
+			'hasAiKey'    => $has_ai_key,
+			'settingsUrl' => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
 		] );
 	}
 

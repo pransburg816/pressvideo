@@ -74,6 +74,9 @@ class PV_Settings_Page {
 		$raw_ga = strtoupper( sanitize_text_field( $input['ga_measurement_id'] ?? '' ) );
 		$clean['ga_measurement_id'] = preg_match( '/^G-[A-Z0-9]{4,15}$/', $raw_ga ) ? $raw_ga : '';
 
+		// Anthropic API key (powers AI Coach in Analytics)
+		$clean['anthropic_api_key'] = sanitize_text_field( $input['anthropic_api_key'] ?? '' );
+
 		return $clean;
 	}
 
@@ -270,6 +273,55 @@ class PV_Settings_Page {
 									          placeholder="PLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"><?php echo esc_textarea( $settings['import_playlists'] ?? '' ); ?></textarea>
 									<p class="pv-field-row__desc">
 										<?php esc_html_e( 'One playlist ID or full playlist URL per line. Use this for private or unlisted playlists your channel auto-importer cannot discover. Already-imported videos are always skipped — re-running the importer with the same IDs is safe.', 'pv-youtube-importer' ); ?>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- AI Coach (full width) -->
+				<div class="pv-card">
+					<div class="pv-card__head">
+						<div class="pv-card__icon" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+						</div>
+						<div class="pv-card__head-text">
+							<h2><?php esc_html_e( 'AI Coach', 'pv-youtube-importer' ); ?></h2>
+							<p><?php esc_html_e( 'Personalized growth recommendations powered by Claude AI, based on your real analytics data.', 'pv-youtube-importer' ); ?></p>
+						</div>
+					</div>
+					<div class="pv-card__body">
+						<div class="pv-field-rows">
+							<div class="pv-field-row">
+								<div class="pv-field-row__label">
+									<label for="pv_anthropic_api_key"><?php esc_html_e( 'Anthropic API Key', 'pv-youtube-importer' ); ?></label>
+								</div>
+								<div class="pv-field-row__control">
+									<input type="password"
+									       name="pv_settings[anthropic_api_key]"
+									       id="pv_anthropic_api_key"
+									       value="<?php echo esc_attr( $settings['anthropic_api_key'] ?? '' ); ?>"
+									       class="regular-text"
+									       autocomplete="off" />
+									<?php if ( ! empty( $settings['anthropic_api_key'] ) ) : ?>
+										<span class="pv-key-status pv-key-status--saved">
+											<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+											<?php esc_html_e( 'Key saved', 'pv-youtube-importer' ); ?>
+										</span>
+									<?php else : ?>
+										<span class="pv-key-status pv-key-status--empty">
+											<?php esc_html_e( 'Not configured', 'pv-youtube-importer' ); ?>
+										</span>
+									<?php endif; ?>
+									<p class="pv-field-row__desc">
+										<?php printf(
+											wp_kses(
+												__( 'Used to power AI coaching in Analytics. Get a key at <a href="%s" target="_blank" rel="noopener">console.anthropic.com</a>. Your key is stored securely and never shared.', 'pv-youtube-importer' ),
+												[ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ] ]
+											),
+											'https://console.anthropic.com/'
+										); ?>
 									</p>
 								</div>
 							</div>

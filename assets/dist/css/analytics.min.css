@@ -1481,6 +1481,57 @@ body.pva-page .pva-empty__graphic circle:first-child {
 
 .pva-coach-copy svg { flex-shrink: 0; }
 
+/* ── AI badge + refresh button ───────────────────────────────── */
+.pva-coach__ai-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	background: rgba(129,140,248,0.18);
+	color: #a5b4fc;
+	border: 1px solid rgba(129,140,248,0.3);
+	margin-right: 6px;
+	flex-shrink: 0;
+}
+
+.pva-coach__refresh-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 5px 11px;
+	border-radius: 7px;
+	border: 1px solid rgba(255,255,255,0.12);
+	background: rgba(255,255,255,0.05);
+	color: rgba(255,255,255,0.55);
+	font-size: 0.72rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.pva-coach__refresh-btn:hover {
+	background: rgba(129,140,248,0.12);
+	color: #a5b4fc;
+	border-color: rgba(129,140,248,0.3);
+}
+
+/* Loading state — dim the playbook while refreshing */
+.pva-coach--loading .pva-coach__playbook {
+	opacity: 0.4;
+	pointer-events: none;
+	transition: opacity 0.2s;
+}
+
+.pva-coach--loading .pva-coach__refresh-btn {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
 .pva-coach-move__impact {
 	margin: 0;
 	font-size: 0.73rem;

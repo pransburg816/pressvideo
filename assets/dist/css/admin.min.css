@@ -558,6 +558,28 @@
 	flex-shrink: 0;
 }
 
+/* ── API key status chip ────────────────────────────────────────── */
+.pv-key-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin-top: 6px;
+	padding: 3px 9px;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 600;
+}
+.pv-key-status--saved {
+	background: rgba(16,185,129,0.12);
+	color: #10b981;
+	border: 1px solid rgba(16,185,129,0.25);
+}
+.pv-key-status--empty {
+	background: rgba(156,163,175,0.1);
+	color: #9ca3af;
+	border: 1px solid rgba(156,163,175,0.2);
+}
+
 /* ── Flush card body (no padding) ───────────────────────────────── */
 .pv-card__body--flush {
 	padding: 0 !important;
