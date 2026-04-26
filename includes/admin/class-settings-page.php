@@ -252,7 +252,9 @@ class PV_Settings_Page {
 
 				</div><!-- /.pvs-two-col -->
 
-				<!-- Additional Playlists (full width) -->
+				<div class="pvs-two-col">
+
+				<!-- Additional Playlists -->
 				<div class="pv-card">
 					<div class="pv-card__head">
 						<div class="pv-card__icon"><span class="dashicons dashicons-playlist-video"></span></div>
@@ -280,7 +282,7 @@ class PV_Settings_Page {
 					</div>
 				</div>
 
-				<!-- AI Coach (full width) -->
+				<!-- AI Coach -->
 				<div class="pv-card">
 					<div class="pv-card__head">
 						<div class="pv-card__icon" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
@@ -351,6 +353,8 @@ class PV_Settings_Page {
 						</div>
 					</div>
 				</div>
+
+				</div><!-- /.pvs-two-col -->
 
 				<?php submit_button( __( 'Save Settings', 'pv-youtube-importer' ) ); ?>
 			</form>
