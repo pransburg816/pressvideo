@@ -1189,10 +1189,10 @@ body.pva-page .pva-empty__graphic circle:first-child {
 }
 
 .pva-grid-lower__coach {
-	height: auto;
+	height: 460px;
 }
 .pva-coach {
-	height: auto;
+	height: 100%;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -1202,9 +1202,12 @@ body.pva-page .pva-empty__graphic circle:first-child {
    Creator Growth Coach
    ══════════════════════════════════════════════════════════ */
 
-/* Coach is now a .pv-card — body has vertical stack */
+/* Coach is now a .pv-card — body scrolls inside fixed-height card */
 .pva-coach__body {
 	padding: 0;
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(255,255,255,0.12) transparent;
 }
