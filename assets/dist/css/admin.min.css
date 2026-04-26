@@ -1309,6 +1309,63 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 @keyframes pv-load-bar { to { width: 100%; } }
 
 /* ══════════════════════════════════════════════════════════════════
+   Dashboard — equal 2-col layout with matched card heights
+   ══════════════════════════════════════════════════════════════════ */
+
+body.pvd-page .pvd-main {
+	grid-template-columns: 1fr 1fr;
+	align-items: stretch;
+}
+body.pvd-page .pvd-col {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+body.pvd-page .pvd-col .pvd-card { margin-bottom: 0; }
+
+/* Last card in left col grows to fill remaining height */
+body.pvd-page .pvd-col--left .pvd-card:last-child {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+body.pvd-page .pvd-col--left .pvd-card:last-child .pvd-card__body { flex: 1; }
+
+/* Right col: single card fills full column height */
+body.pvd-page .pvd-col--right .pvd-card {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+body.pvd-page .pvd-col--right .pvd-card .pvd-card__body {
+	flex: 1;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+/* ── Settings — two-col card grid ──────────────────────────────── */
+
+.pvs-two-col {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+	margin-bottom: 20px;
+	align-items: stretch;
+}
+.pvs-two-col > .pv-card {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 0;
+}
+.pvs-two-col > .pv-card > .pv-card__body { flex: 1; }
+
+@media (max-width: 960px) {
+	body.pvd-page .pvd-main { grid-template-columns: 1fr; }
+	.pvs-two-col { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
    Dashboard dark card overrides — scoped to body.pvd-page
    ══════════════════════════════════════════════════════════════════ */
 

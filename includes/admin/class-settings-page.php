@@ -128,6 +128,8 @@ class PV_Settings_Page {
 				<input type="hidden" name="pv_settings[archive_layout]"    value="<?php echo esc_attr( $settings['archive_layout']    ?? 'grid' ); ?>">
 				<input type="hidden" name="pv_settings[content_width]"     value="<?php echo esc_attr( $settings['content_width']     ?? '' ); ?>">
 
+				<div class="pvs-two-col">
+
 				<!-- YouTube Connection -->
 				<div class="pv-card">
 					<div class="pv-card__head">
@@ -204,35 +206,7 @@ class PV_Settings_Page {
 					</div>
 				</div>
 
-				<!-- Additional Playlists -->
-				<div class="pv-card">
-					<div class="pv-card__head">
-						<div class="pv-card__icon"><span class="dashicons dashicons-playlist-video"></span></div>
-						<div class="pv-card__head-text">
-							<h2><?php esc_html_e( 'Additional Playlists', 'pv-youtube-importer' ); ?></h2>
-							<p><?php esc_html_e( 'Import from specific playlists, including private and unlisted ones.', 'pv-youtube-importer' ); ?></p>
-						</div>
-					</div>
-					<div class="pv-card__body">
-						<div class="pv-field-rows">
-							<div class="pv-field-row">
-								<div class="pv-field-row__label">
-									<label for="pv_import_playlists"><?php esc_html_e( 'Playlist IDs', 'pv-youtube-importer' ); ?></label>
-								</div>
-								<div class="pv-field-row__control">
-									<textarea name="pv_settings[import_playlists]" id="pv_import_playlists"
-									          class="large-text" rows="6"
-									          placeholder="PLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"><?php echo esc_textarea( $settings['import_playlists'] ?? '' ); ?></textarea>
-									<p class="pv-field-row__desc">
-										<?php esc_html_e( 'One playlist ID or full playlist URL per line. Use this for private or unlisted playlists your channel auto-importer cannot discover. Already-imported videos are always skipped — re-running the importer with the same IDs is safe.', 'pv-youtube-importer' ); ?>
-									</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Google Analytics -->
+				<!-- Google Analytics 4 (2nd card in pvs-two-col) -->
 				<div class="pv-card">
 					<div class="pv-card__head">
 						<div class="pv-card__icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
@@ -265,6 +239,36 @@ class PV_Settings_Page {
 											),
 											'https://analytics.google.com/'
 										); ?>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				</div><!-- /.pvs-two-col -->
+
+				<!-- Additional Playlists (full width) -->
+				<div class="pv-card">
+					<div class="pv-card__head">
+						<div class="pv-card__icon"><span class="dashicons dashicons-playlist-video"></span></div>
+						<div class="pv-card__head-text">
+							<h2><?php esc_html_e( 'Additional Playlists', 'pv-youtube-importer' ); ?></h2>
+							<p><?php esc_html_e( 'Import from specific playlists, including private and unlisted ones.', 'pv-youtube-importer' ); ?></p>
+						</div>
+					</div>
+					<div class="pv-card__body">
+						<div class="pv-field-rows">
+							<div class="pv-field-row">
+								<div class="pv-field-row__label">
+									<label for="pv_import_playlists"><?php esc_html_e( 'Playlist IDs', 'pv-youtube-importer' ); ?></label>
+								</div>
+								<div class="pv-field-row__control">
+									<textarea name="pv_settings[import_playlists]" id="pv_import_playlists"
+									          class="large-text" rows="6"
+									          placeholder="PLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"><?php echo esc_textarea( $settings['import_playlists'] ?? '' ); ?></textarea>
+									<p class="pv-field-row__desc">
+										<?php esc_html_e( 'One playlist ID or full playlist URL per line. Use this for private or unlisted playlists your channel auto-importer cannot discover. Already-imported videos are always skipped — re-running the importer with the same IDs is safe.', 'pv-youtube-importer' ); ?>
 									</p>
 								</div>
 							</div>
