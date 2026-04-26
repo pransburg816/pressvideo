@@ -101,7 +101,8 @@ class PV_Settings_Page {
 		$settings = get_option( 'pv_settings', [] );
 		$tier     = PV_Tier::current();
 		?>
-		<div class="wrap pv-settings-wrap">
+		<div class="wrap pvs-wrap">
+		<div class="pvs-inner">
 
 			<div class="pv-page-header">
 				<h1>
@@ -279,7 +280,8 @@ class PV_Settings_Page {
 				<?php submit_button( __( 'Save Settings', 'pv-youtube-importer' ) ); ?>
 			</form>
 
-		</div>
+		</div><!-- /.pvs-inner -->
+		</div><!-- /.pvs-wrap -->
 		<?php
 	}
 

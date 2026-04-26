@@ -788,6 +788,20 @@ body.pva-page #wpbody-content {
 	margin: 0 auto;
 }
 
+/* Settings wrapper — full width, transparent (gradient comes from #wpwrap) */
+.pvs-wrap {
+	max-width: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	background: transparent !important;
+}
+
+.pvs-inner {
+	padding: 0 32px 48px;
+	max-width: 1400px;
+	margin: 0 auto;
+}
+
 /* Dashboard wrapper — full width, transparent (gradient comes from #wpwrap) */
 .pvd-wrap {
 	max-width: none !important;
@@ -1070,6 +1084,7 @@ body.pva-page #wpbody-content {
 @media (max-width: 782px) {
 	.pvd-wrap  { margin: 0 -10px !important; }
 	.pvd-inner { padding: 0 16px 32px; }
+	.pvs-inner { padding: 0 16px 32px; }
 	.pvd-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 	.pvd-hero  { padding: 24px 0 20px; }
 	.pvd-hero__brand h1 { font-size: 1.45rem; }
@@ -1447,13 +1462,6 @@ body.pvs-page #wpwrap {
 body.pvs-page #wpcontent,
 body.pvs-page #wpbody,
 body.pvs-page #wpbody-content { background: transparent; }
-
-body.pvs-page .pv-settings-wrap {
-	max-width: none !important;
-	margin: 0 !important;
-	padding: 0 32px 48px !important;
-	background: transparent !important;
-}
 
 /* Page header */
 body.pvs-page .pv-page-header {
