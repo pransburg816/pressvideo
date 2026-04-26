@@ -1329,3 +1329,53 @@ body.pv-customizer-fullscreen .wrap {
 	transform: translateX(-50%) translateY(0);
 }
 .pvc-toast--error { border-left-color: #ef4444; }
+
+/* ── Detect theme colors button ─────────────────────────────────── */
+.pvc-detect-colors-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-top: 8px;
+	background: none;
+	border: 1px solid rgba(255,255,255,0.15);
+	color: rgba(255,255,255,0.55);
+	font-size: 0.72rem;
+	font-family: inherit;
+	padding: 4px 10px;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: border-color 0.15s, color 0.15s;
+}
+.pvc-detect-colors-btn:hover:not(:disabled) {
+	border-color: rgba(255,255,255,0.35);
+	color: rgba(255,255,255,0.85);
+}
+.pvc-detect-colors-btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+/* ── Theme color swatches ───────────────────────────────────────── */
+.pvc-color-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-top: 10px;
+	padding: 10px;
+	background: rgba(255,255,255,0.05);
+	border: 1px solid rgba(255,255,255,0.1);
+	border-radius: 8px;
+}
+.pvc-swatch {
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	border: 2px solid rgba(255,255,255,0.15);
+	cursor: pointer;
+	padding: 0;
+	transition: transform 0.12s, border-color 0.12s;
+}
+.pvc-swatch:hover {
+	transform: scale(1.18);
+	border-color: rgba(255,255,255,0.5);
+}

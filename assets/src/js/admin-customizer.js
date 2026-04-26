@@ -481,6 +481,69 @@
 		});
 	}
 
+	// ── Detect theme colors ──────────────────────────────────────────
+	var detectBtn  = document.getElementById('pvc-detect-colors-btn');
+	var swatchesEl = document.getElementById('pvc-color-swatches');
+
+	if (detectBtn && swatchesEl) {
+		var detectBtnHTML = detectBtn.innerHTML;
+
+		detectBtn.addEventListener('click', function () {
+			if (detectBtn.disabled) return;
+			detectBtn.disabled   = true;
+			detectBtn.textContent = 'Detecting…';
+
+			var fd = new FormData();
+			fd.append('action', 'pv_detect_theme_colors');
+			fd.append('nonce',  cfg.nonce);
+
+			fetch(cfg.ajaxUrl, { method: 'POST', body: fd })
+				.then(function (r) { return r.json(); })
+				.then(function (res) {
+					detectBtn.disabled  = false;
+					detectBtn.innerHTML = detectBtnHTML;
+
+					if (!res.success || !res.data || !res.data.length) {
+						showToast('No theme colors detected.', true);
+						return;
+					}
+
+					swatchesEl.innerHTML = '';
+					res.data.forEach(function (item) {
+						var btn = document.createElement('button');
+						btn.type      = 'button';
+						btn.className = 'pvc-swatch';
+						btn.title     = item.name + ' — ' + item.color;
+						btn.style.background = item.color;
+						btn.setAttribute('data-color', item.color);
+						btn.addEventListener('click', function () {
+							var $accentPicker = $('[data-setting="default_accent"]');
+							if ($accentPicker.length && $.fn.wpColorPicker) {
+								$accentPicker.wpColorPicker('color', item.color);
+							}
+							sendMessage({ type: 'pv-update', accent: item.color });
+							triggerSave(true);
+							swatchesEl.hidden = true;
+						});
+						swatchesEl.appendChild(btn);
+					});
+
+					swatchesEl.hidden = false;
+				})
+				.catch(function () {
+					detectBtn.disabled  = false;
+					detectBtn.innerHTML = detectBtnHTML;
+					showToast('Could not detect theme colors.', true);
+				});
+		});
+
+		document.addEventListener('click', function (e) {
+			if (!swatchesEl.hidden && !swatchesEl.contains(e.target) && e.target !== detectBtn) {
+				swatchesEl.hidden = true;
+			}
+		});
+	}
+
 	// ── WP Media Uploader (hero background image) ────────────
 	var mediaFrame    = null;
 	var heroBgSelect  = document.getElementById('pvc-hero-bg-select');

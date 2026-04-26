@@ -14,7 +14,8 @@ class PV_Customizer_Page {
 		add_action( 'wp_ajax_pv_save_preview',       [ $this, 'ajax_save_preview' ] );
 		add_action( 'wp_ajax_pv_publish_settings',   [ $this, 'ajax_publish_settings' ] );
 		add_action( 'wp_ajax_pv_fetch_yt_playlists',  [ $this, 'ajax_fetch_yt_playlists' ] );
-		add_action( 'wp_ajax_pv_check_live_status',   [ $this, 'ajax_check_live_status' ] );
+		add_action( 'wp_ajax_pv_check_live_status',    [ $this, 'ajax_check_live_status' ] );
+		add_action( 'wp_ajax_pv_detect_theme_colors',  [ $this, 'ajax_detect_theme_colors' ] );
 	}
 
 	public function add_menu(): void {
@@ -136,6 +137,62 @@ class PV_Customizer_Page {
 		} else {
 			wp_send_json_success( [ 'live' => false ] );
 		}
+	}
+
+	public function ajax_detect_theme_colors(): void {
+		check_ajax_referer( 'pv_customizer', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) wp_die( -1 );
+
+		$colors = [];
+
+		// Block themes: read palette from theme.json via wp_get_global_settings()
+		if ( function_exists( 'wp_get_global_settings' ) ) {
+			$global  = wp_get_global_settings();
+			$palette = $global['color']['palette'] ?? [];
+
+			// WP 6.0+ groups by origin ('theme','default','custom'); WP 5.8 is a flat array
+			if ( isset( $palette['theme'] ) || isset( $palette['default'] ) ) {
+				$src = ! empty( $palette['theme'] ) ? $palette['theme'] : ( $palette['default'] ?? [] );
+			} else {
+				$src = $palette;
+			}
+
+			foreach ( (array) $src as $item ) {
+				$color = sanitize_hex_color( $item['color'] ?? '' );
+				if ( $color ) {
+					$colors[] = [
+						'name'  => sanitize_text_field( $item['name'] ?? $item['slug'] ?? '' ),
+						'color' => $color,
+					];
+				}
+			}
+		}
+
+		// Classic theme fallback: common Customizer color mods
+		if ( empty( $colors ) ) {
+			$candidates = [
+				'Primary'    => get_theme_mod( 'accent_color', '' ) ?: get_theme_mod( 'primary_color', '' ),
+				'Header'     => get_theme_mod( 'header_textcolor', '' ),
+				'Background' => get_background_color(),
+			];
+			foreach ( $candidates as $name => $val ) {
+				if ( ! $val ) continue;
+				if ( '#' !== substr( $val, 0, 1 ) ) {
+					$val = '#' . $val;
+				}
+				$color = sanitize_hex_color( $val );
+				if ( $color ) {
+					$colors[] = [ 'name' => $name, 'color' => $color ];
+				}
+			}
+		}
+
+		if ( empty( $colors ) ) {
+			wp_send_json_error( __( 'No theme colors found.', 'pv-youtube-importer' ) );
+			return;
+		}
+
+		wp_send_json_success( array_slice( $colors, 0, 12 ) );
 	}
 
 	private function sanitize( array $raw ): array {
