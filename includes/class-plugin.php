@@ -101,6 +101,7 @@ class PV_Plugin {
 
 		if ( is_admin() ) {
 			add_filter( 'admin_body_class', [ $this, 'fullscreen_body_class' ] );
+			add_action( 'admin_head',       [ $this, 'render_pv_head_loader' ] );
 			add_action( 'admin_footer',     [ $this, 'render_pv_shell' ] );
 		}
 	}
@@ -120,6 +121,40 @@ class PV_Plugin {
 			$classes .= ' pv-fullscreen-ui';
 		}
 		return $classes;
+	}
+
+	public function render_pv_head_loader(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || ! in_array( $screen->id, $this->pv_fullscreen_screen_ids(), true ) ) return;
+		?>
+		<script>
+		(function() {
+			// Zero out WP admin bar spacing before body content paints
+			document.documentElement.style.marginTop = '0';
+			document.documentElement.style.paddingTop = '0';
+			// Create and inject the loader immediately — before any body content renders
+			var l = document.createElement('div');
+			l.id = 'pv-app-loader';
+			l.setAttribute('aria-hidden', 'true');
+			l.innerHTML =
+				'<div class="pv-app-loader__inner">' +
+				'<div class="pv-app-loader__wordmark">' +
+				'<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"><\/path><\/svg>' +
+				'<span>PressVideo<\/span><\/div>' +
+				'<div class="pv-app-loader__bar"><div class="pv-app-loader__bar-fill"><\/div><\/div>' +
+				'<\/div>';
+			document.documentElement.appendChild(l);
+			document.addEventListener('DOMContentLoaded', function() {
+				document.body.style.marginTop = '0';
+				document.body.style.paddingTop = '0';
+				setTimeout(function() {
+					l.classList.add('pv-loader--done');
+					setTimeout(function() { if (l.parentNode) l.parentNode.removeChild(l); }, 500);
+				}, 300);
+			});
+		}());
+		</script>
+		<?php
 	}
 
 	public function render_pv_shell(): void {
@@ -212,62 +247,34 @@ class PV_Plugin {
 
 		</aside>
 
-		<div id="pv-app-loader" aria-hidden="true">
-			<div class="pv-app-loader__inner">
-				<div class="pv-app-loader__wordmark">
-					<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>
-					<span>PressVideo</span>
-				</div>
-				<div class="pv-app-loader__bar"><div class="pv-app-loader__bar-fill"></div></div>
-			</div>
-		</div>
 		<script>
 		(function() {
-			document.documentElement.style.marginTop = '0';
-			document.documentElement.style.paddingTop = '0';
-			document.body.style.marginTop = '0';
-			document.body.style.paddingTop = '0';
-			var loader = document.getElementById('pv-app-loader');
-			if (loader) {
-				document.addEventListener('DOMContentLoaded', function() {
-					setTimeout(function() {
-						loader.classList.add('pv-loader--done');
-						setTimeout(function() { loader.remove(); }, 500);
-					}, 380);
-				});
-			}
 			document.addEventListener('DOMContentLoaded', function() {
 
 				// ── Navigation bridge ─────────────────────────────────────────
-				// Intercept aside nav-item clicks, show the loader overlay
-				// immediately so the browser's page-load flash is hidden behind it.
-				// Both this overlay and the incoming page's loader share the same
-				// background colour, making the transition seamless.
+				// On nav click: discard the page-load loader and show a fresh one
+				// so the outgoing-page transition is immediate and seamless with
+				// the incoming page's head-injected loader.
 				document.querySelectorAll('#pv-aside .pv-aside__nav-item[href]').forEach(function(link) {
 					link.addEventListener('click', function(e) {
-						if (link.classList.contains('is-active')) return; // already here
+						if (link.classList.contains('is-active')) return;
 						e.preventDefault();
 						var dest = link.href;
-						// Re-use the existing loader if still in the DOM, or create a fresh one
-						var mask = document.getElementById('pv-app-loader');
-						if (!mask) {
-							mask = document.createElement('div');
-							mask.id = 'pv-app-loader';
-							mask.setAttribute('aria-hidden', 'true');
-							mask.innerHTML =
-								'<div class="pv-app-loader__inner">' +
-								'<div class="pv-app-loader__wordmark">' +
-								'<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>' +
-								'<span>PressVideo</span></div>' +
-								'<div class="pv-app-loader__bar"><div class="pv-app-loader__bar-fill"></div></div>' +
-								'</div>';
-							document.body.appendChild(mask);
-						}
-						// Force it fully visible with no fade-out transition
-						mask.style.cssText = 'opacity:1;pointer-events:auto;transition:none;';
-						mask.classList.remove('pv-loader--done');
-						// Wait two animation frames so the browser paints the overlay
-						// before starting navigation — eliminates the CSS-loading flash
+						// Always create a fresh loader — avoids conflicts with the
+						// head-loader's pending dismiss timeout
+						var old = document.getElementById('pv-app-loader');
+						if (old) old.parentNode.removeChild(old);
+						var mask = document.createElement('div');
+						mask.id = 'pv-app-loader';
+						mask.setAttribute('aria-hidden', 'true');
+						mask.innerHTML =
+							'<div class="pv-app-loader__inner">' +
+							'<div class="pv-app-loader__wordmark">' +
+							'<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/><\/svg>' +
+							'<span>PressVideo<\/span><\/div>' +
+							'<div class="pv-app-loader__bar"><div class="pv-app-loader__bar-fill"><\/div><\/div>' +
+							'<\/div>';
+						document.body.appendChild(mask);
 						requestAnimationFrame(function() {
 							requestAnimationFrame(function() {
 								window.location.href = dest;
