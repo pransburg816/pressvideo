@@ -127,12 +127,25 @@ class PV_Plugin {
 		$screen = get_current_screen();
 		if ( ! $screen || ! in_array( $screen->id, $this->pv_fullscreen_screen_ids(), true ) ) return;
 		?>
+		<style>
+		/* Applied in <head> — dark bg on <html> prevents the white flash that occurs
+		   between pages during navigation, before any body content paints. */
+		html{background:#1a1740!important;margin-top:0!important;padding-top:0!important;}
+		body{margin-top:0!important;padding-top:0!important;}
+		/* Critical loader styles inlined so they work before admin.min.css loads */
+		#pv-app-loader{position:fixed;inset:0;z-index:999999;background:#1a1740;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease;}
+		#pv-app-loader.pv-loader--done{opacity:0;pointer-events:none;}
+		.pv-app-loader__inner{display:flex;flex-direction:column;align-items:center;gap:26px;}
+		.pv-app-loader__wordmark{display:flex;align-items:center;gap:11px;color:#fff;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+		.pv-app-loader__wordmark svg{color:#818cf8;}
+		.pv-app-loader__bar{width:180px;height:3px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;}
+		.pv-app-loader__bar-fill{height:100%;width:0;background:linear-gradient(90deg,#4f46e5,#818cf8);border-radius:99px;animation:pv-load-bar .65s cubic-bezier(.4,0,.2,1) .08s forwards;}
+		@keyframes pv-load-bar{to{width:100%;}}
+		</style>
 		<script>
 		(function() {
-			// Zero out WP admin bar spacing before body content paints
 			document.documentElement.style.marginTop = '0';
 			document.documentElement.style.paddingTop = '0';
-			// Create and inject the loader immediately — before any body content renders
 			var l = document.createElement('div');
 			l.id = 'pv-app-loader';
 			l.setAttribute('aria-hidden', 'true');
@@ -149,7 +162,7 @@ class PV_Plugin {
 				document.body.style.paddingTop = '0';
 				setTimeout(function() {
 					l.classList.add('pv-loader--done');
-					setTimeout(function() { if (l.parentNode) l.parentNode.removeChild(l); }, 500);
+					setTimeout(function() { if (l.parentNode) l.parentNode.removeChild(l); }, 300);
 				}, 300);
 			});
 		}());
