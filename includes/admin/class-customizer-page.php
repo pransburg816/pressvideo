@@ -145,16 +145,19 @@ class PV_Customizer_Page {
 
 		$colors = [];
 
-		// Block themes: read palette from theme.json via wp_get_global_settings()
+		// Block themes: read palette from theme.json via wp_get_global_settings().
+		// Only use the theme's own palette — skip WP core default swatches.
 		if ( function_exists( 'wp_get_global_settings' ) ) {
 			$global  = wp_get_global_settings();
 			$palette = $global['color']['palette'] ?? [];
 
-			// WP 6.0+ groups by origin ('theme','default','custom'); WP 5.8 is a flat array
-			if ( isset( $palette['theme'] ) || isset( $palette['default'] ) ) {
-				$src = ! empty( $palette['theme'] ) ? $palette['theme'] : ( $palette['default'] ?? [] );
+			// WP 6.0+ groups by origin; WP 5.8 returns a flat array.
+			if ( is_array( $palette ) && ( isset( $palette['theme'] ) || isset( $palette['custom'] ) ) ) {
+				$src = ! empty( $palette['theme'] ) ? $palette['theme'] : ( $palette['custom'] ?? [] );
+			} elseif ( is_array( $palette ) && ! isset( $palette['default'] ) ) {
+				$src = $palette; // WP 5.8 flat array
 			} else {
-				$src = $palette;
+				$src = []; // only WP core defaults present — skip
 			}
 
 			foreach ( (array) $src as $item ) {
@@ -168,13 +171,27 @@ class PV_Customizer_Page {
 			}
 		}
 
-		// Classic theme fallback: common Customizer color mods
+		// Classic theme fallback: read both parent and child theme mods; child wins.
 		if ( empty( $colors ) ) {
+			$parent_mods = get_option( 'theme_mods_' . get_template(), [] );
+			$child_mods  = get_option( 'theme_mods_' . get_stylesheet(), [] );
+			$mods        = array_merge( $parent_mods, $child_mods );
+
+			$raw_header = $mods['header_textcolor'] ?? '';
+			if ( $raw_header && '#' !== substr( $raw_header, 0, 1 ) ) {
+				$raw_header = '#' . $raw_header;
+			}
+
 			$candidates = [
-				'Primary'    => get_theme_mod( 'accent_color', '' ) ?: get_theme_mod( 'primary_color', '' ),
-				'Header'     => get_theme_mod( 'header_textcolor', '' ),
-				'Background' => get_background_color(),
+				// Storefront / WooCommerce Storefront
+				'Accent'      => $mods['storefront_accent_color']            ?? $mods['accent_color']            ?? $mods['primary_color']           ?? '',
+				'Header BG'   => $mods['storefront_header_background_color'] ?? $mods['header_background_color'] ?? '',
+				'Header Text' => $mods['storefront_header_text_color']       ?? $mods['header_text_color']       ?? $raw_header                       ?? '',
+				'Header Link' => $mods['storefront_header_link_color']       ?? $mods['header_link_color']       ?? '',
+				'Button BG'   => $mods['storefront_button_background_color'] ?? $mods['button_background_color'] ?? '',
+				'Button Text' => $mods['storefront_button_text_color']       ?? $mods['button_text_color']       ?? '',
 			];
+
 			foreach ( $candidates as $name => $val ) {
 				if ( ! $val ) continue;
 				if ( '#' !== substr( $val, 0, 1 ) ) {
@@ -185,10 +202,21 @@ class PV_Customizer_Page {
 					$colors[] = [ 'name' => $name, 'color' => $color ];
 				}
 			}
+
+			// Deduplicate by hex value
+			$seen   = [];
+			$unique = [];
+			foreach ( $colors as $c ) {
+				if ( ! isset( $seen[ $c['color'] ] ) ) {
+					$seen[ $c['color'] ] = true;
+					$unique[]            = $c;
+				}
+			}
+			$colors = $unique;
 		}
 
 		if ( empty( $colors ) ) {
-			wp_send_json_error( __( 'No theme colors found.', 'pv-youtube-importer' ) );
+			wp_send_json_error( __( 'No theme colors found. Try setting colors in the WordPress Customizer first.', 'pv-youtube-importer' ) );
 			return;
 		}
 

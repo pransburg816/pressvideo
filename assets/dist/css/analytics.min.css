@@ -1189,10 +1189,10 @@ body.pva-page .pva-empty__graphic circle:first-child {
 }
 
 .pva-grid-lower__coach {
-	height: 460px;
+	height: auto;
 }
 .pva-coach {
-	height: 100%;
+	height: auto;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -1205,9 +1205,6 @@ body.pva-page .pva-empty__graphic circle:first-child {
 /* Coach is now a .pv-card — body has vertical stack */
 .pva-coach__body {
 	padding: 0;
-	flex: 1;
-	min-height: 0;
-	overflow-y: auto;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(255,255,255,0.12) transparent;
 }
