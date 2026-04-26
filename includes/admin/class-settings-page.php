@@ -292,6 +292,29 @@ class PV_Settings_Page {
 						</div>
 					</div>
 					<div class="pv-card__body">
+
+						<?php if ( PV_Tier::meets( 'platinum' ) ) : ?>
+							<div class="pv-ai-included-notice">
+								<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+								<div>
+									<strong><?php esc_html_e( 'AI coaching is included in your Platinum plan', 'pv-youtube-importer' ); ?></strong>
+									<p><?php esc_html_e( 'No API key needed — AI insights are powered automatically. Optionally add your own Anthropic key below to use a personal account instead.', 'pv-youtube-importer' ); ?></p>
+								</div>
+							</div>
+						<?php else : ?>
+							<div class="pv-ai-upgrade-notice">
+								<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+								<div>
+									<strong><?php esc_html_e( 'Two ways to unlock AI coaching', 'pv-youtube-importer' ); ?></strong>
+									<p>
+										<?php esc_html_e( 'Add your own Anthropic API key below (Gold+), or', 'pv-youtube-importer' ); ?>
+										<a href="https://pressvideo.com" target="_blank" rel="noopener"><?php esc_html_e( 'upgrade to Platinum', 'pv-youtube-importer' ); ?></a>
+										<?php esc_html_e( 'to have it included automatically — no key required.', 'pv-youtube-importer' ); ?>
+									</p>
+								</div>
+							</div>
+						<?php endif; ?>
+
 						<div class="pv-field-rows">
 							<div class="pv-field-row">
 								<div class="pv-field-row__label">
@@ -317,7 +340,7 @@ class PV_Settings_Page {
 									<p class="pv-field-row__desc">
 										<?php printf(
 											wp_kses(
-												__( 'Used to power AI coaching in Analytics. Get a key at <a href="%s" target="_blank" rel="noopener">console.anthropic.com</a>. Your key is stored securely and never shared.', 'pv-youtube-importer' ),
+												__( 'Your personal key from <a href="%s" target="_blank" rel="noopener">console.anthropic.com</a>. Optional for Platinum — required for Gold. Stored securely, never shared.', 'pv-youtube-importer' ),
 												[ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ] ]
 											),
 											'https://console.anthropic.com/'

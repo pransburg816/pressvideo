@@ -61,10 +61,10 @@ class PV_Analytics_Page {
 			PV_VERSION,
 			true
 		);
-		// ── AI Coach: fetch cached insights or generate on first load ────
-		$settings    = get_option( 'pv_settings', [] );
-		$api_key     = sanitize_text_field( $settings['anthropic_api_key'] ?? '' );
+		// ── AI Coach: resolve key (Platinum = master key, Gold = own key) ──
+		$api_key     = PV_Analytics_Tracker::resolve_ai_key();
 		$has_ai_key  = ! empty( $api_key );
+		$is_platinum = PV_Tier::meets( 'platinum' );
 		$ai_moves    = [];
 
 		if ( $has_ai_key ) {
@@ -88,6 +88,7 @@ class PV_Analytics_Page {
 			'siteUrl'     => home_url(),
 			'aiMoves'     => $ai_moves,
 			'hasAiKey'    => $has_ai_key,
+			'isPlatinum'  => $is_platinum,
 			'settingsUrl' => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
 		] );
 	}

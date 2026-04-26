@@ -231,6 +231,21 @@ class PV_Analytics_Tracker {
 		];
 	}
 
+	// ── Resolve the API key for the current user/tier ───────────────────
+	// Platinum: use master key from wp-config.php constant PV_ANTHROPIC_KEY.
+	// Gold+: fall back to the user's own key from pv_settings.
+
+	public static function resolve_ai_key(): string {
+		if ( PV_Tier::meets( 'platinum' ) && defined( 'PV_ANTHROPIC_KEY' ) && PV_ANTHROPIC_KEY ) {
+			return PV_ANTHROPIC_KEY;
+		}
+		if ( PV_Tier::meets( 'gold' ) ) {
+			$settings = get_option( 'pv_settings', [] );
+			return sanitize_text_field( $settings['anthropic_api_key'] ?? '' );
+		}
+		return '';
+	}
+
 	// ── AJAX: force-refresh AI insights ──────────────────────────────────
 
 	public function ajax_refresh_ai(): void {
@@ -241,8 +256,7 @@ class PV_Analytics_Tracker {
 			return;
 		}
 
-		$settings = get_option( 'pv_settings', [] );
-		$api_key  = sanitize_text_field( $settings['anthropic_api_key'] ?? '' );
+		$api_key = self::resolve_ai_key();
 
 		if ( empty( $api_key ) ) {
 			wp_send_json_error( 'no_api_key' );
