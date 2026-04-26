@@ -1253,26 +1253,6 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 .pv-aside__nav-item:hover .dashicons { color: rgba(255,255,255,.65); }
 .pv-aside__nav-item.is-active .dashicons { color: #818cf8; }
 
-/* Divider inside the nav (customizer: separates panel buttons from Exit) */
-.pv-aside__nav-sep {
-	height: 1px;
-	background: rgba(255,255,255,0.07);
-	margin: 6px 10px;
-	flex-shrink: 0;
-}
-
-/* Exit link rendered inside the nav on the customizer page */
-.pv-aside__exit-nav {
-	color: rgba(255,255,255,0.32) !important;
-	font-size: .78rem !important;
-}
-.pv-aside__exit-nav svg { flex-shrink: 0; opacity: .55; }
-.pv-aside__exit-nav:hover {
-	background: rgba(255,255,255,0.06) !important;
-	color: rgba(255,255,255,0.65) !important;
-}
-.pv-aside__exit-nav:hover svg { opacity: .8; }
-
 /* Footer / Exit */
 .pv-aside__footer {
 	padding: 10px 10px 14px;

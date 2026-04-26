@@ -165,6 +165,11 @@ class PV_Plugin {
 		?>
 		<aside id="pv-aside">
 
+			<div class="pv-aside__brand">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>
+				<span>PressVideo</span>
+			</div>
+
 			<?php if ( $is_customizer ) : ?>
 
 				<div class="pv-aside__sub-header">
@@ -182,19 +187,9 @@ class PV_Plugin {
 						<span><?php echo esc_html( $p['label'] ); ?></span>
 					</button>
 					<?php endforeach; ?>
-					<div class="pv-aside__nav-sep" aria-hidden="true"></div>
-					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="pv-aside__nav-item pv-aside__exit-nav">
-						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-						<span><?php esc_html_e( 'Exit to WP Admin', 'pv-youtube-importer' ); ?></span>
-					</a>
 				</nav>
 
 			<?php else : ?>
-
-				<div class="pv-aside__brand">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>
-					<span>PressVideo</span>
-				</div>
 
 				<nav class="pv-aside__nav" aria-label="<?php esc_attr_e( 'PressVideo Admin', 'pv-youtube-importer' ); ?>">
 					<?php foreach ( $main_nav as $item ) : ?>
@@ -206,14 +201,14 @@ class PV_Plugin {
 					<?php endforeach; ?>
 				</nav>
 
-				<div class="pv-aside__footer">
-					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="pv-aside__exit">
-						<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-						<?php esc_html_e( 'Exit to WP Admin', 'pv-youtube-importer' ); ?>
-					</a>
-				</div>
-
 			<?php endif; ?>
+
+			<div class="pv-aside__footer">
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="pv-aside__exit">
+					<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+					<?php esc_html_e( 'Exit to WP Admin', 'pv-youtube-importer' ); ?>
+				</a>
+			</div>
 
 		</aside>
 
