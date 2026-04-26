@@ -1481,6 +1481,52 @@ body.pva-page .pva-empty__graphic circle:first-child {
 
 .pva-coach-copy svg { flex-shrink: 0; }
 
+/* ── AI active status banner ─────────────────────────────────── */
+.pva-ai-status {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	padding: 9px 18px;
+	background: linear-gradient(90deg, rgba(79,70,229,0.18) 0%, rgba(129,140,248,0.10) 100%);
+	border-bottom: 1px solid rgba(129,140,248,0.2);
+	font-size: 0.78rem;
+	color: rgba(255,255,255,0.75);
+}
+
+.pva-ai-status--off {
+	background: rgba(255,255,255,0.03);
+	border-bottom-color: rgba(255,255,255,0.06);
+	color: rgba(255,255,255,0.35);
+}
+
+.pva-ai-status--off a {
+	color: #818cf8;
+	text-decoration: none;
+}
+
+.pva-ai-status--off svg {
+	flex-shrink: 0;
+	color: rgba(255,255,255,0.25);
+}
+
+.pva-ai-status__dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #10b981;
+	flex-shrink: 0;
+	box-shadow: 0 0 0 0 rgba(16,185,129,0.5);
+	animation: pva-ai-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pva-ai-pulse {
+	0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+	60%  { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+	100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+
+.pva-ai-status__text strong { color: #a5b4fc; font-weight: 700; }
+
 /* ── AI badge + refresh button ───────────────────────────────── */
 .pva-coach__ai-badge {
 	display: inline-flex;
