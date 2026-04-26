@@ -98,6 +98,214 @@ class PV_Plugin {
 		add_action( 'pre_get_posts',         [ $this, 'archive_per_page' ], 50 );
 		add_action( 'wp_enqueue_scripts',    [ $this, 'enqueue_frontend_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
+		if ( is_admin() ) {
+			add_filter( 'admin_body_class', [ $this, 'fullscreen_body_class' ] );
+			add_action( 'admin_footer',     [ $this, 'render_pv_shell' ] );
+		}
+	}
+
+	private function pv_fullscreen_screen_ids(): array {
+		return [
+			'pv_youtube_page_pv-youtube-importer-dashboard',
+			'pv_youtube_page_pv-youtube-importer-settings',
+			'pv_youtube_page_pv-customizer',
+			'pv_youtube_page_pv-analytics',
+		];
+	}
+
+	public function fullscreen_body_class( string $classes ): string {
+		$screen = get_current_screen();
+		if ( $screen && in_array( $screen->id, $this->pv_fullscreen_screen_ids(), true ) ) {
+			$classes .= ' pv-fullscreen-ui';
+		}
+		return $classes;
+	}
+
+	public function render_pv_shell(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || ! in_array( $screen->id, $this->pv_fullscreen_screen_ids(), true ) ) return;
+
+		$is_customizer = 'pv_youtube_page_pv-customizer' === $screen->id;
+
+		$main_nav = [
+			[
+				'label'  => 'Dashboard',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ),
+				'screen' => 'pv_youtube_page_pv-youtube-importer-dashboard',
+				'icon'   => 'dashicons-dashboard',
+			],
+			[
+				'label'  => 'Settings',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
+				'screen' => 'pv_youtube_page_pv-youtube-importer-settings',
+				'icon'   => 'dashicons-admin-settings',
+			],
+			[
+				'label'  => 'Live Preview',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-customizer' ),
+				'screen' => 'pv_youtube_page_pv-customizer',
+				'icon'   => 'dashicons-visibility',
+			],
+			[
+				'label'  => 'Analytics',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ),
+				'screen' => 'pv_youtube_page_pv-analytics',
+				'icon'   => 'dashicons-chart-bar',
+			],
+		];
+
+		$customizer_panels = [
+			[ 'panel' => 'layout',        'label' => 'Layout',   'icon' => 'dashicons-layout' ],
+			[ 'panel' => 'hero',          'label' => 'Hero',     'icon' => 'dashicons-format-image' ],
+			[ 'panel' => 'sidebar',       'label' => 'Sidebar',  'icon' => 'dashicons-align-pull-right' ],
+			[ 'panel' => 'style',         'label' => 'Style',    'icon' => 'dashicons-art' ],
+			[ 'panel' => 'notifications', 'label' => 'Alerts',   'icon' => 'dashicons-bell' ],
+		];
+		?>
+		<aside id="pv-aside">
+
+			<?php if ( $is_customizer ) : ?>
+
+				<div class="pv-aside__sub-header">
+					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ) ); ?>" class="pv-aside__back">
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+						<?php esc_html_e( 'Main Menu', 'pv-youtube-importer' ); ?>
+					</a>
+					<div class="pv-aside__section-label"><?php esc_html_e( 'Live Preview', 'pv-youtube-importer' ); ?></div>
+				</div>
+				<nav class="pv-aside__nav" aria-label="<?php esc_attr_e( 'Live Preview Sections', 'pv-youtube-importer' ); ?>">
+					<?php foreach ( $customizer_panels as $i => $p ) : ?>
+					<button class="pv-aside__nav-item pv-aside__panel-btn<?php echo 0 === $i ? ' is-active' : ''; ?>"
+					        data-pv-panel="<?php echo esc_attr( $p['panel'] ); ?>">
+						<span class="dashicons <?php echo esc_attr( $p['icon'] ); ?>"></span>
+						<span><?php echo esc_html( $p['label'] ); ?></span>
+					</button>
+					<?php endforeach; ?>
+					<div class="pv-aside__nav-sep" aria-hidden="true"></div>
+					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="pv-aside__nav-item pv-aside__exit-nav">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+						<span><?php esc_html_e( 'Exit to WP Admin', 'pv-youtube-importer' ); ?></span>
+					</a>
+				</nav>
+
+			<?php else : ?>
+
+				<div class="pv-aside__brand">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>
+					<span>PressVideo</span>
+				</div>
+
+				<nav class="pv-aside__nav" aria-label="<?php esc_attr_e( 'PressVideo Admin', 'pv-youtube-importer' ); ?>">
+					<?php foreach ( $main_nav as $item ) : ?>
+					<a href="<?php echo esc_url( $item['url'] ); ?>"
+					   class="pv-aside__nav-item<?php echo $screen->id === $item['screen'] ? ' is-active' : ''; ?>">
+						<span class="dashicons <?php echo esc_attr( $item['icon'] ); ?>"></span>
+						<span><?php echo esc_html( $item['label'] ); ?></span>
+					</a>
+					<?php endforeach; ?>
+				</nav>
+
+				<div class="pv-aside__footer">
+					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="pv-aside__exit">
+						<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+						<?php esc_html_e( 'Exit to WP Admin', 'pv-youtube-importer' ); ?>
+					</a>
+				</div>
+
+			<?php endif; ?>
+
+		</aside>
+
+		<div id="pv-app-loader" aria-hidden="true">
+			<div class="pv-app-loader__inner">
+				<div class="pv-app-loader__wordmark">
+					<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>
+					<span>PressVideo</span>
+				</div>
+				<div class="pv-app-loader__bar"><div class="pv-app-loader__bar-fill"></div></div>
+			</div>
+		</div>
+		<script>
+		(function() {
+			document.documentElement.style.marginTop = '0';
+			document.documentElement.style.paddingTop = '0';
+			document.body.style.marginTop = '0';
+			document.body.style.paddingTop = '0';
+			var loader = document.getElementById('pv-app-loader');
+			if (loader) {
+				document.addEventListener('DOMContentLoaded', function() {
+					setTimeout(function() {
+						loader.classList.add('pv-loader--done');
+						setTimeout(function() { loader.remove(); }, 500);
+					}, 380);
+				});
+			}
+			document.addEventListener('DOMContentLoaded', function() {
+
+				// ── Navigation bridge ─────────────────────────────────────────
+				// Intercept aside nav-item clicks, show the loader overlay
+				// immediately so the browser's page-load flash is hidden behind it.
+				// Both this overlay and the incoming page's loader share the same
+				// background colour, making the transition seamless.
+				document.querySelectorAll('#pv-aside .pv-aside__nav-item[href]').forEach(function(link) {
+					link.addEventListener('click', function(e) {
+						if (link.classList.contains('is-active')) return; // already here
+						e.preventDefault();
+						var dest = link.href;
+						// Re-use the existing loader if still in the DOM, or create a fresh one
+						var mask = document.getElementById('pv-app-loader');
+						if (!mask) {
+							mask = document.createElement('div');
+							mask.id = 'pv-app-loader';
+							mask.setAttribute('aria-hidden', 'true');
+							mask.innerHTML =
+								'<div class="pv-app-loader__inner">' +
+								'<div class="pv-app-loader__wordmark">' +
+								'<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>' +
+								'<span>PressVideo</span></div>' +
+								'<div class="pv-app-loader__bar"><div class="pv-app-loader__bar-fill"></div></div>' +
+								'</div>';
+							document.body.appendChild(mask);
+						}
+						// Force it fully visible with no fade-out transition
+						mask.style.cssText = 'opacity:1;pointer-events:auto;transition:none;';
+						mask.classList.remove('pv-loader--done');
+						// Wait two animation frames so the browser paints the overlay
+						// before starting navigation — eliminates the CSS-loading flash
+						requestAnimationFrame(function() {
+							requestAnimationFrame(function() {
+								window.location.href = dest;
+							});
+						});
+					});
+				});
+
+				// ── Customizer panel bridge ───────────────────────────────────
+				// Wire aside panel buttons to the existing pvc-nav-btn click logic
+				var asideBtns = document.querySelectorAll('.pv-aside__panel-btn[data-pv-panel]');
+				if (!asideBtns.length) return;
+				asideBtns.forEach(function(btn) {
+					btn.addEventListener('click', function() {
+						var pvcBtn = document.querySelector('.pvc-nav-btn[data-tab="' + btn.dataset.pvPanel + '"]');
+						if (pvcBtn) pvcBtn.click();
+						asideBtns.forEach(function(b) { b.classList.remove('is-active'); });
+						btn.classList.add('is-active');
+					});
+				});
+				// Keep aside in sync when pvc-nav-btn is clicked directly
+				document.querySelectorAll('.pvc-nav-btn[data-tab]').forEach(function(pvcBtn) {
+					pvcBtn.addEventListener('click', function() {
+						asideBtns.forEach(function(b) {
+							b.classList.toggle('is-active', b.dataset.pvPanel === pvcBtn.dataset.tab);
+						});
+					});
+				});
+
+			});
+		}());
+		</script>
+		<?php
 	}
 
 	public function archive_per_page( WP_Query $q ): void {
