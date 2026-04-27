@@ -222,11 +222,17 @@ class PV_Analytics_Page {
 			<!-- ── Dynamic Analytics Summary (JS-rendered) ──────── -->
 			<div id="pva-summary-section" hidden></div>
 
-			<!-- ── Charts + Table section ─────────────────────── -->
-			<div id="pva-charts-section">
+			<!-- ── Row 1: AI Blocks — Coach + Performance Insights ── -->
+			<div class="pva-ai-row" id="pva-ai-row" hidden>
+				<div class="pva-ai-row__coach" id="pva-coach-col"></div>
+				<div class="pva-ai-row__insights" id="pva-insights-col"></div>
+			</div>
+
+			<!-- ── Row 2: Charts — Play Trend + Top Videos + Watch Depth ── -->
+			<div class="pva-charts-row" id="pva-charts-section">
 
 				<!-- Play Trend -->
-				<div class="pv-card pva-card-trend">
+				<div class="pv-card">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'Play Trend', 'pv-youtube-importer' ); ?></h2>
 						<span class="pva-chart-sub" id="pva-trend-sub"></span>
@@ -241,45 +247,42 @@ class PV_Analytics_Page {
 					</div>
 				</div>
 
-				<!-- Top Videos + Watch Depth -->
-				<div class="pva-two-col">
-
-					<div class="pv-card">
-						<div class="pv-card__head">
-							<h2 class="pv-card__title"><?php esc_html_e( 'Top Videos', 'pv-youtube-importer' ); ?></h2>
+				<!-- Top Videos -->
+				<div class="pv-card">
+					<div class="pv-card__head">
+						<h2 class="pv-card__title"><?php esc_html_e( 'Top Videos', 'pv-youtube-importer' ); ?></h2>
+					</div>
+					<div class="pv-card__body">
+						<div class="pva-chart-wrap pva-chart-wrap--top">
+							<canvas id="pva-top-chart" aria-label="<?php esc_attr_e( 'Top videos by play count', 'pv-youtube-importer' ); ?>" role="img"></canvas>
 						</div>
-						<div class="pv-card__body">
-							<div class="pva-chart-wrap pva-chart-wrap--top">
-								<canvas id="pva-top-chart" aria-label="<?php esc_attr_e( 'Top videos by play count', 'pv-youtube-importer' ); ?>" role="img"></canvas>
-							</div>
-							<div class="pva-loading" id="pva-top-loading">
-								<div class="pva-skeleton pva-skeleton--bars"></div>
-							</div>
+						<div class="pva-loading" id="pva-top-loading">
+							<div class="pva-skeleton pva-skeleton--bars"></div>
 						</div>
 					</div>
+				</div>
 
-					<div class="pv-card">
-						<div class="pv-card__head">
-							<h2 class="pv-card__title"><?php esc_html_e( 'Watch Depth', 'pv-youtube-importer' ); ?></h2>
+				<!-- Watch Depth -->
+				<div class="pv-card">
+					<div class="pv-card__head">
+						<h2 class="pv-card__title"><?php esc_html_e( 'Watch Depth', 'pv-youtube-importer' ); ?></h2>
+					</div>
+					<div class="pv-card__body">
+						<div class="pva-chart-wrap pva-chart-wrap--donut">
+							<canvas id="pva-depth-chart" aria-label="<?php esc_attr_e( 'Watch depth distribution', 'pv-youtube-importer' ); ?>" role="img"></canvas>
 						</div>
-						<div class="pv-card__body">
-							<div class="pva-chart-wrap pva-chart-wrap--donut">
-								<canvas id="pva-depth-chart" aria-label="<?php esc_attr_e( 'Watch depth distribution', 'pv-youtube-importer' ); ?>" role="img"></canvas>
-							</div>
-							<div class="pva-loading" id="pva-depth-loading">
-								<div class="pva-skeleton pva-skeleton--donut"></div>
-							</div>
+						<div class="pva-loading" id="pva-depth-loading">
+							<div class="pva-skeleton pva-skeleton--donut"></div>
 						</div>
 					</div>
+				</div>
 
-				</div><!-- .pva-two-col -->
+			</div><!-- .pva-charts-row -->
 
-			</div><!-- #pva-charts-section -->
+			<!-- ── Row 3: Tables — All Videos + Least Watched ────── -->
+			<div class="pva-table-row" id="pva-table-row" hidden>
 
-			<!-- ── All Videos + Growth Coach side by side ────────── -->
-			<div class="pva-grid-lower" id="pva-grid-lower" hidden>
-
-				<div class="pv-card pva-grid-lower__table">
+				<div class="pv-card pva-table-row__all">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'All Videos', 'pv-youtube-importer' ); ?></h2>
 					</div>
@@ -293,12 +296,12 @@ class PV_Analytics_Page {
 					</div>
 				</div>
 
-				<div class="pva-grid-lower__coach" id="pva-coach-col"></div>
+				<div class="pva-table-row__least" id="pva-least-col"></div>
 
-			</div><!-- #pva-grid-lower -->
+			</div><!-- .pva-table-row -->
 
-			<!-- ── Feature Picks + Insights (JS-rendered) ────────── -->
-			<div id="pva-insights-section" hidden></div>
+			<!-- ── Row 4: What to Feature (JS-rendered) ──────────── -->
+			<div id="pva-feature-section" hidden></div>
 
 			<!-- ── Empty State ────────────────────────────────── -->
 			<div class="pva-empty" id="pva-empty" hidden>
