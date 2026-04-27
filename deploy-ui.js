@@ -29,12 +29,12 @@ const REMOTE_PLUGIN = '/devsite.iac-intl.com/public_html/wp-content/plugins/pv-y
 
 const FILES = [
 	// JS
-	'assets/dist/js/archive-filter.min.js',
+	'assets/dist/js/analytics-admin.min.js',
 	// CSS
-	'assets/dist/css/grid.min.css',
-	'assets/dist/css/watch-page.min.css',
-	// Templates
-	'templates/archive/archive-videos.php',
+	'assets/dist/css/analytics.min.css',
+	// PHP
+	'includes/admin/class-analytics-page.php',
+	'includes/analytics/class-analytics-tracker.php',
 	// PHP — core
 	'pv-youtube-importer.php',
 	'includes/class-plugin.php',

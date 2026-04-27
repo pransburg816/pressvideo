@@ -269,6 +269,7 @@ class PV_Analytics_Tracker {
 
 		$transient = 'pv_ai_insights_' . get_current_user_id() . '_' . $days;
 		if ( ! empty( $result['moves'] ) ) {
+			$result['cached_at'] = time();
 			set_transient( $transient, $result, DAY_IN_SECONDS );
 		}
 

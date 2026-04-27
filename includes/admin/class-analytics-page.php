@@ -77,6 +77,7 @@ class PV_Analytics_Page {
 			$cache_empty    = is_array( $cached ) && empty( $cached );
 			$cache_old_fmt  = is_array( $cached ) && ! empty( $cached ) && ! isset( $cached['moves'] );
 
+			$ai_cached_at = null;
 			if ( false === $cached || $cache_empty || $cache_old_fmt ) {
 				delete_transient( $transient );
 				$tracker  = new PV_Analytics_Tracker();
@@ -85,7 +86,9 @@ class PV_Analytics_Page {
 				$ai_moves = $result['moves']   ?? [];
 				$ai_summary = $result['summary'] ?? null;
 				if ( ! empty( $ai_moves ) ) {
+					$result['cached_at'] = time();
 					set_transient( $transient, $result, DAY_IN_SECONDS );
+					$ai_cached_at = $result['cached_at'];
 					$ai_source = 'fresh';
 				} else {
 					$ai_source = 'api_failed';
@@ -93,6 +96,7 @@ class PV_Analytics_Page {
 			} else {
 				$ai_moves   = $cached['moves']   ?? [];
 				$ai_summary = $cached['summary'] ?? null;
+				$ai_cached_at = $cached['cached_at'] ?? null;
 				$ai_source  = 'cached';
 			}
 		}
@@ -105,6 +109,7 @@ class PV_Analytics_Page {
 			'siteUrl'     => home_url(),
 			'aiMoves'     => $ai_moves,
 			'aiSummary'   => $ai_summary,
+			'aiCachedAt'  => $ai_cached_at,
 			'hasAiKey'    => $has_ai_key,
 			'isPlatinum'  => $is_platinum,
 			'settingsUrl' => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
