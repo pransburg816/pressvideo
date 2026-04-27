@@ -2102,6 +2102,12 @@
 	font-weight: 700;
 	margin: 0;
 }
+.pv-section-head__count {
+	color: rgba(255,255,255,.45);
+	font-size: .8rem;
+	font-weight: 500;
+	flex-shrink: 0;
+}
 
 /* ── Shared: sort bar ────────────────────────────────────────────── */
 .pv-sort-bar {

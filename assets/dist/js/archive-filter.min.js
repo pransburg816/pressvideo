@@ -64,6 +64,8 @@
 		fd.append('page', String(page));
 		fd.append('per_page', String(perPage));
 		fd.append('pv_yt_pl', pvCurrentPlaylist || '');
+		var _pvPrevNonce = (window.pvBroadcast && window.pvBroadcast.previewNonce) || '';
+		if (_pvPrevNonce) fd.append('pv_preview_nonce', _pvPrevNonce);
 
 		fetch(pvAjaxUrl, { method: 'POST', body: fd })
 			.then(function (r) { return r.json(); })
@@ -109,6 +111,8 @@
 				// Hide Show: toggle when fewer than 20 items
 				var ppEl = main.querySelector('.pv-toolbar .pv-per-page');
 				if (ppEl) ppEl.hidden = ((d.found || 0) < 20);
+				var _stdCnt = main.querySelector('.pv-section-head [data-pv-count]');
+				if (_stdCnt) _stdCnt.textContent = d.found ? '(' + d.found + ')' : '';
 			})
 			.catch(function () {
 				pvLoading = false;
@@ -401,12 +405,16 @@
 			bcHomePage    = page;
 			bcHomePerPage = perPage;
 			bcHomeGrid.innerHTML = '<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>';
+			var _bcPlCnt = bcHomeSectionHead ? bcHomeSectionHead.querySelector('[data-pv-count]') : null;
+			if (_bcPlCnt) _bcPlCnt.textContent = '';
 			var fd = new FormData();
 			fd.append('action',   'pv_bc_videos');
 			fd.append('nonce',    bcNonce);
 			fd.append('page',     String(page));
 			fd.append('per_page', String(perPage));
 			fd.append('pv_yt_pl', plId);
+			var _pvPrevNonce = (window.pvBroadcast && window.pvBroadcast.previewNonce) || '';
+			if (_pvPrevNonce) fd.append('pv_preview_nonce', _pvPrevNonce);
 			fetch(bcAjaxUrl, { method: 'POST', body: fd })
 				.then(function (r) { return r.json(); })
 				.then(function (data) {
@@ -424,6 +432,8 @@
 					var _hppp = homePanel ? homePanel.querySelector('.pv-per-page') : null;
 					if (_hppp) _hppp.hidden = (d.total || 0) < 20;
 					if (bcHomeSortBar) bcHomeSortBar.hidden = (d.total || 0) <= 1;
+					if (_bcPlCnt) _bcPlCnt.textContent = d.total ? '(' + d.total + ')' : '';
+					if (d.playlist) bcHomeGrid.dataset.pvPlaylist = d.playlist;
 				})
 				.catch(function () {
 					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>';
@@ -459,12 +469,16 @@
 			bcHomePerPage = perPage;
 
 			bcHomeGrid.innerHTML = '<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>';
+			var _bcHomeCnt = bcHomeSectionHead ? bcHomeSectionHead.querySelector('[data-pv-count]') : null;
+			if (_bcHomeCnt) _bcHomeCnt.textContent = '';
 
 			var fd = new FormData();
 			fd.append('action', 'pv_bc_videos');
 			fd.append('nonce',    bcNonce);
 			fd.append('page',     String(page));
 			fd.append('per_page', String(perPage));
+			var _pvPrevNonce = (window.pvBroadcast && window.pvBroadcast.previewNonce) || '';
+			if (_pvPrevNonce) fd.append('pv_preview_nonce', _pvPrevNonce);
 
 			fetch(bcAjaxUrl, { method: 'POST', body: fd })
 				.then(function (r) { return r.json(); })
@@ -483,6 +497,8 @@
 					var _hppp = homePanel ? homePanel.querySelector('.pv-per-page') : null;
 					if (_hppp) _hppp.hidden = (d.total || 0) < 20;
 					if (bcHomeSortBar) bcHomeSortBar.hidden = false;
+					if (_bcHomeCnt) _bcHomeCnt.textContent = d.total ? '(' + d.total + ')' : '';
+					if (d.playlist) bcHomeGrid.dataset.pvPlaylist = d.playlist;
 				})
 				.catch(function () {
 					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load videos.</p>';
@@ -505,6 +521,8 @@
 			fd.append('per_page', String(perPage));
 			if (bcVideosCategory) fd.append('category', bcVideosCategory);
 			if (bcVideosYtPl)     fd.append('pv_yt_pl', bcVideosYtPl);
+			var _pvPrevNonce = (window.pvBroadcast && window.pvBroadcast.previewNonce) || '';
+			if (_pvPrevNonce) fd.append('pv_preview_nonce', _pvPrevNonce);
 
 			fetch(bcAjaxUrl, { method: 'POST', body: fd })
 				.then(function (r) { return r.json(); })
@@ -522,6 +540,7 @@
 					var _vppp = videosPanel ? videosPanel.querySelector('.pv-per-page') : null;
 					if (_vppp) _vppp.hidden = (d.total || 0) < 20;
 					if (bcSortBar) bcSortBar.hidden = (d.total || 0) <= 1;
+					if (d.playlist) bcVideosGrid.dataset.pvPlaylist = d.playlist;
 				})
 				.catch(function () {
 					bcVideosGrid.innerHTML = '<p class="pv-no-videos">Could not load videos.</p>';

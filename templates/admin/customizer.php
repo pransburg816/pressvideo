@@ -46,6 +46,7 @@ $tag_count = (int) ( $s['aside_tag_count'] ?? 5 );
 
 $cards_excerpt  = isset( $s['cards_show_excerpt'] )  ? (bool) $s['cards_show_excerpt']  : true;
 $cards_cat      = isset( $s['cards_show_category'] ) ? (bool) $s['cards_show_category'] : true;
+$cards_views    = isset( $s['cards_show_views'] )    ? (bool) $s['cards_show_views']    : true;
 $search_align   = $s['search_bar_align'] ?? 'center';
 $grid_label_show = isset( $s['grid_label_show'] ) ? (bool) $s['grid_label_show'] : false;
 $grid_label_text = $s['grid_label_text'] ?? 'Latest Videos';
@@ -289,6 +290,12 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 						<div class="pvc-aside-section__head">
 							<div><span style="font-size:.78rem;color:rgba(255,255,255,.65);font-weight:600;display:block;">Category Badge</span><span class="pvc-hint" style="margin:2px 0 0;">Show category label on each card</span></div>
 							<label class="pvc-toggle"><input type="checkbox" data-setting="cards_show_category" <?php checked( $cards_cat ); ?>><span class="pvc-toggle__track"></span></label>
+						</div>
+					</div>
+					<div class="pvc-aside-section" style="margin-top:8px;">
+						<div class="pvc-aside-section__head">
+							<div><span style="font-size:.78rem;color:rgba(255,255,255,.65);font-weight:600;display:block;">View Count</span><span class="pvc-hint" style="margin:2px 0 0;">Show YouTube view count next to upload date</span></div>
+							<label class="pvc-toggle"><input type="checkbox" data-setting="cards_show_views" <?php checked( $cards_views ); ?>><span class="pvc-toggle__track"></span></label>
 						</div>
 					</div>
 					<div class="pvc-aside-section" style="margin-top:8px;">

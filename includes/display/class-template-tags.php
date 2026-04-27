@@ -33,7 +33,7 @@ function pv_video_grid( array $args = [] ): void {
  * Render a single broadcast card and return its HTML.
  * Shared between the archive template and the AJAX lazy-load handlers.
  */
-function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas' ): string {
+function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas', bool $show_views = true ): string {
 	$yt     = get_post_meta( $post->ID, '_pv_youtube_id', true );
 	$accent = pv_resolve_accent_color( $post->ID );
 	$embed  = $yt ? 'https://www.youtube.com/embed/' . $yt . '?rel=0&modestbranding=1' : '';
@@ -66,6 +66,7 @@ function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas' ): string
 				        data-title="<?php echo esc_attr( $post->post_title ); ?>"
 				        data-description=""
 				        data-accent="<?php echo esc_attr( $accent ); ?>"
+				        data-thumb="<?php echo esc_attr( $thumb ); ?>"
 				        aria-label="<?php echo esc_attr( sprintf( __( 'Watch %s', 'pv-youtube-importer' ), $post->post_title ) ); ?>">
 					<?php echo $play_svg; // phpcs:ignore ?>
 				</button>
@@ -81,6 +82,9 @@ function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas' ): string
 			<div class="pv-bc-card__meta">
 				<?php if ( $cat ) : ?><span class="pv-bc-card__cat"><?php echo esc_html( $cat ); ?></span><span aria-hidden="true">&middot;</span><?php endif; ?>
 				<span><?php echo esc_html( $date ); ?></span>
+				<?php if ( $show_views && $views > 0 ) : ?>
+					<span aria-hidden="true">&middot;</span><span><?php echo esc_html( number_format_i18n( $views ) ); ?> <?php esc_html_e( 'views', 'pv-youtube-importer' ); ?></span>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>

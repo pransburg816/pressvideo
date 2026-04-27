@@ -348,6 +348,13 @@ class PV_Plugin {
 		check_ajax_referer( 'pv_load_page', 'nonce' );
 
 		$settings = get_option( 'pv_settings', [] );
+		$_pv_prev_nonce = sanitize_text_field( wp_unslash( $_POST['pv_preview_nonce'] ?? '' ) ); // phpcs:ignore
+		if ( $_pv_prev_nonce && wp_verify_nonce( $_pv_prev_nonce, 'pv_preview' ) && current_user_can( 'manage_options' ) ) {
+			$_preview = get_transient( 'pv_preview_settings' );
+			if ( is_array( $_preview ) ) {
+				$settings = array_merge( $settings, $_preview );
+			}
+		}
 		$layout   = $settings['archive_layout'] ?? 'grid';
 		$display  = $settings['display_mode']   ?? 'offcanvas';
 		$page      = max( 1, (int) ( $_POST['page'] ?? 1 ) );                                       // phpcs:ignore
@@ -405,11 +412,32 @@ class PV_Plugin {
 
 		$q = new WP_Query( $q_args );
 
-		// Build playlist JSON for offcanvas card buttons
+		// Build playlist JSON for offcanvas/modal card buttons (full dataset, capped at 200).
 		$pv_playlist_json = '[]';
 		if ( in_array( $display, [ 'offcanvas', 'modal' ], true ) && ! empty( $q->posts ) ) {
+			$_pl_posts = $q->posts;
+			$_found    = (int) $q->found_posts;
+
+			if ( ! $nopaging && $_found > count( $_pl_posts ) && $_found <= 200 ) {
+				$_full_args = [
+					'post_type'      => 'pv_youtube',
+					'post_status'    => 'publish',
+					'posts_per_page' => 200,
+					'nopaging'       => true,
+					'orderby'        => 'date',
+					'order'          => 'DESC',
+					'no_found_rows'  => true,
+				];
+				if ( ! empty( $q_args['meta_query'] ) ) {
+					$_full_args['meta_query'] = $q_args['meta_query']; // phpcs:ignore
+				}
+				$_full_q   = new WP_Query( $_full_args );
+				$_pl_posts = $_full_q->posts;
+				wp_reset_postdata();
+			}
+
 			$_pl = [];
-			foreach ( $q->posts as $_p ) {
+			foreach ( $_pl_posts as $_p ) {
 				$_yt = get_post_meta( $_p->ID, '_pv_youtube_id', true );
 				if ( ! $_yt ) continue;
 				$_pl[] = [
@@ -429,6 +457,7 @@ class PV_Plugin {
 		$pv_display       = $display;
 		$pv_cards_excerpt = isset( $settings['cards_show_excerpt'] )  ? (bool) $settings['cards_show_excerpt']  : true;
 		$pv_cards_cat     = isset( $settings['cards_show_category'] ) ? (bool) $settings['cards_show_category'] : true;
+		$pv_cards_views   = isset( $settings['cards_show_views'] )    ? (bool) $settings['cards_show_views']    : true;
 
 		ob_start();
 
@@ -496,7 +525,14 @@ class PV_Plugin {
 
 	public function ajax_bc_videos(): void {
 		check_ajax_referer( 'pv_bc_load', 'nonce' );
-		$settings     = get_option( 'pv_settings', [] );
+		$settings = get_option( 'pv_settings', [] );
+		$_pv_prev_nonce = sanitize_text_field( wp_unslash( $_POST['pv_preview_nonce'] ?? '' ) ); // phpcs:ignore
+		if ( $_pv_prev_nonce && wp_verify_nonce( $_pv_prev_nonce, 'pv_preview' ) && current_user_can( 'manage_options' ) ) {
+			$_preview = get_transient( 'pv_preview_settings' );
+			if ( is_array( $_preview ) ) {
+				$settings = array_merge( $settings, $_preview );
+			}
+		}
 		$display      = $settings['display_mode'] ?? 'offcanvas';
 		$page         = max( 1, (int) ( $_POST['page'] ?? 1 ) );                                    // phpcs:ignore
 		$category     = sanitize_key( $_POST['category'] ?? '' );                                   // phpcs:ignore
@@ -563,11 +599,57 @@ class PV_Plugin {
 
 		$q = new WP_Query( $query_args );
 
+		$show_views = isset( $settings['cards_show_views'] ) ? (bool) $settings['cards_show_views'] : true;
 		$html = '';
 		foreach ( $q->posts as $_p ) {
-			$html .= pv_bc_card_html( $_p, $display );
+			$html .= pv_bc_card_html( $_p, $display, $show_views );
 		}
 		wp_reset_postdata();
+
+		// Build full playlist (all pages, capped at 200) for modal/offcanvas navigation.
+		$_bc_playlist_json = '[]';
+		if ( in_array( $display, [ 'offcanvas', 'modal' ], true ) && ! empty( $q->posts ) ) {
+			$_bc_pl_posts = $q->posts;
+			$_bc_found    = (int) $q->found_posts;
+
+			if ( ! $nopaging && $_bc_found > count( $_bc_pl_posts ) && $_bc_found <= 200 ) {
+				$_bc_full_args = [
+					'post_type'      => 'pv_youtube',
+					'post_status'    => 'publish',
+					'posts_per_page' => 200,
+					'nopaging'       => true,
+					'orderby'        => 'date',
+					'order'          => 'DESC',
+					'no_found_rows'  => true,
+				];
+				if ( ! empty( $query_args['meta_query'] ) ) {
+					$_bc_full_args['meta_query'] = $query_args['meta_query']; // phpcs:ignore
+				}
+				if ( ! empty( $query_args['tax_query'] ) ) {
+					$_bc_full_args['tax_query'] = $query_args['tax_query']; // phpcs:ignore
+				}
+				$_bc_full_q   = new WP_Query( $_bc_full_args );
+				$_bc_pl_posts = $_bc_full_q->posts;
+				wp_reset_postdata();
+			}
+
+			$_bc_pl = [];
+			foreach ( $_bc_pl_posts as $_bc_p ) {
+				$_bc_yt = get_post_meta( $_bc_p->ID, '_pv_youtube_id', true );
+				if ( ! $_bc_yt ) continue;
+				$_bc_pl[] = [
+					'id'        => $_bc_p->ID,
+					'youtubeId' => $_bc_yt,
+					'embedUrl'  => 'https://www.youtube.com/embed/' . $_bc_yt,
+					'title'     => $_bc_p->post_title,
+					'desc'      => '',
+					'accent'    => pv_resolve_accent_color( $_bc_p->ID ),
+					'thumb'     => get_the_post_thumbnail_url( $_bc_p->ID, 'medium' ) ?: '',
+					'duration'  => get_post_meta( $_bc_p->ID, '_pv_duration', true ) ?: '',
+				];
+			}
+			$_bc_playlist_json = wp_json_encode( $_bc_pl );
+		}
 
 		$max_pages  = $q->max_num_pages;
 		$pagination = '';
@@ -590,6 +672,7 @@ class PV_Plugin {
 			'total'      => $q->found_posts,
 			'pages'      => $max_pages,
 			'page'       => $page,
+			'playlist'   => $_bc_playlist_json,
 		] );
 	}
 
@@ -825,10 +908,16 @@ class PV_Plugin {
 				PV_VERSION,
 				true
 			);
+			$_pv_is_preview_req = (
+				isset( $_GET['pv_preview'], $_GET['pv_nonce'] ) // phpcs:ignore
+				&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['pv_nonce'] ) ), 'pv_preview' ) // phpcs:ignore
+				&& current_user_can( 'manage_options' )
+			);
 			wp_localize_script( 'pv-archive-filter', 'pvBroadcast', [
 				'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
 				'nonce'         => wp_create_nonce( 'pv_bc_load' ),
 				'loadPageNonce' => wp_create_nonce( 'pv_load_page' ),
+				'previewNonce'  => $_pv_is_preview_req ? sanitize_text_field( wp_unslash( $_GET['pv_nonce'] ) ) : '', // phpcs:ignore
 			] );
 		}
 	}

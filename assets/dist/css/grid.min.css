@@ -70,10 +70,13 @@
 	position: absolute;
 	inset: 0;
 	display: flex;
-	align-items: center;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
 	padding: 0 16px;
 	background: none;
 	z-index: 2;
+	gap: 4px;
 	transition: opacity 0.2s ease;
 	transition-delay: 0.1s;
 }
@@ -92,6 +95,15 @@
 	-webkit-line-clamp: 2;
 	-webkit-box-orient: vertical;
 	overflow: hidden;
+}
+.pv-card__meta {
+	font-size: 0.68rem;
+	color: rgba(255,255,255,0.5);
+	margin: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
 }
 
 /* ── Category badge — top left, always visible ──────────────────────── */

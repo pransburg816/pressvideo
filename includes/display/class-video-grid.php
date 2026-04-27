@@ -67,9 +67,8 @@ class PV_Video_Grid {
 		$cats     = get_the_terms( $post->ID, 'pv_category' );
 		$cat_name = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0]->name : '';
 
-		// Playlist JSON for offcanvas nav (scoped to this video).
-		$card_pl   = array_values( array_filter( $playlist, fn( $v ) => $v['youtubeId'] === $youtube_id ) );
-		$pl_json   = wp_json_encode( $card_pl ?: [
+		// Full playlist JSON so modal/offcanvas nav can step through all videos in the grid.
+		$pl_json = wp_json_encode( $playlist ?: [
 			[ 'youtubeId' => $youtube_id, 'embedUrl' => $embed_url, 'title' => $post->post_title, 'desc' => $desc, 'accent' => $accent ],
 		] );
 

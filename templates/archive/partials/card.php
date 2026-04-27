@@ -1,7 +1,7 @@
 <?php
 /**
  * Card partial — used by archive-videos.php and ajax_load_more().
- * Variables expected in scope: $pv_display, $pv_playlist_json, $pv_cards_excerpt, $pv_cards_cat
+ * Variables expected in scope: $pv_display, $pv_playlist_json, $pv_cards_excerpt, $pv_cards_cat, $pv_cards_views
  * Must be called within an active WP post loop (the_post() already called).
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 $youtube_id = get_post_meta( get_the_ID(), '_pv_youtube_id', true );
 if ( ! $youtube_id && in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) return;
 $accent    = pv_resolve_accent_color( get_the_ID() );
+$views     = (int) get_post_meta( get_the_ID(), '_pv_view_count', true );
 $embed_url = $youtube_id ? 'https://www.youtube.com/embed/' . $youtube_id . '?rel=0&modestbranding=1' : '';
 $duration  = get_post_meta( get_the_ID(), '_pv_duration', true );
 $thumb_url = get_the_post_thumbnail_url( get_the_ID(), 'medium' ) ?: '';
@@ -25,7 +26,12 @@ $cat_slug  = $cat ? $cat->slug : '';
      style="--pv-accent:<?php echo esc_attr( $accent ); ?>;<?php if ( $thumb_url ) : ?> background-image: linear-gradient(to top right,rgba(0,0,0,.75),rgba(0,0,0,.05)),url(<?php echo esc_url( $thumb_url ); ?>);<?php endif; ?>">
 	<?php if ( $pv_cards_cat && $cat_name ) : ?><span class="pv-card__cat"><?php echo esc_html( $cat_name ); ?></span><?php endif; ?>
 	<?php if ( $duration ) : ?><span class="pv-card__duration"><?php echo esc_html( $duration ); ?></span><?php endif; ?>
-	<div class="pv-card__footer"><div class="pv-card__title"><?php the_title(); ?></div></div>
+	<div class="pv-card__footer">
+		<div class="pv-card__title"><?php the_title(); ?></div>
+		<?php if ( ! empty( $pv_cards_views ) && $views > 0 ) : ?>
+			<div class="pv-card__meta"><?php echo esc_html( get_the_date( 'M j, Y' ) ); ?> &middot; <?php echo esc_html( number_format_i18n( $views ) ); ?> <?php esc_html_e( 'views', 'pv-youtube-importer' ); ?></div>
+		<?php endif; ?>
+	</div>
 	<div class="pv-card__hover-content">
 		<?php if ( $excerpt && $pv_cards_excerpt ) : ?>
 			<p class="pv-card__hover-excerpt"><?php echo esc_html( $excerpt ); ?></p>

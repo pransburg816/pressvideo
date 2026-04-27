@@ -61,15 +61,48 @@
 				current  = playlist.findIndex(function (v) { return v.youtubeId === ytId; });
 				if (current < 0) current = 0;
 			} else {
-				playlist = [{
-					youtubeId : ytId,
-					embedUrl  : trigger.dataset.embedUrl    || '',
-					title     : trigger.dataset.title       || '',
-					desc      : trigger.dataset.description || '',
-					accent    : trigger.dataset.accent      || '#4f46e5',
-					thumb     : ''
-				}];
-				current = 0;
+				// No playlist JSON on the button — try the container's full playlist (broadcast AJAX).
+				var container = trigger.closest(
+					'.pv-bc-video-grid, .pv-bc-home-grid, .pv-bc-search-results, .pv-grid'
+				);
+				var containerPlRaw = container ? (container.dataset.pvPlaylist || '') : '';
+				var containerPl = null;
+				try { containerPl = containerPlRaw ? JSON.parse(containerPlRaw) : null; } catch (err) {}
+
+				if (containerPl && containerPl.length > 0) {
+					playlist = containerPl;
+					current  = playlist.findIndex(function (v) { return v.youtubeId === ytId; });
+					if (current < 0) current = 0;
+				} else {
+					// Final fallback: collect visible sibling triggers.
+					var siblings = container
+						? Array.from(container.querySelectorAll('.pv-trigger[data-youtube-id]'))
+						: [];
+					if (siblings.length > 1) {
+						playlist = siblings.map(function (btn) {
+							return {
+								youtubeId : btn.dataset.youtubeId   || '',
+								embedUrl  : btn.dataset.embedUrl    || '',
+								title     : btn.dataset.title       || '',
+								desc      : btn.dataset.description || '',
+								accent    : btn.dataset.accent      || '#4f46e5',
+								thumb     : btn.dataset.thumb       || '',
+							};
+						});
+						current = playlist.findIndex(function (v) { return v.youtubeId === ytId; });
+						if (current < 0) current = 0;
+					} else {
+						playlist = [{
+							youtubeId : ytId,
+							embedUrl  : trigger.dataset.embedUrl    || '',
+							title     : trigger.dataset.title       || '',
+							desc      : trigger.dataset.description || '',
+							accent    : trigger.dataset.accent      || '#4f46e5',
+							thumb     : trigger.dataset.thumb       || ''
+						}];
+						current = 0;
+					}
+				}
 			}
 
 			loadSlide(current);

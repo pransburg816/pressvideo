@@ -64,6 +64,7 @@ $_pv_sub_style   = $_pv_sub_color   ? ' style="color:' . esc_attr( $_pv_sub_colo
 // Card options
 $pv_cards_excerpt  = isset( $pv_settings['cards_show_excerpt'] )  ? (bool) $pv_settings['cards_show_excerpt']  : true;
 $pv_cards_cat      = isset( $pv_settings['cards_show_category'] ) ? (bool) $pv_settings['cards_show_category'] : true;
+$pv_cards_views    = isset( $pv_settings['cards_show_views'] )    ? (bool) $pv_settings['cards_show_views']    : true;
 $pv_search_align   = $pv_settings['search_bar_align'] ?? 'center';
 $_pv_label_show    = isset( $pv_settings['grid_label_show'] ) ? (bool) $pv_settings['grid_label_show'] : false;
 $_pv_label_text    = $pv_settings['grid_label_text'] ?? __( 'Latest Videos', 'pv-youtube-importer' );
@@ -122,9 +123,37 @@ if ( empty( $pv_nav_playlists ) && is_array( $_pv_ch_pls_cache ) ) {
 }
 
 $pv_playlist_json = '[]';
-if ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) && ! empty( $GLOBALS['wp_query']->posts ) ) {
+if ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) {
+	$_pv_query_posts = (array) $GLOBALS['wp_query']->posts;
+	$_pv_found_total = (int) $GLOBALS['wp_query']->found_posts;
+
+	// When more posts exist than are on this page, fetch the full list (capped at 200).
+	if ( $_pv_found_total > count( $_pv_query_posts ) && $_pv_found_total <= 200 ) {
+		$_full_args = [
+			'post_type'      => 'pv_youtube',
+			'post_status'    => 'publish',
+			'posts_per_page' => 200,
+			'nopaging'       => true,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'no_found_rows'  => true,
+		];
+		$_main_tax = $GLOBALS['wp_query']->get( 'tax_query' );
+		if ( $_main_tax ) {
+			$_full_args['tax_query'] = $_main_tax; // phpcs:ignore
+		}
+		$_main_meta = $GLOBALS['wp_query']->get( 'meta_query' );
+		if ( $_main_meta ) {
+			$_full_args['meta_query'] = $_main_meta; // phpcs:ignore
+		}
+		$_full_q         = new WP_Query( $_full_args );
+		$_pv_query_posts = $_full_q->posts;
+		wp_reset_postdata();
+	}
+
 	$_pv_pl = [];
-	foreach ( (array) $GLOBALS['wp_query']->posts as $_p ) {
+	foreach ( $_pv_query_posts as $_p ) {
+		if ( ! ( $_p instanceof WP_Post ) ) continue;
 		$_yt = get_post_meta( $_p->ID, '_pv_youtube_id', true );
 		if ( ! $_yt ) continue;
 		$_pv_pl[] = [
@@ -223,7 +252,7 @@ $render_aside_item = function( $_r ) {
 	<?php
 };
 
-$render_card = function() use ( $pv_display, $pv_playlist_json, $pv_cards_excerpt, $pv_cards_cat ) {
+$render_card = function() use ( $pv_display, $pv_playlist_json, $pv_cards_excerpt, $pv_cards_cat, $pv_cards_views ) {
 	include PV_PLUGIN_DIR . 'templates/archive/partials/card.php';
 };
 
@@ -418,6 +447,8 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 				<div class="pv-section-head" data-default-title="<?php echo esc_attr( $_pv_label_text ); ?>">
 					<div class="pv-section-head__left">
 						<h2 class="pv-section-head__title"><?php echo esc_html( $_pv_label_text ); ?></h2>
+						<?php $_pv_std_count = (int) $GLOBALS['wp_query']->found_posts; ?>
+						<span class="pv-section-head__count" data-pv-count><?php if ( $_pv_std_count > 0 ) echo '(' . esc_html( number_format_i18n( $_pv_std_count ) ) . ')'; ?></span>
 					</div>
 					<div class="pv-sort-bar">
 						<button class="pv-sort-btn pv-sort-btn--active" data-sort="latest" type="button"><?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?></button>
@@ -669,7 +700,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 					$bc_all_series = is_wp_error( $bc_all_series ) ? [] : $bc_all_series;
 
 					// Broadcast card helper: YouTube-style (thumb + info below)
-					$render_bc_card = function( $_bcp ) use ( $pv_display ) {
+					$render_bc_card = function( $_bcp ) use ( $pv_display, $pv_cards_views ) {
 						$_bc_yt     = get_post_meta( $_bcp->ID, '_pv_youtube_id', true );
 						$_bc_accent = pv_resolve_accent_color( $_bcp->ID );
 						$_bc_embed  = $_bc_yt ? 'https://www.youtube.com/embed/' . $_bc_yt . '?rel=0&modestbranding=1' : '';
@@ -712,6 +743,9 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 								<div class="pv-bc-card__meta">
 									<?php if ( $_bc_cat ) : ?><span class="pv-bc-card__cat"><?php echo esc_html( $_bc_cat ); ?></span><span aria-hidden="true">&middot;</span><?php endif; ?>
 									<span><?php echo esc_html( $_bc_date ); ?></span>
+									<?php if ( ! empty( $pv_cards_views ) && $_bc_views > 0 ) : ?>
+										<span aria-hidden="true">&middot;</span><span><?php echo esc_html( number_format_i18n( $_bc_views ) ); ?> <?php esc_html_e( 'views', 'pv-youtube-importer' ); ?></span>
+									<?php endif; ?>
 								</div>
 							</div>
 						</div>
@@ -767,6 +801,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							<div class="pv-section-head" data-default-title="<?php echo esc_attr( $_pv_label_text ); ?>">
 								<div class="pv-section-head__left">
 									<h2 class="pv-section-head__title"><?php echo esc_html( $_pv_label_text ); ?></h2>
+									<span class="pv-section-head__count" data-pv-count></span>
 								</div>
 								<div class="pv-sort-bar">
 									<button class="pv-sort-btn pv-sort-btn--active" data-sort="latest" type="button"><?php esc_html_e( 'Latest', 'pv-youtube-importer' ); ?></button>
