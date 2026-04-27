@@ -144,9 +144,22 @@ if ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) {
 			'order'          => 'DESC',
 			'no_found_rows'  => true,
 		];
-		$_main_tax = $GLOBALS['wp_query']->get( 'tax_query' );
-		if ( $_main_tax ) {
-			$_full_args['tax_query'] = $_main_tax; // phpcs:ignore
+		// On taxonomy archives WP builds the query from the queried object internally
+		// and never stores it in get('tax_query'), so reconstruct it explicitly.
+		if ( is_tax( [ 'pv_tag', 'pv_category', 'pv_series', 'pv_type' ] ) ) {
+			$_qtax_obj = get_queried_object();
+			if ( $_qtax_obj instanceof WP_Term ) {
+				$_full_args['tax_query'] = [ [ // phpcs:ignore
+					'taxonomy' => $_qtax_obj->taxonomy,
+					'field'    => 'term_id',
+					'terms'    => $_qtax_obj->term_id,
+				] ];
+			}
+		} else {
+			$_main_tax = $GLOBALS['wp_query']->get( 'tax_query' );
+			if ( $_main_tax ) {
+				$_full_args['tax_query'] = $_main_tax; // phpcs:ignore
+			}
 		}
 		$_main_meta = $GLOBALS['wp_query']->get( 'meta_query' );
 		if ( $_main_meta ) {
