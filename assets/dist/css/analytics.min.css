@@ -311,41 +311,39 @@
 .pva-summary__grade-row {
 	display: flex;
 	align-items: center;
-	gap: 14px;
-	margin-bottom: 10px;
+	gap: 8px;
+	margin-bottom: 8px;
 }
-.pva-summary__grade-box {
-	width: 54px;
-	height: 54px;
-	border-radius: 10px;
+.pva-summary__grade-name {
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: rgba(255,255,255,0.55);
+}
+.pva-summary__grade-score {
+	font-size: 0.72rem;
+	color: rgba(255,255,255,0.35);
+}
+.pva-summary__grade-score::before { content: '·'; margin-right: 6px; }
+/* Large grade box — right side of summary head */
+.pva-summary__grade-badge {
+	width: 88px;
+	height: 88px;
+	border-radius: 14px;
 	background: var(--grade-clr, #6366f1);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	box-shadow: 0 4px 14px color-mix(in srgb, var(--grade-clr, #6366f1) 45%, transparent);
+	box-shadow: 0 6px 24px color-mix(in srgb, var(--grade-clr, #6366f1) 50%, transparent);
 }
 .pva-summary__grade-letter {
-	font-size: 26px;
-	font-weight: 800;
+	font-size: 42px;
+	font-weight: 900;
 	color: #fff;
 	line-height: 1;
-	letter-spacing: -1px;
-}
-.pva-summary__grade-desc {
-	display: flex;
-	flex-direction: column;
-	gap: 2px;
-}
-.pva-summary__grade-name {
-	font-size: 15px;
-	font-weight: 700;
-	color: #fff;
-	line-height: 1.2;
-}
-.pva-summary__grade-score {
-	font-size: 12px;
-	color: rgba(255,255,255,0.45);
+	letter-spacing: -2px;
 }
 
 /* ── Chart card helpers (legacy, kept for any stray refs) ──── */
@@ -944,6 +942,13 @@ body.pva-page .pva-empty__graphic circle:first-child {
 .pva-summary__head {
 	padding: 24px 28px 22px 30px;
 	border-bottom: 1px solid rgba(255,255,255,0.07);
+	display: flex;
+	align-items: center;
+	gap: 24px;
+}
+.pva-summary__head-content {
+	flex: 1;
+	min-width: 0;
 }
 
 .pva-summary__welcome {
@@ -1072,6 +1077,8 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-summary__head { padding: 20px 20px 18px 24px; }
 	.pva-summary__tip  { padding: 16px 20px 16px 24px; }
 	.pva-summary__title { font-size: 1rem; }
+	.pva-summary__grade-badge { width: 64px; height: 64px; }
+	.pva-summary__grade-letter { font-size: 30px; }
 }
 
 /* ── Insights section wrapper ─────────────────────────────── */
