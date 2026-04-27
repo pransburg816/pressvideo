@@ -143,26 +143,27 @@ class PV_Customizer_Page {
 		check_ajax_referer( 'pv_customizer', 'nonce' );
 		if ( ! current_user_can( 'manage_options' ) ) wp_die( -1 );
 
-		$colors = [];
+		$colors   = [];
+		$seen_hex = [];
 
-		// Block themes: read palette from theme.json via wp_get_global_settings().
-		// Only use the theme's own palette — skip WP core default swatches.
+		// ── 1: Block themes — theme.json global settings palette ─────────────
+		// WP 6.0+ groups by origin; WP 5.8 returns a flat array.
 		if ( function_exists( 'wp_get_global_settings' ) ) {
 			$global  = wp_get_global_settings();
 			$palette = $global['color']['palette'] ?? [];
 
-			// WP 6.0+ groups by origin; WP 5.8 returns a flat array.
 			if ( is_array( $palette ) && ( isset( $palette['theme'] ) || isset( $palette['custom'] ) ) ) {
 				$src = ! empty( $palette['theme'] ) ? $palette['theme'] : ( $palette['custom'] ?? [] );
 			} elseif ( is_array( $palette ) && ! isset( $palette['default'] ) ) {
-				$src = $palette; // WP 5.8 flat array
+				$src = $palette;
 			} else {
-				$src = []; // only WP core defaults present — skip
+				$src = [];
 			}
 
 			foreach ( (array) $src as $item ) {
 				$color = sanitize_hex_color( $item['color'] ?? '' );
-				if ( $color ) {
+				if ( $color && ! isset( $seen_hex[ $color ] ) ) {
+					$seen_hex[ $color ] = true;
 					$colors[] = [
 						'name'  => sanitize_text_field( $item['name'] ?? $item['slug'] ?? '' ),
 						'color' => $color,
@@ -171,56 +172,77 @@ class PV_Customizer_Page {
 			}
 		}
 
-		// Classic theme fallback: read both parent and child theme mods; child wins.
+		// ── 2: Classic themes — theme_mods + CSS custom property scan ────────
 		if ( empty( $colors ) ) {
-			$parent_mods = get_option( 'theme_mods_' . get_template(), [] );
-			$child_mods  = get_option( 'theme_mods_' . get_stylesheet(), [] );
-			$mods        = array_merge( $parent_mods, $child_mods );
 
-			$raw_header = $mods['header_textcolor'] ?? '';
-			if ( $raw_header && '#' !== substr( $raw_header, 0, 1 ) ) {
-				$raw_header = '#' . $raw_header;
-			}
-
-			$candidates = [
-				// Storefront / WooCommerce Storefront
-				'Accent'      => $mods['storefront_accent_color']            ?? $mods['accent_color']            ?? $mods['primary_color']           ?? '',
-				'Header BG'   => $mods['storefront_header_background_color'] ?? $mods['header_background_color'] ?? '',
-				'Header Text' => $mods['storefront_header_text_color']       ?? $mods['header_text_color']       ?? $raw_header                       ?? '',
-				'Header Link' => $mods['storefront_header_link_color']       ?? $mods['header_link_color']       ?? '',
-				'Button BG'   => $mods['storefront_button_background_color'] ?? $mods['button_background_color'] ?? '',
-				'Button Text' => $mods['storefront_button_text_color']       ?? $mods['button_text_color']       ?? '',
-			];
-
-			foreach ( $candidates as $name => $val ) {
-				if ( ! $val ) continue;
-				if ( '#' !== substr( $val, 0, 1 ) ) {
-					$val = '#' . $val;
-				}
+			// 2a. Scan ALL theme_mods (parent + child) for any hex-like value.
+			//     Catches any theme's Customizer color controls regardless of key name.
+			$all_mods = array_merge(
+				get_option( 'theme_mods_' . get_template(),   [] ),
+				get_option( 'theme_mods_' . get_stylesheet(), [] )
+			);
+			foreach ( $all_mods as $key => $val ) {
+				if ( ! is_string( $val ) || strlen( $val ) > 20 ) continue;
+				$val = trim( $val );
+				if ( '' === $val ) continue;
+				if ( '#' !== substr( $val, 0, 1 ) ) $val = '#' . $val;
 				$color = sanitize_hex_color( $val );
-				if ( $color ) {
-					$colors[] = [ 'name' => $name, 'color' => $color ];
+				if ( ! $color || isset( $seen_hex[ $color ] ) ) continue;
+				$seen_hex[ $color ] = true;
+				$label    = ucwords( str_replace( [ '_', '-' ], ' ', (string) $key ) );
+				$colors[] = [ 'name' => $label, 'color' => $color ];
+			}
+
+			// 2b. Parse CSS files for --custom-property: #hex declarations.
+			//     Covers child themes (and parents) that define brand colors as CSS
+			//     variables in their stylesheet rather than via the Customizer.
+			$css_dirs = array_unique( [
+				get_template_directory(),
+				get_stylesheet_directory(),
+			] );
+			$css_text = '';
+			foreach ( $css_dirs as $dir ) {
+				foreach ( array_merge(
+					glob( $dir . '/*.css' )    ?: [],
+					glob( $dir . '/*/*.css' )  ?: [],
+					glob( $dir . '/*/*/*.css' ) ?: []
+				) as $file ) {
+					if ( is_readable( $file ) ) {
+						$css_text .= ' ' . file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+					}
 				}
 			}
 
-			// Deduplicate by hex value
-			$seen   = [];
-			$unique = [];
-			foreach ( $colors as $c ) {
-				if ( ! isset( $seen[ $c['color'] ] ) ) {
-					$seen[ $c['color'] ] = true;
-					$unique[]            = $c;
+			// Also include additional CSS saved via the WP Customizer.
+			$custom_css = wp_get_custom_css();
+			if ( $custom_css ) {
+				$css_text .= ' ' . $custom_css;
+			}
+
+			if ( $css_text ) {
+				preg_match_all(
+					'/(--[\w-]+)\s*:\s*(#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3}))\b/',
+					$css_text,
+					$matches,
+					PREG_SET_ORDER
+				);
+				foreach ( $matches as $m ) {
+					$color = sanitize_hex_color( $m[2] );
+					if ( ! $color || isset( $seen_hex[ $color ] ) ) continue;
+					$seen_hex[ $color ] = true;
+					$raw      = str_replace( [ '--', '-', '_' ], [ '', ' ', ' ' ], $m[1] );
+					$label    = ucwords( trim( $raw ) );
+					$colors[] = [ 'name' => $label, 'color' => $color ];
 				}
 			}
-			$colors = $unique;
 		}
 
 		if ( empty( $colors ) ) {
-			wp_send_json_error( __( 'No theme colors found. Colors must be set via the WordPress Customizer or a theme.json palette.', 'pv-youtube-importer' ) );
+			wp_send_json_error( __( 'No theme colors found. Colors must be defined in theme.json, the WordPress Customizer, or as CSS custom properties (--var-name: #hex) in the theme stylesheet.', 'pv-youtube-importer' ) );
 			return;
 		}
 
-		wp_send_json_success( array_slice( $colors, 0, 12 ) );
+		wp_send_json_success( array_slice( $colors, 0, 16 ) );
 	}
 
 	private function sanitize( array $raw ): array {

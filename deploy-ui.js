@@ -29,7 +29,7 @@ const REMOTE_PLUGIN = '/devsite.iac-intl.com/public_html/wp-content/plugins/pv-y
 
 const FILES = [
 	// PHP
-	'includes/cpt/class-video-taxonomies.php',
+	'includes/admin/class-customizer-page.php',
 	// PHP — core
 	'pv-youtube-importer.php',
 	'includes/class-plugin.php',
