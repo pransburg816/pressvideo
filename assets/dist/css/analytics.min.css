@@ -1776,7 +1776,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 
 /* ── Tooltip popover ──────────────────────────────────────── */
 #pva-tip-pop {
-	position: absolute;
+	position: fixed;
 	z-index: 99999;
 	width: 280px;
 	background: #1e1b4b;
