@@ -337,13 +337,8 @@
 		if (pvcTipArrow) pvcTipArrow.style.left = Math.max(8, (rect.left + rect.width / 2) - left - 5) + 'px';
 	}
 
-	document.addEventListener('click', function (e) {
-		var tipBtn = e.target.closest('.pvc-tooltip-btn[data-tip]');
-		if (tipBtn) {
-			e.stopPropagation();
-			showPvcTip(tipBtn, tipBtn.dataset.tip);
-			return;
-		}
+	// Close popover on any outside click
+	document.addEventListener('click', function () {
 		if (pvcTipPop && !pvcTipPop.hidden) {
 			pvcTipPop.hidden = true;
 			if (pvcActiveBtn) { pvcActiveBtn.classList.remove('pvc-tooltip-btn--active'); pvcActiveBtn = null; }
@@ -352,8 +347,11 @@
 
 	document.querySelectorAll('.pvc-tooltip-btn').forEach(function (btn) {
 		btn.addEventListener('click', function (e) {
-			e.stopPropagation();
-			if (btn.dataset.tip) return; // handled by delegated listener above
+			e.stopPropagation(); // prevent document listener from immediately closing the popover
+			if (btn.dataset.tip) {
+				showPvcTip(btn, btn.dataset.tip);
+				return;
+			}
 			var idx = parseInt(btn.dataset.tourStep, 10);
 			if (!isNaN(idx)) showTourStep(idx);
 		});
