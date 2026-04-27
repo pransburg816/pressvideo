@@ -900,7 +900,15 @@ class PV_Plugin {
 			'gaId'    => $ga_id,
 		] );
 
-		if ( is_post_type_archive( 'pv_youtube' ) ) {
+		// Prevent body background flash during navigation between archive and tax archive pages.
+		if ( is_post_type_archive( 'pv_youtube' ) || is_tax( [ 'pv_tag', 'pv_category', 'pv_series', 'pv_type' ] ) ) {
+			$_pv_arc_bg = ! empty( $settings['page_bg_color'] )
+				? ( sanitize_hex_color( $settings['page_bg_color'] ) ?: '#0c0c18' )
+				: '#0c0c18';
+			wp_add_inline_style( 'pv-grid', "html,body{background-color:{$_pv_arc_bg}}" );
+		}
+
+		if ( is_post_type_archive( 'pv_youtube' ) || is_tax( [ 'pv_tag', 'pv_category', 'pv_series', 'pv_type' ] ) ) {
 			wp_enqueue_script(
 				'pv-archive-filter',
 				PV_PLUGIN_URL . 'assets/dist/js/archive-filter.min.js',
