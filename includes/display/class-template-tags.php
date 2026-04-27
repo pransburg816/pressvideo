@@ -51,7 +51,7 @@ function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas', bool $sh
 
 	ob_start();
 	?>
-	<div class="pv-bc-card" data-category="<?php echo esc_attr( $cslug ); ?>" data-date="<?php echo esc_attr( $ts ); ?>" data-views="<?php echo esc_attr( $views ); ?>" style="--pv-accent:<?php echo esc_attr( $accent ); ?>;">
+	<div class="pv-bc-card" data-category="<?php echo esc_attr( $cslug ); ?>" data-date="<?php echo esc_attr( $ts ); ?>" data-views="<?php echo esc_attr( $views ); ?>" data-yt-id="<?php echo esc_attr( $yt ); ?>" style="--pv-accent:<?php echo esc_attr( $accent ); ?>;">
 		<div class="pv-bc-card__thumb">
 			<?php if ( $thumb ) : ?>
 				<img src="<?php echo esc_url( $thumb ); ?>" alt="<?php echo esc_attr( $post->post_title ); ?>" loading="lazy">

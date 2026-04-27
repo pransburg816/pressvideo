@@ -885,6 +885,57 @@
 		} else if (micBtn) {
 			micBtn.style.display = 'none';
 		}
+
+		// ── Broadcast hover preview (cycles YouTube storyboard frames) ────
+		(function () {
+			var _hTimer = null;
+			var _hCard  = null;
+
+			function startPreview(card) {
+				var ytId = card.dataset.ytId;
+				if (!ytId) return;
+				var img = card.querySelector('.pv-bc-card__thumb img');
+				if (!img) return;
+				if (_hCard === card) return;
+				stopPreview();
+				_hCard = card;
+				img.dataset.pvOrigSrc = img.src;
+				var frame = 1;
+				function nextFrame() {
+					img.src = 'https://i.ytimg.com/vi/' + ytId + '/' + frame + '.jpg';
+					frame = (frame % 3) + 1;
+				}
+				nextFrame();
+				card.classList.add('pv-bc-card--previewing');
+				_hTimer = setInterval(nextFrame, 700);
+			}
+
+			function stopPreview() {
+				if (_hTimer) { clearInterval(_hTimer); _hTimer = null; }
+				if (_hCard) {
+					var img = _hCard.querySelector('.pv-bc-card__thumb img');
+					if (img && img.dataset.pvOrigSrc) {
+						img.src = img.dataset.pvOrigSrc;
+						delete img.dataset.pvOrigSrc;
+					}
+					_hCard.classList.remove('pv-bc-card--previewing');
+					_hCard = null;
+				}
+			}
+
+			bc.addEventListener('mouseover', function (e) {
+				var card = e.target.closest('.pv-bc-card');
+				if (!card || card === _hCard) return;
+				startPreview(card);
+			});
+
+			bc.addEventListener('mouseout', function (e) {
+				if (!_hCard) return;
+				var to = e.relatedTarget;
+				if (to && _hCard.contains(to)) return;
+				stopPreview();
+			});
+		}());
 	}
 
 	/* ── Standard layout controls (non-broadcast) ───────────────────── */
