@@ -86,7 +86,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 		<!-- Test mode indicator bar -->
 		<div class="pvc-test-mode-indicator" id="pvc-test-mode-indicator">
 			<span class="pvc-test-mode-indicator__dot"></span>
-			Test Mode Active &mdash; Preview only
+			Test Mode Active: Preview Only
 		</div>
 
 		<div class="pvc-body">
@@ -633,7 +633,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 						<input type="checkbox" data-setting="live_hide_content" <?php checked( ! empty( $s['live_hide_content'] ) ); ?>>
 						<span class="pvc-aside-toggle__label">Hide Videos &amp; Sidebar While Live</span>
 					</label>
-					<span class="pvc-hint">Broadcast layout only. When live (or in Test Mode), hides the video library and sidebar &mdash; only the stream and chat are visible.</span>
+					<span class="pvc-hint">Broadcast layout only. When live (or in Test Mode), hides the video library and sidebar. Only the stream and chat are visible.</span>
 				</div>
 
 				<div class="pvc-divider"></div>

@@ -32,7 +32,7 @@ class PV_Renderer_Offcanvas implements PV_Renderer_Interface {
 	}
 
 	public static function get_description(): string {
-		return __( 'Video opens in a branded slide-in drawer — no page reload.', 'pv-youtube-importer' );
+		return __( 'Video opens in a branded slide-in drawer with no page reload.', 'pv-youtube-importer' );
 	}
 
 	public static function get_required_tier(): string {

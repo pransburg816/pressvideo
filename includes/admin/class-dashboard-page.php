@@ -57,8 +57,8 @@ class PV_Dashboard_Page {
 			<?php if ( $last ) : ?>
 				<span class="pv-list-stat">
 					<?php esc_html_e( 'Last import:', 'pv-youtube-importer' ); ?>
-					<strong><?php echo esc_html( human_time_diff( $last['time'], time() ) . ' ' . __( 'ago', 'pv-youtube-importer' ) ); ?></strong>
-					&mdash; <?php echo esc_html( sprintf(
+					<strong><?php echo esc_html( human_time_diff( $last['time'], time() ) . ' ' . __( 'ago', 'pv-youtube-importer' ) ); ?></strong>,
+					<?php echo esc_html( sprintf(
 						__( '%1$d imported, %2$d skipped', 'pv-youtube-importer' ),
 						$last['imported'],
 						$last['skipped']

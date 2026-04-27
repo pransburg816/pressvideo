@@ -79,7 +79,7 @@
 			.then(function (r) { return r.json(); })
 			.then(function (data) {
 				if (!data.success) {
-					if (liveTextEl) liveTextEl.textContent = data.data && data.data.message ? data.data.message : 'Could not check — configure API key and Channel ID in Settings.';
+					if (liveTextEl) liveTextEl.textContent = data.data && data.data.message ? data.data.message : 'Could not check. Configure your API key and Channel ID in Settings.';
 					liveStatusEl.classList.add('pvc-live-status--off');
 					return;
 				}
@@ -174,7 +174,7 @@
 			sectionId    : 'pvc-section-live-banner',
 			icon         : '🔴',
 			title        : 'Sitewide Live Banner',
-			body         : 'When your YouTube channel goes live, a full-width strip automatically appears at the top of every page on your site with a Watch Live link. Visitors dismiss it per-stream — it won\'t nag them again for the same broadcast.',
+			body         : 'When your YouTube channel goes live, a full-width strip automatically appears at the top of every page on your site with a Watch Live link. Visitors dismiss it per-stream and it won\'t appear again for the same broadcast.',
 			step         : '1 of 2',
 			isLast       : false,
 			calloutClass : 'pvc-preview-callout--banner',
@@ -184,7 +184,7 @@
 			sectionId    : 'pvc-section-new-video',
 			icon         : '🎬',
 			title        : 'New Video Alerts',
-			body         : 'Whenever new videos are imported to your library, a small toast notification slides in once per visitor — a gentle nudge to check out your latest content. They dismiss it on their own and won\'t see it again.',
+			body         : 'Whenever new videos are imported to your library, a small toast notification slides in once per visitor as a gentle nudge to check out your latest content. They dismiss it on their own and won\'t see it again.',
 			step         : '2 of 2',
 			isLast       : true,
 			calloutClass : 'pvc-preview-callout--toast',
@@ -524,7 +524,7 @@
 						var btn = document.createElement('button');
 						btn.type      = 'button';
 						btn.className = 'pvc-swatch';
-						btn.title     = item.name + ' — ' + item.color;
+						btn.title     = item.name + ': ' + item.color;
 						btn.style.background = item.color;
 						btn.setAttribute('data-color', item.color);
 						btn.addEventListener('click', function () {

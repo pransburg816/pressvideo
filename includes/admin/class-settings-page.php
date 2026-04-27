@@ -274,7 +274,7 @@ class PV_Settings_Page {
 									          class="large-text" rows="6"
 									          placeholder="PLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"><?php echo esc_textarea( $settings['import_playlists'] ?? '' ); ?></textarea>
 									<p class="pv-field-row__desc">
-										<?php esc_html_e( 'One playlist ID or full playlist URL per line. Use this for private or unlisted playlists your channel auto-importer cannot discover. Already-imported videos are always skipped — re-running the importer with the same IDs is safe.', 'pv-youtube-importer' ); ?>
+										<?php esc_html_e( 'One playlist ID or full playlist URL per line. Use this for private or unlisted playlists your channel auto-importer cannot discover. Already-imported videos are always skipped, so re-running the importer with the same IDs is safe.', 'pv-youtube-importer' ); ?>
 									</p>
 								</div>
 							</div>
@@ -300,7 +300,7 @@ class PV_Settings_Page {
 								<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
 								<div>
 									<strong><?php esc_html_e( 'AI coaching is included in your Platinum plan', 'pv-youtube-importer' ); ?></strong>
-									<p><?php esc_html_e( 'No API key needed — AI insights are powered automatically. Optionally add your own Anthropic key below to use a personal account instead.', 'pv-youtube-importer' ); ?></p>
+									<p><?php esc_html_e( 'No API key needed. AI insights are powered automatically. Optionally add your own Anthropic key below to use a personal account instead.', 'pv-youtube-importer' ); ?></p>
 								</div>
 							</div>
 						<?php else : ?>
@@ -311,7 +311,7 @@ class PV_Settings_Page {
 									<p>
 										<?php esc_html_e( 'Add your own Anthropic API key below (Gold+), or', 'pv-youtube-importer' ); ?>
 										<a href="https://pressvideo.com" target="_blank" rel="noopener"><?php esc_html_e( 'upgrade to Platinum', 'pv-youtube-importer' ); ?></a>
-										<?php esc_html_e( 'to have it included automatically — no key required.', 'pv-youtube-importer' ); ?>
+										<?php esc_html_e( 'to have it included automatically with no key required.', 'pv-youtube-importer' ); ?>
 									</p>
 								</div>
 							</div>
@@ -342,7 +342,7 @@ class PV_Settings_Page {
 									<p class="pv-field-row__desc">
 										<?php printf(
 											wp_kses(
-												__( 'Your personal key from <a href="%s" target="_blank" rel="noopener">console.anthropic.com</a>. Optional for Platinum — required for Gold. Stored securely, never shared.', 'pv-youtube-importer' ),
+												__( 'Your personal key from <a href="%s" target="_blank" rel="noopener">console.anthropic.com</a>. Optional for Platinum, required for Gold. Stored securely, never shared.', 'pv-youtube-importer' ),
 												[ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ] ]
 											),
 											'https://console.anthropic.com/'

@@ -43,7 +43,7 @@ class PV_Import_UI {
 		);
 
 		if ( $result['limit_reached'] ) {
-			$message .= ' ' . __( 'Video limit reached — upgrade to import more.', 'pv-youtube-importer' );
+			$message .= ' ' . __( 'Video limit reached. Upgrade to import more.', 'pv-youtube-importer' );
 		}
 
 		if ( ! empty( $result['errors'] ) ) {
