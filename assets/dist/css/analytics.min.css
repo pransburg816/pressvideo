@@ -1748,6 +1748,64 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	flex-shrink: 0;
 }
 
+/* ── Tooltip ? button ─────────────────────────────────────── */
+.pva-tip-btn {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	border: 1px solid rgba(255,255,255,0.18);
+	background: rgba(255,255,255,0.06);
+	color: rgba(255,255,255,0.4);
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	margin-left: 6px;
+	transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.pva-tip-btn:hover,
+.pva-tip-btn--active {
+	background: rgba(99,102,241,0.2);
+	border-color: rgba(99,102,241,0.5);
+	color: #a5b4fc;
+}
+
+/* ── Tooltip popover ──────────────────────────────────────── */
+#pva-tip-pop {
+	position: absolute;
+	z-index: 99999;
+	width: 280px;
+	background: #1e1b4b;
+	border: 1px solid rgba(99,102,241,0.35);
+	border-radius: 10px;
+	padding: 12px 14px;
+	box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+	pointer-events: none;
+}
+#pva-tip-pop[hidden] { display: none; }
+.pva-tip-pop__arrow {
+	position: absolute;
+	top: -6px;
+	left: 20px;
+	width: 10px;
+	height: 10px;
+	background: #1e1b4b;
+	border-top: 1px solid rgba(99,102,241,0.35);
+	border-left: 1px solid rgba(99,102,241,0.35);
+	transform: rotate(45deg);
+	border-radius: 2px 0 0 0;
+}
+.pva-tip-pop__text {
+	font-size: 12.5px;
+	line-height: 1.55;
+	color: rgba(255,255,255,0.78);
+	margin: 0;
+}
+
 .pva-coach__refresh-btn {
 	display: inline-flex;
 	align-items: center;

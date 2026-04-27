@@ -236,6 +236,7 @@ class PV_Analytics_Page {
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'Play Trend', 'pv-youtube-importer' ); ?></h2>
 						<span class="pva-chart-sub" id="pva-trend-sub"></span>
+						<button class="pva-tip-btn" type="button" data-tip="trend" aria-label="<?php esc_attr_e( 'About Play Trend', 'pv-youtube-importer' ); ?>">?</button>
 					</div>
 					<div class="pv-card__body">
 						<div class="pva-chart-wrap pva-chart-wrap--trend">
@@ -251,6 +252,7 @@ class PV_Analytics_Page {
 				<div class="pv-card">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'Top Videos', 'pv-youtube-importer' ); ?></h2>
+						<button class="pva-tip-btn" type="button" data-tip="top-videos" aria-label="<?php esc_attr_e( 'About Top Videos', 'pv-youtube-importer' ); ?>">?</button>
 					</div>
 					<div class="pv-card__body">
 						<div class="pva-chart-wrap pva-chart-wrap--top">
@@ -266,6 +268,7 @@ class PV_Analytics_Page {
 				<div class="pv-card">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'Watch Depth', 'pv-youtube-importer' ); ?></h2>
+						<button class="pva-tip-btn" type="button" data-tip="watch-depth" aria-label="<?php esc_attr_e( 'About Watch Depth', 'pv-youtube-importer' ); ?>">?</button>
 					</div>
 					<div class="pv-card__body">
 						<div class="pva-chart-wrap pva-chart-wrap--donut">
@@ -285,6 +288,7 @@ class PV_Analytics_Page {
 				<div class="pv-card pva-table-row__all">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'All Videos', 'pv-youtube-importer' ); ?></h2>
+						<button class="pva-tip-btn" type="button" data-tip="all-videos" aria-label="<?php esc_attr_e( 'About All Videos', 'pv-youtube-importer' ); ?>">?</button>
 					</div>
 					<div class="pva-table-wrap" id="pva-table-wrap">
 						<div class="pva-loading" style="padding:16px">
@@ -302,6 +306,12 @@ class PV_Analytics_Page {
 
 			<!-- ── Row 4: What to Feature (JS-rendered) ──────────── -->
 			<div id="pva-feature-section" hidden></div>
+
+			<!-- ── Shared tooltip popover ────────────────────────── -->
+			<div id="pva-tip-pop" role="tooltip" hidden>
+				<div class="pva-tip-pop__arrow"></div>
+				<p class="pva-tip-pop__text"></p>
+			</div>
 
 			<!-- ── Empty State ────────────────────────────────── -->
 			<div class="pva-empty" id="pva-empty" hidden>
