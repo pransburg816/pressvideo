@@ -59,7 +59,7 @@ function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas' ): string
 				<div class="pv-bc-card__thumb-placeholder"><?php echo $play_svg; // phpcs:ignore ?></div>
 			<?php endif; ?>
 			<?php if ( $dur ) : ?><span class="pv-bc-card__dur"><?php echo esc_html( $dur ); ?></span><?php endif; ?>
-			<?php if ( $yt && 'offcanvas' === $display ) : ?>
+			<?php if ( $yt && in_array( $display, [ 'offcanvas', 'modal' ], true ) ) : ?>
 				<button class="pv-trigger pv-bc-card__play"
 				        data-youtube-id="<?php echo esc_attr( $yt ); ?>"
 				        data-embed-url="<?php echo esc_attr( $embed ); ?>"

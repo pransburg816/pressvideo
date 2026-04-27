@@ -407,7 +407,7 @@ class PV_Plugin {
 
 		// Build playlist JSON for offcanvas card buttons
 		$pv_playlist_json = '[]';
-		if ( 'offcanvas' === $display && ! empty( $q->posts ) ) {
+		if ( in_array( $display, [ 'offcanvas', 'modal' ], true ) && ! empty( $q->posts ) ) {
 			$_pl = [];
 			foreach ( $q->posts as $_p ) {
 				$_yt = get_post_meta( $_p->ID, '_pv_youtube_id', true );

@@ -111,7 +111,7 @@ class PV_Offcanvas {
 				$wp_q->the_post();
 				$post_id    = get_the_ID();
 				$youtube_id = get_post_meta( $post_id, '_pv_youtube_id', true );
-				if ( ! $youtube_id && 'offcanvas' === $display_mode ) continue;
+				if ( ! $youtube_id && in_array( $display_mode, [ 'offcanvas', 'modal' ], true ) ) continue;
 				$accent    = pv_resolve_accent_color( $post_id );
 				$embed_url = $youtube_id ? 'https://www.youtube.com/embed/' . $youtube_id . '?rel=0&modestbranding=1' : '';
 				$duration  = get_post_meta( $post_id, '_pv_duration', true );
@@ -141,7 +141,7 @@ class PV_Offcanvas {
 					$cards .= '<p class="pv-card__hover-excerpt">' . esc_html( $excerpt ) . '</p>';
 					$cards .= '<a href="' . esc_url( get_permalink() ) . '" class="pv-card__read-more">Read more &rarr;</a>';
 				}
-				if ( 'offcanvas' === $display_mode && $youtube_id ) {
+				if ( in_array( $display_mode, [ 'offcanvas', 'modal' ], true ) && $youtube_id ) {
 					$cards .= '<button class="pv-trigger pv-card__watch-btn"'
 						. ' data-youtube-id="' . esc_attr( $youtube_id ) . '"'
 						. ' data-embed-url="' . esc_attr( $embed_url ) . '"'
