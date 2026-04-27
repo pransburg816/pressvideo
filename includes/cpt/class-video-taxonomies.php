@@ -10,6 +10,11 @@ class PV_Video_Taxonomies {
 	public function register(): void {
 		add_action( 'init', [ $this, 'register_taxonomies' ] );
 
+		// Noindex all PV taxonomy archive pages — they are filtered views of the
+		// main archive (thin/duplicate content). The main /pv-videos/ archive
+		// stays indexed and captures all SEO value.
+		add_filter( 'wp_robots', [ $this, 'noindex_tax_archives' ] );
+
 		// Color picker fields on taxonomy add/edit forms.
 		foreach ( [ 'pv_tag', 'pv_category' ] as $tax ) {
 			add_action( "{$tax}_add_form_fields",  [ $this, 'add_color_field' ] );
@@ -20,6 +25,13 @@ class PV_Video_Taxonomies {
 			add_filter( "manage_edit-{$tax}_columns",          [ $this, 'add_color_column' ] );
 			add_filter( "manage_{$tax}_custom_column",         [ $this, 'render_color_column' ], 10, 3 );
 		}
+	}
+
+	public function noindex_tax_archives( array $robots ): array {
+		if ( is_tax( [ 'pv_tag', 'pv_category', 'pv_series', 'pv_type' ] ) ) {
+			$robots['noindex'] = true;
+		}
+		return $robots;
 	}
 
 	public function register_taxonomies(): void {

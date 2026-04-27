@@ -28,13 +28,8 @@ const PLUGIN_LOCAL  = __dirname;
 const REMOTE_PLUGIN = '/devsite.iac-intl.com/public_html/wp-content/plugins/pv-youtube-importer';
 
 const FILES = [
-	// JS
-	'assets/dist/js/analytics-admin.min.js',
-	// CSS
-	'assets/dist/css/analytics.min.css',
 	// PHP
-	'includes/admin/class-analytics-page.php',
-	'includes/analytics/class-analytics-tracker.php',
+	'includes/cpt/class-video-taxonomies.php',
 	// PHP — core
 	'pv-youtube-importer.php',
 	'includes/class-plugin.php',
