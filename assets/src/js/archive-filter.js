@@ -126,6 +126,22 @@
 
 	/* ── Click interceptors (per-page + pagination) ──────────────────── */
 	document.addEventListener('click', function (e) {
+		// Aside pill links (tag/category archives) and back link: spinner + navigate
+		var navLink = e.target.closest('.pv-aside-pill, .pv-pl-nav-back');
+		if (navLink && navLink.href) {
+			e.preventDefault();
+			var dest = navLink.href;
+			var wrap = document.getElementById('pv-layout-wrap');
+			if (wrap) {
+				wrap.style.minHeight = wrap.offsetHeight + 'px';
+				wrap.innerHTML = '<div class="pv-ajax-spinner"><span class="pv-spin"></span></div>';
+			}
+			requestAnimationFrame(function () {
+				requestAnimationFrame(function () { window.location.href = dest; });
+			});
+			return;
+		}
+
 		// Skip broadcast's own per-page buttons — handled inside setupBroadcast
 		var perPageBtn = e.target.closest('.pv-per-page__btn');
 		if (perPageBtn && !perPageBtn.closest('.pv-broadcast') && !perPageBtn.classList.contains('pv-per-page__btn--active')) {

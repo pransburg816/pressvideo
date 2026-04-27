@@ -68,7 +68,8 @@ $pv_cards_views    = isset( $pv_settings['cards_show_views'] )    ? (bool) $pv_s
 $pv_search_align   = $pv_settings['search_bar_align'] ?? 'center';
 $_pv_label_show    = isset( $pv_settings['grid_label_show'] ) ? (bool) $pv_settings['grid_label_show'] : false;
 $_pv_label_text    = $pv_settings['grid_label_text'] ?? __( 'Latest Videos', 'pv-youtube-importer' );
-if ( is_tax( [ 'pv_tag', 'pv_category', 'pv_series', 'pv_type' ] ) ) {
+$pv_is_tax_archive = is_tax( [ 'pv_tag', 'pv_category', 'pv_series', 'pv_type' ] );
+if ( $pv_is_tax_archive ) {
 	$_queried_term = get_queried_object();
 	if ( $_queried_term instanceof WP_Term ) {
 		$_pv_label_text = $_queried_term->name . ' ' . __( 'Videos', 'pv-youtube-importer' );
@@ -476,7 +477,15 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 					</div>
 				</div>
 
-				<?php if ( ! empty( $pv_nav_playlists ) ) : ?>
+				<?php if ( $pv_is_tax_archive ) : ?>
+				<!-- Back to main archive on taxonomy pages -->
+				<div class="pv-pl-nav">
+					<a href="<?php echo esc_url( get_post_type_archive_link( 'pv_youtube' ) ); ?>" class="pv-pl-nav-back">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+						<?php esc_html_e( 'Back to All Latest', 'pv-youtube-importer' ); ?>
+					</a>
+				</div>
+				<?php elseif ( ! empty( $pv_nav_playlists ) ) : ?>
 				<!-- Playlist nav -->
 				<div class="pv-pl-nav" role="group" aria-label="<?php esc_attr_e( 'Browse playlists', 'pv-youtube-importer' ); ?>">
 					<button class="pv-pl-nav-btn pv-pl-nav-btn--active" data-pl-id="" type="button">
@@ -493,7 +502,8 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 				<?php endif; ?>
 				<?php endif; /* end non-broadcast control bar */ ?>
 
-				<div id="pv-layout-wrap">
+				<div id="pv-layout-wrap"<?php if ( $pv_is_tax_archive ) echo ' data-pv-entry="1"'; ?>>
+
 
 				<?php if ( 'featured' === $pv_layout ) :
 					the_post();
