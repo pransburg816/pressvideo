@@ -304,9 +304,56 @@
 		tourReplayBtn.addEventListener('click', startTour);
 	}
 
+	var PVC_TIPS = {
+		'detect-theme': 'Scans your active theme\'s stylesheets and Customizer settings for brand colors. CSS custom properties declared as --variable-name: #hex are picked up automatically. Click any swatch to apply it as your accent color.',
+	};
+
+	var pvcTipPop    = document.getElementById('pvc-tip-pop');
+	var pvcTipText   = pvcTipPop ? pvcTipPop.querySelector('.pvc-tip-pop__text')  : null;
+	var pvcTipArrow  = pvcTipPop ? pvcTipPop.querySelector('.pvc-tip-pop__arrow') : null;
+	var pvcActiveBtn = null;
+
+	function showPvcTip(btn, key) {
+		if (!pvcTipPop || !pvcTipText) return;
+		if (pvcActiveBtn === btn && !pvcTipPop.hidden) {
+			pvcTipPop.hidden = true;
+			btn.classList.remove('pvc-tooltip-btn--active');
+			pvcActiveBtn = null;
+			return;
+		}
+		if (pvcActiveBtn) pvcActiveBtn.classList.remove('pvc-tooltip-btn--active');
+		pvcActiveBtn = btn;
+		btn.classList.add('pvc-tooltip-btn--active');
+		pvcTipText.textContent = PVC_TIPS[key] || '';
+		pvcTipPop.hidden = false;
+
+		var rect = btn.getBoundingClientRect();
+		var popW = 260;
+		var left = rect.left + rect.width / 2 - popW / 2;
+		left = Math.max(8, Math.min(left, document.documentElement.clientWidth - popW - 8));
+		pvcTipPop.style.top  = (rect.bottom + 8) + 'px';
+		pvcTipPop.style.left = left + 'px';
+		pvcTipPop.style.width = popW + 'px';
+		if (pvcTipArrow) pvcTipArrow.style.left = Math.max(8, (rect.left + rect.width / 2) - left - 5) + 'px';
+	}
+
+	document.addEventListener('click', function (e) {
+		var tipBtn = e.target.closest('.pvc-tooltip-btn[data-tip]');
+		if (tipBtn) {
+			e.stopPropagation();
+			showPvcTip(tipBtn, tipBtn.dataset.tip);
+			return;
+		}
+		if (pvcTipPop && !pvcTipPop.hidden) {
+			pvcTipPop.hidden = true;
+			if (pvcActiveBtn) { pvcActiveBtn.classList.remove('pvc-tooltip-btn--active'); pvcActiveBtn = null; }
+		}
+	});
+
 	document.querySelectorAll('.pvc-tooltip-btn').forEach(function (btn) {
 		btn.addEventListener('click', function (e) {
 			e.stopPropagation();
+			if (btn.dataset.tip) return; // handled by delegated listener above
 			var idx = parseInt(btn.dataset.tourStep, 10);
 			if (!isNaN(idx)) showTourStep(idx);
 		});

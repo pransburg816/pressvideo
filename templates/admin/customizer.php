@@ -567,10 +567,13 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 				<div class="pvc-field">
 					<span class="pvc-label">Accent Color</span>
 					<input type="text" class="pvc-color-picker" data-setting="default_accent" value="<?php echo esc_attr( $accent ); ?>">
-					<button type="button" class="pvc-detect-colors-btn" id="pvc-detect-colors-btn">
-						<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.71 5.63l-2.34-2.34a1 1 0 00-1.41 0l-3.12 3.12-1.41-1.42-1.42 1.42 1.41 1.41-6.6 6.6A2 2 0 005 16v3h3a2 2 0 001.42-.59l6.6-6.6 1.41 1.42 1.42-1.42-1.42-1.41 3.12-3.12a1 1 0 000-1.65z"/></svg>
-						Detect from theme
-					</button>
+					<div class="pvc-detect-row">
+						<button type="button" class="pvc-detect-colors-btn" id="pvc-detect-colors-btn">
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.71 5.63l-2.34-2.34a1 1 0 00-1.41 0l-3.12 3.12-1.41-1.42-1.42 1.42 1.41 1.41-6.6 6.6A2 2 0 005 16v3h3a2 2 0 001.42-.59l6.6-6.6 1.41 1.42 1.42-1.42-1.42-1.41 3.12-3.12a1 1 0 000-1.65z"/></svg>
+							<?php esc_html_e( 'Detect from theme', 'pv-youtube-importer' ); ?>
+						</button>
+						<button type="button" class="pvc-tooltip-btn" data-tip="detect-theme" aria-label="<?php esc_attr_e( 'About Detect From Theme', 'pv-youtube-importer' ); ?>">?</button>
+					</div>
 					<div class="pvc-color-swatches" id="pvc-color-swatches" hidden></div>
 					<span class="pvc-hint">Used for buttons, highlights, and the sidebar border.</span>
 				</div>
@@ -725,3 +728,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 
 </div><!-- /.pvc-wrap -->
 <div class="pvc-toast" id="pvc-toast"></div>
+<div id="pvc-tip-pop" hidden role="tooltip">
+	<div class="pvc-tip-pop__arrow"></div>
+	<p class="pvc-tip-pop__text"></p>
+</div>

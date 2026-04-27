@@ -1107,10 +1107,50 @@ body.pv-customizer-fullscreen .wrap {
 	transition: background 0.15s, border-color 0.15s;
 	padding: 0;
 }
-.pvc-tooltip-btn:hover {
+.pvc-tooltip-btn:hover,
+.pvc-tooltip-btn--active {
 	background: rgba(79,70,229,0.38);
 	border-color: rgba(129,140,248,0.8);
 	color: #fff;
+}
+
+/* ── Detect-from-theme row (button + ? side by side) ────────────── */
+.pvc-detect-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+/* ── Inline tip popover ─────────────────────────────────────────── */
+#pvc-tip-pop {
+	position: fixed;
+	z-index: 999999;
+	width: 260px;
+	background: #1e1e2e;
+	border: 1px solid rgba(129,140,248,0.25);
+	border-radius: 8px;
+	padding: 10px 13px;
+	box-shadow: 0 8px 28px rgba(0,0,0,0.55);
+	pointer-events: none;
+}
+#pvc-tip-pop[hidden] { display: none; }
+.pvc-tip-pop__arrow {
+	position: absolute;
+	top: -5px;
+	left: 20px;
+	width: 9px;
+	height: 9px;
+	background: #1e1e2e;
+	border-left: 1px solid rgba(129,140,248,0.25);
+	border-top: 1px solid rgba(129,140,248,0.25);
+	transform: rotate(45deg);
+	border-radius: 2px 0 0 0;
+}
+.pvc-tip-pop__text {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.55;
+	color: rgba(255,255,255,0.75);
 }
 
 /* ── Preview callout overlay (tour step indicator) ──────────────── */
