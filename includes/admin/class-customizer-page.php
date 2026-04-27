@@ -216,7 +216,7 @@ class PV_Customizer_Page {
 		}
 
 		if ( empty( $colors ) ) {
-			wp_send_json_error( __( 'No theme colors found. Try setting colors in the WordPress Customizer first.', 'pv-youtube-importer' ) );
+			wp_send_json_error( __( 'No theme colors found. Colors must be set via the WordPress Customizer or a theme.json palette.', 'pv-youtube-importer' ) );
 			return;
 		}
 
