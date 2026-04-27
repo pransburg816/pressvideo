@@ -58,7 +58,7 @@ class PV_Settings_Page {
 		$clean['channel_id'] = sanitize_text_field( $input['channel_id'] ?? '' );
 
 		$clean['default_accent']    = sanitize_hex_color( $input['default_accent'] ?? '' ) ?: ( $existing['default_accent'] ?? '#4f46e5' );
-		$clean['display_mode']      = in_array( $input['display_mode'] ?? '', [ 'offcanvas', 'page' ], true )
+		$clean['display_mode']      = in_array( $input['display_mode'] ?? '', [ 'offcanvas', 'page', 'modal' ], true )
 			? $input['display_mode'] : ( $existing['display_mode'] ?? 'offcanvas' );
 		$clean['watch_page_layout'] = in_array( $input['watch_page_layout'] ?? '', [ 'hero-top', 'hero-split', 'theater' ], true )
 			? $input['watch_page_layout'] : ( $existing['watch_page_layout'] ?? 'hero-top' );
@@ -406,6 +406,38 @@ class PV_Settings_Page {
 			. '<rect x="28" y="84" width="124" height="6" rx="2" fill="#334155"/>'
 			. '<rect x="40" y="96" width="100" height="4" rx="2" fill="#e2e8f0"/>'
 			. '<rect x="52" y="105" width="76" height="4" rx="2" fill="#e2e8f0"/>'
+			. '</svg>';
+	}
+
+	public static function svg_modal(): string {
+		return '<svg viewBox="0 0 180 112" fill="none" xmlns="http://www.w3.org/2000/svg">'
+			. '<rect width="180" height="112" rx="5" fill="#f1f5f9"/>'
+			. '<rect width="180" height="20" rx="5" fill="#e2e8f0"/>'
+			. '<circle cx="12" cy="10" r="3" fill="#fca5a5"/>'
+			. '<circle cx="22" cy="10" r="3" fill="#fcd34d"/>'
+			. '<circle cx="32" cy="10" r="3" fill="#86efac"/>'
+			. '<rect x="52" y="7" width="76" height="7" rx="3.5" fill="#fff" opacity=".7"/>'
+			. '<rect x="20" y="30" width="80" height="5" rx="2" fill="#e2e8f0" opacity=".4"/>'
+			. '<rect x="20" y="40" width="60" height="4" rx="2" fill="#e2e8f0" opacity=".3"/>'
+			. '<rect x="0" y="20" width="180" height="92" fill="rgba(6,6,14,0.82)"/>'
+			. '<rect x="28" y="27" width="124" height="78" rx="8" fill="#0d0d1a"/>'
+			. '<rect x="28" y="27" width="124" height="78" rx="8" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>'
+			. '<rect x="28" y="27" width="124" height="47" rx="8" fill="#070714"/>'
+			. '<rect x="28" y="55" width="124" height="19" fill="#070714"/>'
+			. '<circle cx="90" cy="50" r="9" fill="rgba(79,70,229,0.32)"/>'
+			. '<polygon points="87,46 87,54 95,50" fill="#4f46e5"/>'
+			. '<rect x="35" y="79" width="56" height="4" rx="2" fill="rgba(255,255,255,0.72)"/>'
+			. '<rect x="35" y="87" width="40" height="3" rx="1.5" fill="rgba(255,255,255,0.25)"/>'
+			. '<rect x="35" y="94" width="16" height="9" rx="2" fill="#4f46e5"/>'
+			. '<rect x="54" y="94" width="16" height="9" rx="2" fill="rgba(255,255,255,0.1)"/>'
+			. '<rect x="73" y="94" width="16" height="9" rx="2" fill="rgba(255,255,255,0.1)"/>'
+			. '<circle cx="143" cy="33" r="5" fill="rgba(255,255,255,0.1)"/>'
+			. '<line x1="141" y1="31" x2="145" y2="35" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"/>'
+			. '<line x1="145" y1="31" x2="141" y2="35" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"/>'
+			. '<circle cx="18" cy="54" r="7" fill="rgba(255,255,255,0.1)"/>'
+			. '<polygon points="20,50 20,58 16,54" fill="rgba(255,255,255,0.55)"/>'
+			. '<circle cx="162" cy="54" r="7" fill="rgba(255,255,255,0.1)"/>'
+			. '<polygon points="160,50 160,58 164,54" fill="rgba(255,255,255,0.55)"/>'
 			. '</svg>';
 	}
 

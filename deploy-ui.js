@@ -47,13 +47,16 @@ const FILES = [
 	'includes/display/class-renderer-factory.php',
 	'includes/display/class-renderer-interface.php',
 	'includes/display/renderers/class-renderer-offcanvas.php',
+	'includes/display/renderers/class-renderer-modal.php',
 	'includes/display/class-video-grid.php',
+	'includes/display/class-modal.php',
 	// Templates
 	'templates/single/single-video.php',
 	'templates/archive/archive-videos.php',
 	'templates/archive/partials/card.php',
 	'templates/archive/partials/list-item.php',
 	'templates/offcanvas/video-offcanvas.php',
+	'templates/modal/video-modal.php',
 	'templates/single/layouts/hero-top.php',
 	'templates/single/layouts/hero-split.php',
 	'templates/single/layouts/theater.php',
@@ -80,6 +83,7 @@ const FILES = [
 	'assets/dist/css/watch-page.min.css',
 	'assets/dist/css/admin-customizer.min.css',
 	'assets/dist/css/analytics.min.css',
+	'assets/dist/css/modal.min.css',
 	// JS
 	'assets/dist/js/admin-color-picker.min.js',
 	'assets/dist/js/offcanvas.min.js',
@@ -89,6 +93,7 @@ const FILES = [
 	'assets/dist/js/pv-notifications.js',
 	'assets/dist/js/pv-tracker.min.js',
 	'assets/dist/js/analytics-admin.min.js',
+	'assets/dist/js/modal.min.js',
 ];
 
 async function main() {

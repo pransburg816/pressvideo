@@ -10,6 +10,7 @@ class PV_Renderer_Factory {
 	/** @var array<string, class-string<PV_Renderer_Interface>> */
 	private static array $map = [
 		'offcanvas'    => 'PV_Renderer_Offcanvas',
+		'modal'        => 'PV_Renderer_Modal',
 		// Phase 3 renderers — registered here once built:
 		// 'lightbox'     => 'PV_Renderer_Lightbox',
 		// 'grid-hero'    => 'PV_Renderer_Grid_Hero',

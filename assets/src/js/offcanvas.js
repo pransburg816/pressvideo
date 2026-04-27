@@ -154,10 +154,6 @@
 					attachSentinel();
 				} else {
 					detachSentinel();
-					var endEl = document.createElement('p');
-					endEl.className = 'pv-rail__end';
-					endEl.textContent = res.total + ' videos total';
-					railEl.appendChild(endEl);
 				}
 			})
 			.catch(function () {

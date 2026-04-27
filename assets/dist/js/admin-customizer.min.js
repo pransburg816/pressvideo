@@ -167,6 +167,7 @@
 	var tourReplayBtn     = document.getElementById('pvc-tour-replay-btn');
 	var previewCalloutEl  = document.getElementById('pvc-preview-callout');
 	var previewCalloutLbl = document.getElementById('pvc-preview-callout-label');
+	var frameDimEl        = document.getElementById('pvc-frame-dim');
 
 	var TOUR_STEPS = [
 		{
@@ -196,12 +197,14 @@
 	function setPreviewCallout(step) {
 		if (!previewCalloutEl) return;
 		previewCalloutEl.className = 'pvc-preview-callout';
+		if (frameDimEl) frameDimEl.classList.remove('pvc-frame-dim--visible');
 		if (!step) return;
 		previewCalloutEl.classList.add(step.calloutClass);
 		if (previewCalloutLbl) previewCalloutLbl.textContent = step.calloutLabel;
 		requestAnimationFrame(function () {
 			requestAnimationFrame(function () {
 				previewCalloutEl.classList.add('pvc-preview-callout--visible');
+				if (frameDimEl) frameDimEl.classList.add('pvc-frame-dim--visible');
 			});
 		});
 	}
@@ -300,6 +303,14 @@
 	if (tourReplayBtn) {
 		tourReplayBtn.addEventListener('click', startTour);
 	}
+
+	document.querySelectorAll('.pvc-tooltip-btn').forEach(function (btn) {
+		btn.addEventListener('click', function (e) {
+			e.stopPropagation();
+			var idx = parseInt(btn.dataset.tourStep, 10);
+			if (!isNaN(idx)) showTourStep(idx);
+		});
+	});
 
 	// ── Segmented controls (generic — uses data-for to find hidden input) ──
 	document.querySelectorAll('.pvc-segment').forEach(function (seg) {

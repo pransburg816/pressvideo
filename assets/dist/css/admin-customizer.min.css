@@ -15,7 +15,6 @@ body.pv-customizer-fullscreen #wpcontent {
 /* When PV aside shell is active: full height, aside handles the left offset */
 body.pv-fullscreen-ui.pv-customizer-fullscreen #wpcontent {
 	height: 100vh;
-	margin-left: 240px !important;
 }
 /* Hide the internal nav rail — pv-aside provides navigation */
 body.pv-fullscreen-ui.pv-customizer-fullscreen .pvc-nav-rail {
@@ -23,7 +22,7 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen .pvc-nav-rail {
 }
 /* Reclaim the nav rail width for panel content */
 body.pv-fullscreen-ui.pv-customizer-fullscreen .pvc-sidebar {
-	width: 300px;
+	width: 530px;
 }
 /* Anchor pvc-wrap to the true top of its container regardless of any WP-injected
    elements (hr.wp-header-end, screen-reader headings) that add phantom spacing */
@@ -311,8 +310,9 @@ body.pv-customizer-fullscreen .wrap {
 .pvc-settings {
 	flex: 1;
 	overflow-y: auto;
-	scrollbar-color: rgba(255,255,255,0.12) transparent;
+	scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
 	scrollbar-width: thin;
+	margin-left: 130px;
 }
 
 /* ── Panels ─────────────────────────────────────────────────────── */
@@ -1084,6 +1084,35 @@ body.pv-customizer-fullscreen .wrap {
 	pointer-events: none;
 }
 
+/* ── Alert section header (toggle + ? button row) ───────────────── */
+.pvc-aside-section-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px;
+}
+.pvc-tooltip-btn {
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	border: 1px solid rgba(129,140,248,0.45);
+	background: rgba(79,70,229,0.18);
+	color: #a5b4fc;
+	font-size: 0.65rem;
+	font-weight: 700;
+	font-family: inherit;
+	line-height: 1;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s;
+	padding: 0;
+}
+.pvc-tooltip-btn:hover {
+	background: rgba(79,70,229,0.38);
+	border-color: rgba(129,140,248,0.8);
+	color: #fff;
+}
+
 /* ── Preview callout overlay (tour step indicator) ──────────────── */
 .pvc-preview-callout {
 	position: absolute;
@@ -1103,11 +1132,27 @@ body.pv-customizer-fullscreen .wrap {
 	left: 0;
 	right: 0;
 	height: 52px;
-	border: 2px solid rgba(239,68,68,0.65);
+	border: 2px solid rgba(239,68,68,0.8);
 	border-top: 3px solid #ef4444;
-	background: rgba(239,68,68,0.06);
+	background: rgba(239,68,68,0.18);
 	border-radius: 0;
 	animation: pvc-callout-pulse 2s ease-in-out infinite;
+}
+.pvc-preview-callout--banner::after {
+	content: '▼  LIVE BANNER APPEARS HERE  ▼';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 0.55rem;
+	font-weight: 800;
+	letter-spacing: 0.14em;
+	color: #fff;
+	background: rgba(0,0,0,0.45);
+	padding: 3px 10px;
+	border-radius: 4px;
+	white-space: nowrap;
+	pointer-events: none;
 }
 .pvc-preview-callout--banner .pvc-preview-callout__label {
 	position: absolute;
@@ -1130,9 +1175,22 @@ body.pv-customizer-fullscreen .wrap {
 	right: 18px;
 	width: 220px;
 	height: 58px;
-	border: 2px solid rgba(79,70,229,0.7);
-	background: rgba(79,70,229,0.07);
+	border: 2px solid rgba(79,70,229,0.9);
+	background: rgba(79,70,229,0.2);
 	animation: pvc-callout-pulse 2s ease-in-out infinite;
+}
+.pvc-preview-callout--toast::after {
+	content: '▲  TOAST APPEARS HERE  ▲';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 0.55rem;
+	font-weight: 800;
+	letter-spacing: 0.14em;
+	color: rgba(129,140,248,0.95);
+	white-space: nowrap;
+	pointer-events: none;
 }
 .pvc-preview-callout--toast .pvc-preview-callout__label {
 	position: absolute;
@@ -1207,6 +1265,20 @@ body.pv-customizer-fullscreen .wrap {
 	animation: pvc-spin 0.7s linear infinite;
 }
 @keyframes pvc-spin { to { transform: rotate(360deg); } }
+
+/* ── Iframe dim overlay (shown during tour steps) ───────────────── */
+.pvc-frame-dim {
+	position: absolute;
+	inset: 0;
+	z-index: 15;
+	background: rgba(0,0,0,0.62);
+	opacity: 0;
+	transition: opacity 0.35s;
+	pointer-events: none;
+}
+.pvc-frame-dim--visible {
+	opacity: 1;
+}
 
 /* ── Notifications feature tour ─────────────────────────────────── */
 

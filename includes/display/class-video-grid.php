@@ -91,7 +91,7 @@ class PV_Video_Grid {
 					<p class="pv-card__hover-excerpt"><?php echo esc_html( $desc ); ?></p>
 					<a href="<?php echo esc_url( get_permalink( $post->ID ) ); ?>" class="pv-card__read-more">Read more &rarr;</a>
 				<?php endif; ?>
-				<?php if ( 'offcanvas' === $display ) : ?>
+				<?php if ( in_array( $display, [ 'offcanvas', 'modal' ], true ) ) : ?>
 					<button class="pv-trigger pv-card__watch-btn"
 					        aria-label="<?php echo esc_attr( sprintf( __( 'Watch %s', 'pv-youtube-importer' ), $post->post_title ) ); ?>"
 					        data-video-id="<?php echo esc_attr( $post->ID ); ?>"

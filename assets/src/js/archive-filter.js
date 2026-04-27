@@ -423,6 +423,7 @@
 					applyBcHomeSort();
 					var _hppp = homePanel ? homePanel.querySelector('.pv-per-page') : null;
 					if (_hppp) _hppp.hidden = (d.total || 0) < 20;
+					if (bcHomeSortBar) bcHomeSortBar.hidden = (d.total || 0) <= 1;
 				})
 				.catch(function () {
 					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load playlist.</p>';
@@ -481,6 +482,7 @@
 					applyBcHomeSort();
 					var _hppp = homePanel ? homePanel.querySelector('.pv-per-page') : null;
 					if (_hppp) _hppp.hidden = (d.total || 0) < 20;
+					if (bcHomeSortBar) bcHomeSortBar.hidden = false;
 				})
 				.catch(function () {
 					bcHomeGrid.innerHTML = '<p class="pv-no-videos">Could not load videos.</p>';
@@ -519,6 +521,7 @@
 					updateBcPerPageBtns(videosPanel, perPage);
 					var _vppp = videosPanel ? videosPanel.querySelector('.pv-per-page') : null;
 					if (_vppp) _vppp.hidden = (d.total || 0) < 20;
+					if (bcSortBar) bcSortBar.hidden = (d.total || 0) <= 1;
 				})
 				.catch(function () {
 					bcVideosGrid.innerHTML = '<p class="pv-no-videos">Could not load videos.</p>';

@@ -177,6 +177,9 @@ class PV_Offcanvas {
 	public function maybe_render(): void {
 		if ( ! did_action( 'pv_player_enqueued' ) ) return;
 
+		$settings = get_option( 'pv_settings', [] );
+		if ( ( $settings['display_mode'] ?? 'offcanvas' ) !== 'offcanvas' ) return;
+
 		$template = $this->locate_template( 'offcanvas/video-offcanvas.php' );
 		if ( $template ) {
 			include $template;

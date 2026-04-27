@@ -75,7 +75,7 @@ $_pv_show_all    = 'all' === $_pv_pp_raw;
 $_pv_cur_pp      = $_pv_show_all ? 'all' : ( in_array( (int) $_pv_pp_raw, $_pv_pp_allowed, true ) ? (int) $_pv_pp_raw : 20 );
 $_pv_pp_base_url = remove_query_arg( 'paged' );
 
-if ( 'offcanvas' === $pv_display ) {
+if ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) {
 	do_action( 'pv_player_enqueued' );
 }
 
@@ -122,7 +122,7 @@ if ( empty( $pv_nav_playlists ) && is_array( $_pv_ch_pls_cache ) ) {
 }
 
 $pv_playlist_json = '[]';
-if ( 'offcanvas' === $pv_display && ! empty( $GLOBALS['wp_query']->posts ) ) {
+if ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) && ! empty( $GLOBALS['wp_query']->posts ) ) {
 	$_pv_pl = [];
 	foreach ( (array) $GLOBALS['wp_query']->posts as $_p ) {
 		$_yt = get_post_meta( $_p->ID, '_pv_youtube_id', true );
@@ -523,7 +523,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 									<?php if ( $sp_cat ) : ?><span class="pv-badge" style="background:<?php echo esc_attr( $sp_accent ); ?>;"><?php echo esc_html( $sp_cat ); ?></span><?php endif; ?>
 									<h2 class="pv-spotlight-hero__title"><a href="<?php echo esc_url( get_permalink( $sp_id ) ); ?>"><?php echo esc_html( get_the_title( $sp_id ) ); ?></a></h2>
 									<?php if ( $sp_exc ) : ?><p class="pv-spotlight-hero__excerpt"><?php echo esc_html( $sp_exc ); ?></p><?php endif; ?>
-									<?php if ( $sp_yt && 'offcanvas' === $pv_display ) : ?>
+									<?php if ( $sp_yt && in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) : ?>
 										<button class="pv-trigger pv-btn" data-youtube-id="<?php echo esc_attr( $sp_yt ); ?>" data-embed-url="<?php echo esc_attr( $sp_embed ); ?>" data-title="<?php echo esc_attr( get_the_title( $sp_id ) ); ?>" data-description="<?php echo esc_attr( $sp_exc ); ?>" data-accent="<?php echo esc_attr( $sp_accent ); ?>" data-playlist="<?php echo esc_attr( $pv_playlist_json ); ?>"><svg class="pv-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> <?php esc_html_e( 'Watch Now', 'pv-youtube-importer' ); ?></button>
 									<?php else : ?>
 										<a href="<?php echo esc_url( get_permalink( $sp_id ) ); ?>" class="pv-btn"><svg class="pv-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> <?php esc_html_e( 'Watch Video', 'pv-youtube-importer' ); ?></a>
@@ -535,9 +535,9 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							<div class="pv-spotlight-rail">
 								<?php foreach ( $sp_rail as $_sr ) : ?>
 									<a href="<?php echo esc_url( $_sr['link'] ); ?>"
-									   class="pv-spotlight-rail-card<?php echo ( 'offcanvas' === $pv_display && $_sr['yt'] ) ? ' pv-trigger' : ''; ?>"
+									   class="pv-spotlight-rail-card<?php echo ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) && $_sr['yt'] ) ? ' pv-trigger' : ''; ?>"
 									   data-category="<?php echo esc_attr( $_sr['cat_slug'] ); ?>"
-									   <?php if ( 'offcanvas' === $pv_display && $_sr['yt'] ) : ?>
+									   <?php if ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) && $_sr['yt'] ) : ?>
 									   data-youtube-id="<?php echo esc_attr( $_sr['yt'] ); ?>"
 									   data-embed-url="<?php echo esc_attr( $_sr['embed'] ); ?>"
 									   data-title="<?php echo esc_attr( $_sr['title'] ); ?>"
@@ -690,7 +690,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 									<div class="pv-bc-card__thumb-placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>
 								<?php endif; ?>
 								<?php if ( $_bc_dur ) : ?><span class="pv-bc-card__dur"><?php echo esc_html( $_bc_dur ); ?></span><?php endif; ?>
-								<?php if ( $_bc_yt && 'offcanvas' === $pv_display ) : ?>
+								<?php if ( $_bc_yt && in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) : ?>
 									<button class="pv-trigger pv-bc-card__play"
 									        data-youtube-id="<?php echo esc_attr( $_bc_yt ); ?>"
 									        data-embed-url="<?php echo esc_attr( $_bc_embed ); ?>"

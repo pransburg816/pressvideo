@@ -229,7 +229,7 @@ class PV_Customizer_Page {
 		$map_enum = [
 			'archive_layout'    => [ 'grid', 'list', 'featured', 'compact', 'wall', 'spotlight', 'broadcast' ],
 			'content_width'     => [ 'wide', 'medium', 'narrow', '' ],
-			'display_mode'      => [ 'offcanvas', 'page' ],
+			'display_mode'      => [ 'offcanvas', 'page', 'modal' ],
 			'watch_page_layout' => [ 'hero-top', 'hero-split', 'theater' ],
 			'hero_title_size'   => [ '', 'lg', 'xl' ],
 			'hero_overlay'      => [ 'light', 'medium', 'dark' ],

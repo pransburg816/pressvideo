@@ -247,8 +247,15 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 								<span class="pvc-mode-card__name">Watch Page<span class="pvc-mode-card__desc">Navigates to a dedicated video page</span></span>
 							</label>
 						</div>
+						<div class="pvc-mode-card">
+							<input type="radio" name="pvc_mode" id="pvcm-modal" value="modal" data-setting="display_mode" <?php checked( $mode, 'modal' ); ?>>
+							<label class="pvc-mode-card__label" for="pvcm-modal">
+								<span class="pvc-mode-card__preview"><?php echo PV_Settings_Page::svg_modal(); // phpcs:ignore ?></span>
+								<span class="pvc-mode-card__name">Modal Popup<span class="pvc-mode-card__desc">Cinematic overlay with filmstrip</span></span>
+							</label>
+						</div>
+					</div>
 				</div>
-			</div>
 
 				<div class="pvc-field pvc-sublayout <?php echo 'page' !== $mode ? 'pvc-collapsed' : ''; ?>" id="pvc-watch-layout-field">
 					<span class="pvc-label">Watch Page Layout</span>
@@ -642,20 +649,26 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 				<div class="pvc-divider"></div>
 
 				<div class="pvc-aside-section" id="pvc-section-live-banner">
-					<label class="pvc-aside-toggle">
-						<input type="checkbox" data-setting="live_banner_enabled" <?php checked( $live_banner_on ); ?>>
-						<span class="pvc-aside-toggle__label">Sitewide Live Banner</span>
-					</label>
+					<div class="pvc-aside-section-head">
+						<label class="pvc-aside-toggle">
+							<input type="checkbox" data-setting="live_banner_enabled" <?php checked( $live_banner_on ); ?>>
+							<span class="pvc-aside-toggle__label">Sitewide Live Banner</span>
+						</label>
+						<button class="pvc-tooltip-btn" type="button" data-tour-step="0" aria-label="<?php esc_attr_e( 'About Sitewide Live Banner', 'pv-youtube-importer' ); ?>">?</button>
+					</div>
 					<span class="pvc-hint">Shows a dismissable banner at the top of every page on your site when your channel is live. Visitors can close it and it won&rsquo;t reappear for that stream.</span>
 				</div>
 
 				<div class="pvc-divider"></div>
 
 				<div class="pvc-aside-section" id="pvc-section-new-video">
-					<label class="pvc-aside-toggle">
-						<input type="checkbox" data-setting="new_video_notify" <?php checked( $nv_on ); ?>>
-						<span class="pvc-aside-toggle__label">New Video Notification</span>
-					</label>
+					<div class="pvc-aside-section-head">
+						<label class="pvc-aside-toggle">
+							<input type="checkbox" data-setting="new_video_notify" <?php checked( $nv_on ); ?>>
+							<span class="pvc-aside-toggle__label">New Video Notification</span>
+						</label>
+						<button class="pvc-tooltip-btn" type="button" data-tour-step="1" aria-label="<?php esc_attr_e( 'About New Video Notification', 'pv-youtube-importer' ); ?>">?</button>
+					</div>
 					<div class="pvc-sub-fields<?php echo $nv_on ? '' : ' pvc-collapsed'; ?>">
 						<div class="pvc-field" style="margin-top:12px;">
 							<span class="pvc-label">Notification Message</span>
@@ -694,6 +707,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 			<div class="pvc-frame-wrap" id="pvc-frame-wrap" data-device="desktop">
 				<iframe id="pvc-preview-iframe" src="about:blank" title="Archive preview"></iframe>
 				<div class="pvc-frame-loading" id="pvc-frame-loading"><div class="pvc-frame-loading__spinner"></div></div>
+				<div class="pvc-frame-dim" id="pvc-frame-dim"></div>
 				<!-- Tour preview callout — points to where banner/toast appear in the iframe -->
 				<div class="pvc-preview-callout" id="pvc-preview-callout">
 					<span class="pvc-preview-callout__label" id="pvc-preview-callout-label"></span>

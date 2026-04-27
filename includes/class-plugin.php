@@ -25,7 +25,9 @@ class PV_Plugin {
 		require_once PV_PLUGIN_DIR . 'includes/display/class-renderer-interface.php';
 		require_once PV_PLUGIN_DIR . 'includes/display/class-renderer-factory.php';
 		require_once PV_PLUGIN_DIR . 'includes/display/renderers/class-renderer-offcanvas.php';
+		require_once PV_PLUGIN_DIR . 'includes/display/renderers/class-renderer-modal.php';
 		require_once PV_PLUGIN_DIR . 'includes/display/class-offcanvas.php';
+		require_once PV_PLUGIN_DIR . 'includes/display/class-modal.php';
 		require_once PV_PLUGIN_DIR . 'includes/display/class-video-grid.php';
 		require_once PV_PLUGIN_DIR . 'includes/display/class-shortcodes.php';
 		require_once PV_PLUGIN_DIR . 'includes/display/class-template-tags.php';
@@ -58,6 +60,7 @@ class PV_Plugin {
 		// Frontend display first.
 		( new PV_Shortcodes() )->register();
 		( new PV_Offcanvas() )->register();
+		( new PV_Modal() )->register();
 
 		// CPT & taxonomies
 		( new PV_Videos_CPT() )->register();
@@ -740,6 +743,12 @@ class PV_Plugin {
 			PV_VERSION
 		);
 		wp_enqueue_style(
+			'pv-modal',
+			PV_PLUGIN_URL . 'assets/dist/css/modal.min.css',
+			[],
+			PV_VERSION
+		);
+		wp_enqueue_style(
 			'pv-grid',
 			PV_PLUGIN_URL . 'assets/dist/css/grid.min.css',
 			[],
@@ -761,6 +770,13 @@ class PV_Plugin {
 		wp_localize_script( 'pv-offcanvas', 'pvOffcanvas', [
 			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 		] );
+		wp_enqueue_script(
+			'pv-modal',
+			PV_PLUGIN_URL . 'assets/dist/js/modal.min.js',
+			[],
+			PV_VERSION,
+			true
+		);
 		wp_enqueue_script(
 			'pv-lazy-video',
 			PV_PLUGIN_URL . 'assets/dist/js/lazy-video.min.js',

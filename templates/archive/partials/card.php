@@ -7,7 +7,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 $youtube_id = get_post_meta( get_the_ID(), '_pv_youtube_id', true );
-if ( ! $youtube_id && 'offcanvas' === $pv_display ) return;
+if ( ! $youtube_id && in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) return;
 $accent    = pv_resolve_accent_color( get_the_ID() );
 $embed_url = $youtube_id ? 'https://www.youtube.com/embed/' . $youtube_id . '?rel=0&modestbranding=1' : '';
 $duration  = get_post_meta( get_the_ID(), '_pv_duration', true );
@@ -31,7 +31,7 @@ $cat_slug  = $cat ? $cat->slug : '';
 			<p class="pv-card__hover-excerpt"><?php echo esc_html( $excerpt ); ?></p>
 			<a href="<?php the_permalink(); ?>" class="pv-card__read-more">Read more &rarr;</a>
 		<?php endif; ?>
-		<?php if ( 'offcanvas' === $pv_display && $youtube_id ) : ?>
+		<?php if ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) && $youtube_id ) : ?>
 			<button class="pv-trigger pv-card__watch-btn"
 			        data-youtube-id="<?php echo esc_attr( $youtube_id ); ?>"
 			        data-embed-url="<?php echo esc_attr( $embed_url ); ?>"
