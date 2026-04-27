@@ -667,7 +667,8 @@
 	line-height: 1.4;
 	white-space: nowrap;
 }
-.pv-aside-pill:hover {
+.pv-aside-pill:hover,
+.pv-aside-pill--active {
 	background: rgba(79,70,229,0.2);
 	border-color: var(--pv-accent, #4f46e5);
 	color: #fff;

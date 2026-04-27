@@ -68,6 +68,12 @@ $pv_cards_views    = isset( $pv_settings['cards_show_views'] )    ? (bool) $pv_s
 $pv_search_align   = $pv_settings['search_bar_align'] ?? 'center';
 $_pv_label_show    = isset( $pv_settings['grid_label_show'] ) ? (bool) $pv_settings['grid_label_show'] : false;
 $_pv_label_text    = $pv_settings['grid_label_text'] ?? __( 'Latest Videos', 'pv-youtube-importer' );
+if ( is_tax( [ 'pv_tag', 'pv_category', 'pv_series', 'pv_type' ] ) ) {
+	$_queried_term = get_queried_object();
+	if ( $_queried_term instanceof WP_Term ) {
+		$_pv_label_text = $_queried_term->name . ' ' . __( 'Videos', 'pv-youtube-importer' );
+	}
+}
 
 // Per-page selector
 $_pv_pp_allowed  = [ 10, 20, 50 ];
@@ -949,8 +955,10 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 				<div class="pv-aside-section">
 					<h3 class="pv-aside-heading"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg> <?php echo esc_html( $pv_aside_tg_label ); ?></h3>
 					<div class="pv-aside-pills pv-aside-pills--tags">
-						<?php foreach ( $pv_aside_tags as $_tag ) : $_tag_link = get_term_link( $_tag ); if ( is_wp_error( $_tag_link ) ) continue; ?>
-							<a href="<?php echo esc_url( $_tag_link ); ?>" class="pv-aside-pill pv-aside-pill--tag"><?php echo esc_html( $_tag->name ); ?></a>
+						<?php foreach ( $pv_aside_tags as $_tag ) : $_tag_link = get_term_link( $_tag ); if ( is_wp_error( $_tag_link ) ) continue;
+							$_tag_active = ( is_tax( 'pv_tag' ) && get_queried_object_id() === $_tag->term_id );
+						?>
+							<a href="<?php echo esc_url( $_tag_link ); ?>" class="pv-aside-pill pv-aside-pill--tag<?php echo $_tag_active ? ' pv-aside-pill--active' : ''; ?>"<?php echo $_tag_active ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $_tag->name ); ?></a>
 						<?php endforeach; ?>
 					</div>
 				</div>
