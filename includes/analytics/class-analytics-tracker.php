@@ -327,7 +327,12 @@ class PV_Analytics_Tracker {
 
 		if ( ! $json || ! isset( $json['content'][0]['text'] ) ) return [];
 
-		$parsed = json_decode( $json['content'][0]['text'], true );
+		$text = trim( $json['content'][0]['text'] );
+		// Strip markdown code fences if the model wraps the JSON despite instructions
+		$text = preg_replace( '/^```(?:json)?\s*/i', '', $text );
+		$text = preg_replace( '/\s*```$/', '', $text );
+
+		$parsed = json_decode( trim( $text ), true );
 
 		if ( ! $parsed || ! isset( $parsed['moves'] ) || ! is_array( $parsed['moves'] ) ) return [];
 
