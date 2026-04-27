@@ -177,6 +177,7 @@
 	var searchClear   = main.querySelector('.pv-search-clear');
 	var searchResults = main.querySelector('.pv-search-results');
 	var searchMsg     = main.querySelector('.pv-search-results-msg');
+	var searchEscape  = main.querySelector('.pv-search-escape');
 	var searchTimer   = null;
 	var searchActive  = false;
 
@@ -225,6 +226,15 @@
 		}
 	}
 
+	var searchBackBtn = main.querySelector('.pv-search-back-btn');
+	if (searchBackBtn) {
+		searchBackBtn.addEventListener('click', function () {
+			if (searchInput) searchInput.value = '';
+			if (searchClear) searchClear.hidden = true;
+			clearSearch();
+		});
+	}
+
 	function doSearch(q) {
 		if (!pvAjaxUrl || !searchResults) return;
 
@@ -233,6 +243,7 @@
 			main.classList.add('pv-archive-main--searching');
 		}
 
+		if (searchEscape) searchEscape.hidden = false;
 		searchResults.hidden = false;
 		searchResults.innerHTML = '<div class="pv-search-loading"><span class="pv-scroll-spinner"></span></div>';
 		if (searchMsg) { searchMsg.textContent = 'Searching\u2026'; searchMsg.hidden = false; }
@@ -269,6 +280,7 @@
 		if (!searchActive) return;
 		searchActive = false;
 		main.classList.remove('pv-archive-main--searching');
+		if (searchEscape) searchEscape.hidden = true;
 		if (searchResults) { searchResults.hidden = true; searchResults.innerHTML = ''; }
 		if (searchMsg) searchMsg.hidden = true;
 		reIndexWall();
@@ -777,12 +789,22 @@
 		}
 
 		// ── Broadcast search ──────────────────────────────────────────
-		var bcInput   = bc.querySelector('.pv-bc-search-input');
-		var bcClear   = bc.querySelector('.pv-bc-search-clear');
-		var bcResults = bc.querySelector('.pv-bc-search-results');
-		var bcMsg     = bc.querySelector('.pv-bc-search-msg');
+		var bcInput      = bc.querySelector('.pv-bc-search-input');
+		var bcClear      = bc.querySelector('.pv-bc-search-clear');
+		var bcResults    = bc.querySelector('.pv-bc-search-results');
+		var bcMsg        = bc.querySelector('.pv-bc-search-msg');
+		var bcEscape     = bc.querySelector('.pv-bc-search-escape');
+		var bcEscapeBtn  = bc.querySelector('.pv-bc-search-back-btn');
 		var bcActive  = false;
 		var bcTimer   = null;
+
+		if (bcEscapeBtn) {
+			bcEscapeBtn.addEventListener('click', function () {
+				if (bcInput) bcInput.value = '';
+				if (bcClear) bcClear.hidden = true;
+				clearBcSearch();
+			});
+		}
 
 		if (bcInput) {
 			bcInput.addEventListener('input', function () {
@@ -805,6 +827,7 @@
 		function doBcSearch(q) {
 			if (!pvAjaxUrl || !bcResults) return;
 			if (!bcActive) { bcActive = true; bc.classList.add('pv-bc-searching'); }
+			if (bcEscape) bcEscape.hidden = false;
 			bcResults.hidden = false;
 			bcResults.innerHTML = '<div class="pv-search-loading"><span class="pv-scroll-spinner"></span></div>';
 			if (bcMsg) { bcMsg.textContent = 'Searching\u2026'; bcMsg.hidden = false; }
@@ -833,6 +856,7 @@
 			if (!bcActive) return;
 			bcActive = false;
 			bc.classList.remove('pv-bc-searching');
+			if (bcEscape) bcEscape.hidden = true;
 			if (bcResults) { bcResults.hidden = true; bcResults.innerHTML = ''; }
 			if (bcMsg) bcMsg.hidden = true;
 		}

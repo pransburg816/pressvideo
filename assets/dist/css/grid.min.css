@@ -332,6 +332,16 @@
 	border-color: var(--pv-accent, #4f46e5);
 	color: #fff;
 }
+button.pv-pl-nav-back {
+	cursor: pointer;
+	font-family: inherit;
+	appearance: none;
+	-webkit-appearance: none;
+}
+.pv-search-escape,
+.pv-bc-search-escape {
+	margin: 0 0 16px;
+}
 .pv-pl-nav-back {
 	display: inline-flex;
 	align-items: center;

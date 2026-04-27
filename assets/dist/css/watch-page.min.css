@@ -1568,7 +1568,7 @@
 }
 
 /* Hide all archive content while in search mode — show only search UI */
-.pv-archive-main--searching > *:not(.pv-search-wrap):not(.pv-search-results-msg):not(.pv-search-results) {
+.pv-archive-main--searching > *:not(.pv-search-wrap):not(.pv-search-results-msg):not(.pv-search-escape):not(.pv-search-results) {
 	display: none !important;
 }
 
