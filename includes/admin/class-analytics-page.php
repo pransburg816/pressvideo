@@ -69,27 +69,31 @@ class PV_Analytics_Page {
 
 		$ai_source = 'none';
 
-		if ( $has_ai_key ) {
-			$transient   = 'pv_ai_insights_' . get_current_user_id() . '_30';
-			$cached      = get_transient( $transient );
-			$cache_empty = is_array( $cached ) && empty( $cached );
+		$ai_summary = null;
 
-			if ( false === $cached || $cache_empty ) {
-				if ( $cache_empty ) {
-					delete_transient( $transient ); // purge stale empty entry so next load is clean
-				}
+		if ( $has_ai_key ) {
+			$transient      = 'pv_ai_insights_' . get_current_user_id() . '_30';
+			$cached         = get_transient( $transient );
+			$cache_empty    = is_array( $cached ) && empty( $cached );
+			$cache_old_fmt  = is_array( $cached ) && ! empty( $cached ) && ! isset( $cached['moves'] );
+
+			if ( false === $cached || $cache_empty || $cache_old_fmt ) {
+				delete_transient( $transient );
 				$tracker  = new PV_Analytics_Tracker();
 				$data     = PV_Analytics_Tracker::get_dashboard_data( 30 );
-				$ai_moves = $tracker->get_ai_insights( $data, $api_key, 30 );
+				$result   = $tracker->get_ai_insights( $data, $api_key, 30 );
+				$ai_moves = $result['moves']   ?? [];
+				$ai_summary = $result['summary'] ?? null;
 				if ( ! empty( $ai_moves ) ) {
-					set_transient( $transient, $ai_moves, DAY_IN_SECONDS );
+					set_transient( $transient, $result, DAY_IN_SECONDS );
 					$ai_source = 'fresh';
 				} else {
 					$ai_source = 'api_failed';
 				}
 			} else {
-				$ai_moves  = is_array( $cached ) ? $cached : [];
-				$ai_source = 'cached';
+				$ai_moves   = $cached['moves']   ?? [];
+				$ai_summary = $cached['summary'] ?? null;
+				$ai_source  = 'cached';
 			}
 		}
 
@@ -100,6 +104,7 @@ class PV_Analytics_Page {
 			'siteName'    => get_bloginfo( 'name' ),
 			'siteUrl'     => home_url(),
 			'aiMoves'     => $ai_moves,
+			'aiSummary'   => $ai_summary,
 			'hasAiKey'    => $has_ai_key,
 			'isPlatinum'  => $is_platinum,
 			'settingsUrl' => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),

@@ -263,14 +263,16 @@ class PV_Analytics_Tracker {
 			return;
 		}
 
-		$days  = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
-		$data  = self::get_dashboard_data( $days );
-		$moves = $this->get_ai_insights( $data, $api_key, $days );
+		$days   = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
+		$data   = self::get_dashboard_data( $days );
+		$result = $this->get_ai_insights( $data, $api_key, $days );
 
 		$transient = 'pv_ai_insights_' . get_current_user_id() . '_' . $days;
-		set_transient( $transient, $moves, DAY_IN_SECONDS );
+		if ( ! empty( $result['moves'] ) ) {
+			set_transient( $transient, $result, DAY_IN_SECONDS );
+		}
 
-		wp_send_json_success( $moves );
+		wp_send_json_success( $result );
 	}
 
 	// ── AI coaching via Claude API ────────────────────────────────────────
@@ -286,7 +288,7 @@ class PV_Analytics_Tracker {
 		$trend_vals = implode( ',', array_map( 'intval', $trend['values'] ?? [] ) );
 
 		$prompt = "You are a video content growth coach for a WordPress creator who embeds their YouTube videos on their own site.\n\n"
-			. "Analyze these {$days}-day analytics and provide exactly 3 specific, actionable recommendations.\n\n"
+			. "Analyze these {$days}-day analytics. Respond ONLY with valid JSON — no markdown, no backticks, no extra text.\n\n"
 			. "Data:\n"
 			. '- Total plays: ' . (int) ( $stats['total_plays'] ?? 0 )
 				. ' | Unique videos: ' . (int) ( $stats['unique_videos'] ?? 0 )
@@ -297,12 +299,17 @@ class PV_Analytics_Tracker {
 				. ', 100%=' . (int) ( $depth['d100'] ?? 0 ) . "\n"
 			. '- Top video: "' . $top_title . '" (' . $top_plays . " plays)\n"
 			. '- Daily trend (' . $days . ' days): [' . $trend_vals . "]\n\n"
-			. "Respond ONLY with valid JSON — no markdown, no backticks, no extra text:\n"
-			. '{"moves":[{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
-			. "title: 5 words max, action-oriented verb phrase\n"
-			. "edge: one sentence — the specific insight from their data\n"
-			. "script: 2-3 sentences — exactly what to do or say\n"
-			. "impact: one sentence — expected measurable outcome";
+			. "Return this exact JSON structure:\n"
+			. '{"summary":{"grade":"...","title":"...","body":"...","tips":[{"title":"...","desc":"..."},{"title":"...","desc":"..."},{"title":"...","desc":"..."}]},"moves":[{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
+			. "summary.grade: exactly one of: Getting Started, Growing, Holding Steady, Needs Attention, Strong Momentum\n"
+			. "summary.title: 8 words max — direct headline about their current situation\n"
+			. "summary.body: 2 sentences — what is happening and what to prioritize, using their real numbers\n"
+			. "summary.tips[].title: 4 words max action label\n"
+			. "summary.tips[].desc: 1-2 sentences using their specific data — no generic advice\n\n"
+			. "moves[].title: 5 words max, action-oriented verb phrase\n"
+			. "moves[].edge: one sentence — the specific insight from their data\n"
+			. "moves[].script: 2-3 sentences — exactly what to do or say\n"
+			. "moves[].impact: one sentence — expected measurable outcome";
 
 		$response = wp_remote_post( 'https://api.anthropic.com/v1/messages', [
 			'timeout' => 15,
@@ -313,7 +320,7 @@ class PV_Analytics_Tracker {
 			],
 			'body' => wp_json_encode( [
 				'model'      => 'claude-haiku-4-5-20251001',
-				'max_tokens' => 600,
+				'max_tokens' => 900,
 				'messages'   => [
 					[ 'role' => 'user', 'content' => $prompt ],
 				],
@@ -336,7 +343,7 @@ class PV_Analytics_Tracker {
 
 		if ( ! $parsed || ! isset( $parsed['moves'] ) || ! is_array( $parsed['moves'] ) ) return [];
 
-		return array_map( function ( $move ) {
+		$moves = array_map( function ( $move ) {
 			return [
 				'title'  => sanitize_text_field( $move['title']  ?? '' ),
 				'edge'   => sanitize_textarea_field( $move['edge']   ?? '' ),
@@ -344,5 +351,20 @@ class PV_Analytics_Tracker {
 				'impact' => sanitize_textarea_field( $move['impact'] ?? '' ),
 			];
 		}, array_slice( $parsed['moves'], 0, 3 ) );
+
+		$raw_summary = $parsed['summary'] ?? [];
+		$summary = [
+			'grade' => sanitize_text_field( $raw_summary['grade'] ?? '' ),
+			'title' => sanitize_text_field( $raw_summary['title'] ?? '' ),
+			'body'  => sanitize_textarea_field( $raw_summary['body']  ?? '' ),
+			'tips'  => array_map( function ( $tip ) {
+				return [
+					'title' => sanitize_text_field( $tip['title'] ?? '' ),
+					'desc'  => sanitize_textarea_field( $tip['desc']  ?? '' ),
+				];
+			}, array_slice( (array) ( $raw_summary['tips'] ?? [] ), 0, 3 ) ),
+		];
+
+		return [ 'moves' => $moves, 'summary' => $summary ];
 	}
 }
