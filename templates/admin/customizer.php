@@ -623,7 +623,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 				<div class="pvc-test-video-field" id="pvc-test-video-field">
 					<span class="pvc-sub-label">Test Video ID <span class="pvc-sub-label-opt">(optional)</span></span>
 					<input type="text" class="pvc-input pvc-input--sm" id="pvc-test-video-id"
-						placeholder="e.g. dQw4w9WgXcQ" maxlength="11" autocomplete="off" spellcheck="false">
+						value="jdXXf7Up73Y" placeholder="11-char YouTube video ID" maxlength="11" autocomplete="off" spellcheck="false">
 					<span class="pvc-hint">Paste a live YouTube video ID to load the real chat. Leave blank to use the layout placeholder.</span>
 				</div>
 
