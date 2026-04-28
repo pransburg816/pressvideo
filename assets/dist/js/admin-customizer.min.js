@@ -133,7 +133,18 @@
 			if (el) el.classList.toggle('pvc-aside-section--muted', on);
 		});
 
-		reloadIframe();
+		if (on) {
+			// Save current settings to transient first so live_hide_content and
+			// archive_layout are fresh before the force-live reload fires.
+			clearTimeout(saveTimer);
+			var fd = new FormData();
+			fd.append('action', 'pv_save_preview');
+			fd.append('nonce', cfg.nonce);
+			fd.append('settings', JSON.stringify(collectSettings()));
+			fetch(cfg.ajaxUrl, { method: 'POST', body: fd }).then(reloadIframe);
+		} else {
+			reloadIframe();
+		}
 	}
 
 	if (testModeBtn) {
