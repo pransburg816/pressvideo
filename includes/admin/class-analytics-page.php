@@ -138,7 +138,7 @@ class PV_Analytics_Page {
 		$settings = get_option( 'pv_settings', [] );
 		$ga_id    = sanitize_text_field( $settings['ga_measurement_id'] ?? '' );
 		$settings_url = admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' );
-		$_cbtn = '<button class="pva-collapse-btn" type="button" aria-expanded="true" aria-label="' . esc_attr__( 'Collapse section', 'pv-youtube-importer' ) . '"><svg class="pva-collapse-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></button>';
+		$_cbtn = '<button class="pva-expand-btn" type="button" aria-label="' . esc_attr__( 'Focus this block', 'pv-youtube-importer' ) . '"><svg class="pva-expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>';
 		?>
 		<div class="wrap pva-wrap">
 		<div class="pva-inner">

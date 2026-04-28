@@ -1951,8 +1951,8 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-pick:last-child { border-bottom: none; }
 }
 
-/* ── Block collapse / expand ──────────────────────────────── */
-.pva-collapse-btn {
+/* ── Block focus / expand ─────────────────────────────────── */
+.pva-expand-btn {
 	background: none;
 	border: none;
 	cursor: pointer;
@@ -1963,30 +1963,24 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	margin-left: auto;
+	margin-left: 6px;
 	line-height: 1;
 	transition: color 0.15s, background 0.15s;
 }
-.pva-collapse-btn:hover {
+.pva-expand-btn:hover {
 	color: rgba(255,255,255,0.72);
 	background: rgba(255,255,255,0.07);
 }
-.pva-collapse-icon {
+.pva-expand-icon {
 	display: block;
-	transition: transform 0.2s ease;
 }
-.pv-card--collapsed .pva-collapse-icon {
-	transform: rotate(-90deg);
-}
-.pv-card--collapsed .pv-card__body,
-.pv-card--collapsed .pva-table-wrap {
-	display: none;
-}
-.pva-charts-row > .pv-card.pv-card--collapsed,
-.pva-table-row__all.pv-card--collapsed {
+/* Focused card: override fixed heights and take full width */
+.pva-focus-card.pv-card {
 	height: auto !important;
+	min-height: 480px;
+	width: 100%;
 }
-.pva-ai-row > div:has(.pv-card--collapsed),
-.pva-table-row__least:has(.pv-card--collapsed) {
-	height: auto;
+/* Focused row: single-column layout so the card fills the full width */
+.pva-focus-row {
+	display: block !important;
 }
