@@ -9,10 +9,11 @@
       "Bash(grep -n \"^</div>$\\\\|^\t</div>$\" templates/archive/archive-videos.php)",
       "Bash(node -e ' *)",
       "Bash(rm \"C:/Users/pransburg/iac-dev/plugins/pressvideo/.git/index.lock\")",
-      "WebSearch",
-      "Bash(rm -f .git/index.lock)",
-      "Bash(node --check assets/dist/js/analytics-admin.min.js)",
-      "Bash(echo \"Exit code: $?\")"
+      "Bash(php -r ' *)",
+      "Bash(git commit *)",
+      "Bash(cp \"C:\\\\Users\\\\pransburg\\\\iac-dev\\\\plugins\\\\pressvideo\\\\assets\\\\src\\\\js\\\\modal.js\" \"C:\\\\Users\\\\pransburg\\\\iac-dev\\\\plugins\\\\pressvideo\\\\assets\\\\dist\\\\js\\\\modal.min.js\")",
+      "Bash(cp \"C:\\\\Users\\\\pransburg\\\\iac-dev\\\\plugins\\\\pressvideo\\\\assets\\\\src\\\\js\\\\archive-filter.js\" \"C:\\\\Users\\\\pransburg\\\\iac-dev\\\\plugins\\\\pressvideo\\\\assets\\\\dist\\\\js\\\\archive-filter.min.js\")",
+      "Bash(node deploy-mu-flush.js)"
     ]
   }
 }

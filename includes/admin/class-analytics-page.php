@@ -61,7 +61,7 @@ class PV_Analytics_Page {
 		);
 		wp_enqueue_style(
 			'pv-analytics',
-			PV_PLUGIN_URL . 'assets/dist/css/analytics.min.css',
+			PV_PLUGIN_URL . 'assets/dist/css/analytics-v2.min.css',
 			[ 'pv-admin' ],
 			PV_VERSION
 		);

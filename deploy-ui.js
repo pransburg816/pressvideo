@@ -28,6 +28,7 @@ const PLUGIN_LOCAL  = __dirname;
 const REMOTE_PLUGIN = '/devsite.iac-intl.com/public_html/wp-content/plugins/pv-youtube-importer';
 
 const FILES = [
+	'pv-flush.php',
 	'assets/dist/js/admin-customizer.min.js',
 	'pv-youtube-importer.php',
 	'includes/class-plugin.php',
@@ -68,6 +69,8 @@ const FILES = [
 	'includes/admin/class-analytics-page.php',
 	// PHP — analytics
 	'includes/analytics/class-analytics-tracker.php',
+	'includes/analytics/class-youtube-oauth.php',
+	'includes/analytics/class-youtube-analytics-api.php',
 	// Admin template
 	'templates/admin/customizer.php',
 	// PHP — import
@@ -83,6 +86,7 @@ const FILES = [
 	'assets/dist/css/watch-page.min.css',
 	'assets/dist/css/admin-customizer.min.css',
 	'assets/dist/css/analytics.min.css',
+	'assets/dist/css/analytics-v2.min.css',
 	'assets/dist/css/modal.min.css',
 	// JS
 	'assets/dist/js/admin-color-picker.min.js',
