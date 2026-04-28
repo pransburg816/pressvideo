@@ -698,10 +698,20 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 		</div><!-- /.pvc-body -->
 
 		<div class="pvc-sidebar-footer">
-			<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="pvc-exit-link">
-				<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-				Exit to WP Admin
-			</a>
+			<nav class="pvc-footer-nav" aria-label="PressVideo sections">
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ) ); ?>" class="pvc-footer-nav-btn" title="Dashboard">
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+					<span>Dashboard</span>
+				</a>
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ); ?>" class="pvc-footer-nav-btn" title="Settings">
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06z"/></svg>
+					<span>Settings</span>
+				</a>
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ) ); ?>" class="pvc-footer-nav-btn" title="Analytics">
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>
+					<span>Analytics</span>
+				</a>
+			</nav>
 		</div>
 	</div><!-- /.pvc-sidebar -->
 

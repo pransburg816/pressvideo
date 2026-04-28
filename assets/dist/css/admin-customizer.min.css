@@ -102,28 +102,38 @@ body.pv-customizer-fullscreen .wrap {
 	flex-shrink: 0;
 }
 
-/* ── Sidebar footer (Exit link) ─────────────────────────────────── */
+/* ── Sidebar footer nav (Dashboard / Settings / Analytics) ──────── */
 .pvc-sidebar-footer {
-	padding: 8px 10px 10px;
+	padding: 6px 8px 8px;
 	border-top: 1px solid rgba(255,255,255,0.06);
 	flex-shrink: 0;
 }
-.pvc-exit-link {
+.pvc-footer-nav {
 	display: flex;
+	gap: 2px;
+}
+.pvc-footer-nav-btn {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
 	align-items: center;
-	gap: 8px;
-	padding: 8px 10px;
+	gap: 4px;
+	padding: 7px 4px 6px;
 	border-radius: 7px;
-	font-size: 0.75rem;
-	color: rgba(255,255,255,0.28);
+	color: rgba(255,255,255,0.32);
 	text-decoration: none;
+	font-size: 0.62rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
 	transition: background 0.15s, color 0.15s;
+	white-space: nowrap;
+	overflow: hidden;
 }
-.pvc-exit-link:hover {
-	background: rgba(255,255,255,0.06);
-	color: rgba(255,255,255,0.6);
+.pvc-footer-nav-btn:hover {
+	background: rgba(255,255,255,0.07);
+	color: rgba(255,255,255,0.85);
 }
-.pvc-exit-link svg { flex-shrink: 0; }
+.pvc-footer-nav-btn svg { flex-shrink: 0; }
 
 .pvc-header-actions {
 	display: flex;
