@@ -165,9 +165,18 @@ class PV_Analytics_Page {
 	}
 
 	public function render_page(): void {
-		$settings = get_option( 'pv_settings', [] );
-		$ga_id    = sanitize_text_field( $settings['ga_measurement_id'] ?? '' );
+		$settings     = get_option( 'pv_settings', [] );
+		$ga_id        = sanitize_text_field( $settings['ga_measurement_id'] ?? '' );
 		$settings_url = admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' );
+
+		$is_platinum         = PV_Tier::meets( 'platinum' );
+		$yt_connected        = $is_platinum && PV_YouTube_OAuth::is_connected();
+		$yt_has_creds        = $is_platinum && PV_YouTube_OAuth::has_credentials();
+		$yt_auth_url         = ( $is_platinum && $yt_has_creds && ! $yt_connected )
+			? PV_YouTube_OAuth::get_auth_url()
+			: '';
+		$yt_disconnect_nonce = $yt_connected ? wp_create_nonce( 'pv_yt_disconnect' ) : '';
+
 		$_cbtn = '<button class="pva-expand-btn" type="button" aria-label="' . esc_attr__( 'Focus this block', 'pv-youtube-importer' ) . '"><svg class="pva-expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>';
 		?>
 		<div class="wrap pva-wrap">
