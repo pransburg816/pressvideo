@@ -71,10 +71,10 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 	<div class="pvc-sidebar">
 
 		<div class="pvc-header">
-			<div class="pvc-logo">
+			<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ) ); ?>" class="pvc-logo" title="Back to Dashboard">
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
 				PressVideo
-			</div>
+			</a>
 			<div class="pvc-header-actions">
 				<button id="pvc-refresh-btn" class="pvc-icon-btn" title="Refresh preview">
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
@@ -696,6 +696,13 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 		</div><!-- /.pvc-settings -->
 
 		</div><!-- /.pvc-body -->
+
+		<div class="pvc-sidebar-footer">
+			<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube' ) ); ?>" class="pvc-exit-link">
+				<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+				Exit to WP Admin
+			</a>
+		</div>
 	</div><!-- /.pvc-sidebar -->
 
 	<!-- ── Preview Pane ───────────────────────────────────── -->

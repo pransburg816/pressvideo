@@ -1185,11 +1185,16 @@ body.pv-fullscreen-ui #wpcontent {
 	min-height: 100vh;
 }
 
+/* Customizer mode: hide the aside — tabs in the settings panel serve as nav */
+body.pv-fullscreen-ui.pv-customizer-fullscreen #pv-aside {
+	display: none !important;
+}
 /* Customizer needs fixed height + overflow:hidden for the split panel */
 body.pv-fullscreen-ui.pv-customizer-fullscreen #wpcontent {
 	height: 100vh !important;
 	min-height: unset;
 	overflow: hidden;
+	margin-left: 0 !important;
 }
 body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	height: 100%;
