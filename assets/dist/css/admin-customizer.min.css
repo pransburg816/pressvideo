@@ -16,10 +16,7 @@ body.pv-customizer-fullscreen #wpcontent {
 body.pv-fullscreen-ui.pv-customizer-fullscreen #wpcontent {
 	height: 100vh;
 }
-/* Fullscreen customizer: wider sidebar, nav tabs remain visible */
-body.pv-fullscreen-ui.pv-customizer-fullscreen .pvc-sidebar {
-	width: 400px;
-}
+/* Fullscreen customizer: sidebar uses the default 500px width */
 /* Anchor pvc-wrap to the true top of its container regardless of any WP-injected
    elements (hr.wp-header-end, screen-reader headings) that add phantom spacing */
 body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody-content {
@@ -60,7 +57,7 @@ body.pv-customizer-fullscreen .wrap {
 
 /* ── Left: settings panel ───────────────────────────────────────── */
 .pvc-sidebar {
-	width: 340px;
+	width: 500px;
 	flex-shrink: 0;
 	background: #0f0f1e;
 	border-right: 1px solid rgba(255,255,255,0.07);
@@ -1055,6 +1052,35 @@ body.pv-customizer-fullscreen .wrap {
 	0%, 100% { opacity: 1; }
 	50% { opacity: 0.3; }
 }
+
+/* ── Preview bar nav (Dashboard / Settings / Analytics) ─────────── */
+.pvc-preview-nav {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	border-left: 1px solid rgba(255,255,255,0.08);
+	padding-left: 10px;
+	margin-left: 2px;
+	flex-shrink: 0;
+}
+.pvc-preview-nav-btn {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 5px 9px;
+	border-radius: 6px;
+	color: rgba(255,255,255,0.42);
+	text-decoration: none;
+	font-size: 0.7rem;
+	font-weight: 600;
+	white-space: nowrap;
+	transition: background 0.15s, color 0.15s;
+}
+.pvc-preview-nav-btn:hover {
+	background: rgba(255,255,255,0.09);
+	color: #fff;
+}
+.pvc-preview-nav-btn svg { flex-shrink: 0; }
 
 /* ── Live check btn disabled state (test mode) ──────────────────── */
 .pvc-live-status__refresh:disabled {

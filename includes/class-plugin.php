@@ -221,6 +221,8 @@ class PV_Plugin {
 				<span>PressVideo</span>
 			</div>
 
+			<a href="<?php echo esc_url( admin_url( 'index.php' ) ); ?>" class="pv-aside__close" aria-label="Exit to WordPress admin">&#215;</a>
+
 			<?php if ( $is_customizer ) : ?>
 
 				<div class="pv-aside__sub-header">
