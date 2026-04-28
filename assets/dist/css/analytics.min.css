@@ -1951,8 +1951,18 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-pick:last-child { border-bottom: none; }
 }
 
+/* ── Content row fade transitions ─────────────────────────── */
+.pva-ai-row,
+.pva-charts-row,
+.pva-table-row,
+#pva-feature-section,
+#pva-summary-section {
+	transition: opacity 0.22s ease;
+}
+
 /* ── Block focus / expand ─────────────────────────────────── */
 .pva-expand-btn {
+	position: relative;
 	background: none;
 	border: none;
 	cursor: pointer;
@@ -1971,16 +1981,62 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	color: rgba(255,255,255,0.72);
 	background: rgba(255,255,255,0.07);
 }
+.pva-expand-btn::after {
+	content: attr(aria-label);
+	position: absolute;
+	top: calc(100% + 6px);
+	right: 0;
+	background: rgba(10,10,26,0.95);
+	color: rgba(255,255,255,0.82);
+	font-size: 11px;
+	line-height: 1;
+	white-space: nowrap;
+	padding: 4px 8px;
+	border-radius: 4px;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.15s ease;
+	z-index: 50;
+}
+.pva-expand-btn:hover::after {
+	opacity: 1;
+}
 .pva-expand-icon {
 	display: block;
 }
-/* Focused card: override fixed heights and take full width */
+
+/* Focused card: override fixed heights, animate into place */
 .pva-focus-card.pv-card {
 	height: auto !important;
 	min-height: 480px;
 	width: 100%;
+	animation: pvaFocusIn 0.28s ease forwards;
 }
-/* Focused row: single-column layout so the card fills the full width */
+@keyframes pvaFocusIn {
+	from { opacity: 0.55; transform: scale(0.984); }
+	to   { opacity: 1;    transform: scale(1); }
+}
+
+/* Focused row: single-column so the card fills the full width */
 .pva-focus-row {
 	display: block !important;
 }
+
+/* ── First-visit focus hint ───────────────────────────────── */
+.pva-focus-hint {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: rgba(79,70,229,0.1);
+	border: 1px solid rgba(79,70,229,0.28);
+	color: rgba(255,255,255,0.6);
+	font-size: 12.5px;
+	padding: 8px 14px;
+	border-radius: 7px;
+	margin-bottom: 16px;
+	opacity: 1;
+	transition: opacity 0.5s ease;
+}
+.pva-focus-hint--out { opacity: 0; }
+.pva-focus-hint svg { flex-shrink: 0; opacity: 0.5; }
+.pva-focus-hint strong { color: rgba(255,255,255,0.82); font-style: normal; }
