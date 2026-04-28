@@ -1151,7 +1151,7 @@ body.pv-fullscreen-ui #wpfooter { display: none !important; }
 
 /* Content area: full width minus the aside, no default WP padding */
 body.pv-fullscreen-ui #wpcontent {
-	margin-left: 240px !important;
+	margin-left: 135px !important;
 	padding: 0 !important;
 }
 body.pv-fullscreen-ui #wpbody,
@@ -1199,11 +1199,13 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 /* ── PV Aside ───────────────────────────────────────────────────── */
 #pv-aside {
 	position: fixed;
-	top: 0; left: 0; bottom: 0;
-	width: 240px;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 135px;
 	z-index: 99999;
-	background: rgba(11,9,32,.98);
-	border-right: 1px solid rgba(255,255,255,.07);
+	background: rgba(11, 9, 32, .98);
+	border-right: 1px solid rgba(255, 255, 255, .07);
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -1590,4 +1592,10 @@ body.pvs-page .submit .button-primary {
 body.pvs-page .submit .button-primary:hover {
 	background: #4338ca;
 	border-color: #3730a3;
+}
+
+/* ── Mobile: hide #pv-aside, full-width content ─────────────────── */
+@media (max-width: 900px) {
+	body.pv-fullscreen-ui #pv-aside { display: none !important; }
+	body.pv-fullscreen-ui #wpcontent { margin-left: 0 !important; }
 }

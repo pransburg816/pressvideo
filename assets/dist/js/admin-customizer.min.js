@@ -18,26 +18,7 @@
 	var toastTimer  = null;
 	var iframeReady = false;
 
-	// ── Nav rail open/close toggle ────────────────────────────
-	var navRail       = document.getElementById('pvc-nav-rail');
-	var navToggleBtn  = document.getElementById('pvc-nav-toggle');
-	var navOpen       = localStorage.getItem('pvc_nav_open') === '1';
-
-	function setNavOpen(open) {
-		navOpen = open;
-		if (navRail) navRail.classList.toggle('pvc-nav-rail--open', open);
-		localStorage.setItem('pvc_nav_open', open ? '1' : '0');
-	}
-
-	setNavOpen(navOpen);
-
-	if (navToggleBtn) {
-		navToggleBtn.addEventListener('click', function () {
-			setNavOpen(!navOpen);
-		});
-	}
-
-	// ── Nav rail navigation ───────────────────────────────────
+	// ── Nav tab navigation ───────────────────────────────────
 	document.querySelectorAll('.pvc-nav-btn').forEach(function (btn) {
 		btn.addEventListener('click', function () {
 			document.querySelectorAll('.pvc-nav-btn').forEach(function (b) {

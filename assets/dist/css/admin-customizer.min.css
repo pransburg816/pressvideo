@@ -16,13 +16,9 @@ body.pv-customizer-fullscreen #wpcontent {
 body.pv-fullscreen-ui.pv-customizer-fullscreen #wpcontent {
 	height: 100vh;
 }
-/* Hide the internal nav rail — pv-aside provides navigation */
-body.pv-fullscreen-ui.pv-customizer-fullscreen .pvc-nav-rail {
-	display: none !important;
-}
-/* Reclaim the nav rail width for panel content */
+/* Fullscreen customizer: wider sidebar, nav tabs remain visible */
 body.pv-fullscreen-ui.pv-customizer-fullscreen .pvc-sidebar {
-	width: 530px;
+	width: 400px;
 }
 /* Anchor pvc-wrap to the true top of its container regardless of any WP-injected
    elements (hr.wp-header-end, screen-reader headings) that add phantom spacing */
@@ -139,9 +135,10 @@ body.pv-customizer-fullscreen .wrap {
 .pvc-publish-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 .pvc-publish-btn--saved { background: #16a34a; }
 
-/* ── Body: icon nav rail + settings panel ───────────────────────── */
+/* ── Body: nav tab bar stacked above settings panel ─────────────── */
 .pvc-body {
 	display: flex;
+	flex-direction: column;
 	flex: 1;
 	overflow: hidden;
 }
@@ -173,73 +170,42 @@ body.pv-customizer-fullscreen .wrap {
 	animation: pv-live-pulse 1.2s ease-in-out infinite;
 }
 
-/* ── Vertical nav rail (collapsible) ───────────────────────────── */
+/* ── Horizontal nav tab bar ─────────────────────────────────────── */
 .pvc-nav-rail {
-	width: 52px;
 	flex-shrink: 0;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	align-items: stretch;
-	padding: 6px 0;
-	gap: 2px;
+	padding: 5px 8px;
+	gap: 3px;
 	background: #0a0a15;
-	border-right: 1px solid rgba(255,255,255,0.06);
-	overflow: hidden;
-	transition: width 0.22s ease;
-}
-.pvc-nav-rail--open {
-	width: 148px;
-}
-
-/* ── Nav toggle button (hamburger/chevron) ──────────────────────── */
-.pvc-nav-toggle {
-	width: 100%;
-	height: 36px;
-	background: none;
-	border: none;
 	border-bottom: 1px solid rgba(255,255,255,0.06);
-	color: rgba(255,255,255,0.3);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0;
-	margin-bottom: 4px;
-	flex-shrink: 0;
-	transition: color 0.18s, background 0.18s;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none;
 }
-.pvc-nav-toggle:hover {
-	color: rgba(255,255,255,0.7);
-	background: rgba(255,255,255,0.05);
-}
-.pvc-nav-toggle__close { display: none; }
-.pvc-nav-rail--open .pvc-nav-toggle__open  { display: none; }
-.pvc-nav-rail--open .pvc-nav-toggle__close { display: block; }
+.pvc-nav-rail::-webkit-scrollbar { display: none; }
+
+.pvc-nav-toggle { display: none; }
 
 .pvc-nav-btn {
 	position: relative;
-	width: 100%;
-	height: 36px;
+	flex: 1;
+	min-height: 54px;
 	background: none;
 	border: none;
-	border-radius: 0;
-	color: rgba(255,255,255,0.32);
+	border-radius: 8px;
+	color: rgba(255,255,255,0.38);
 	cursor: pointer;
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 0;
-	padding: 0;
-	transition: background 0.18s, color 0.18s, padding 0.22s, justify-content 0.22s;
-	flex-shrink: 0;
+	gap: 4px;
+	padding: 8px 4px 7px;
+	transition: background 0.18s, color 0.18s;
 	box-sizing: border-box;
 	overflow: hidden;
-	white-space: nowrap;
-}
-.pvc-nav-rail--open .pvc-nav-btn {
-	justify-content: flex-start;
-	padding: 0 14px;
-	gap: 10px;
 }
 .pvc-nav-btn:hover {
 	background: rgba(255,255,255,0.08);
@@ -252,59 +218,30 @@ body.pv-customizer-fullscreen .wrap {
 .pvc-nav-btn--active::before {
 	content: '';
 	position: absolute;
-	left: 0;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 3px;
-	height: 20px;
+	bottom: 4px;
+	left: 22%;
+	right: 22%;
+	height: 2px;
 	background: #4f46e5;
-	border-radius: 0 3px 3px 0;
+	border-radius: 2px;
+	top: auto;
+	width: auto;
+	transform: none;
 }
 .pvc-nav-btn svg {
 	flex-shrink: 0;
 }
 .pvc-nav-label {
-	font-size: 0.72rem;
+	font-size: 0.62rem;
 	font-weight: 600;
-	letter-spacing: 0.03em;
-	opacity: 0;
-	width: 0;
+	letter-spacing: 0.02em;
+	opacity: 1;
 	overflow: hidden;
-	transition: opacity 0.15s ease 0s, width 0.22s ease;
-}
-.pvc-nav-rail--open .pvc-nav-label {
-	opacity: 1;
-	width: auto;
-	transition: opacity 0.18s ease 0.1s, width 0.22s ease;
-}
-
-/* Tooltip — only shown when rail is collapsed */
-.pvc-nav-btn::after {
-	content: attr(aria-label);
-	position: absolute;
-	left: calc(100% + 10px);
-	top: 50%;
-	transform: translateY(-50%);
-	background: #1e1b4b;
-	color: #e2e8f0;
-	font-size: 0.72rem;
-	font-weight: 600;
+	text-overflow: ellipsis;
+	max-width: 100%;
 	white-space: nowrap;
-	padding: 5px 10px;
-	border-radius: 6px;
-	border: 1px solid rgba(255,255,255,0.1);
-	pointer-events: none;
-	opacity: 0;
-	transition: opacity 0.15s;
-	z-index: 100;
-	letter-spacing: 0.04em;
 }
-.pvc-nav-btn:hover::after {
-	opacity: 1;
-}
-.pvc-nav-rail--open .pvc-nav-btn::after {
-	display: none;
-}
+.pvc-nav-btn::after { display: none; }
 
 /* ── Settings scroll area ───────────────────────────────────────── */
 .pvc-settings {
@@ -312,7 +249,6 @@ body.pv-customizer-fullscreen .wrap {
 	overflow-y: auto;
 	scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
 	scrollbar-width: thin;
-	margin-left: 130px;
 }
 
 /* ── Panels ─────────────────────────────────────────────────────── */
@@ -1512,4 +1448,23 @@ body.pv-customizer-fullscreen .wrap {
 .pvc-swatch:hover {
 	transform: scale(1.18);
 	border-color: rgba(255,255,255,0.5);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+	.pvc-preview { display: none !important; }
+	.pvc-sidebar {
+		width: 100% !important;
+		border-right: none;
+	}
+	.pvc-nav-btn {
+		min-height: 50px;
+		padding: 7px 4px 6px;
+	}
+	.pvc-nav-label { font-size: 0.6rem; }
+}
+@media (max-width: 480px) {
+	.pvc-nav-btn { min-height: 46px; }
+	.pvc-nav-label { display: none; }
+	.pvc-nav-btn { min-height: 42px; }
 }

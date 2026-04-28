@@ -92,10 +92,6 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 		<div class="pvc-body">
 
 		<nav class="pvc-nav-rail" id="pvc-nav-rail" aria-label="Settings sections">
-			<button class="pvc-nav-toggle" id="pvc-nav-toggle" aria-label="Toggle navigation">
-				<svg class="pvc-nav-toggle__open" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-				<svg class="pvc-nav-toggle__close" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-			</button>
 			<button class="pvc-nav-btn pvc-nav-btn--active" data-tab="layout" aria-label="Layout">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/></svg>
 				<span class="pvc-nav-label">Layout</span>
