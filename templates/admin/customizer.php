@@ -9,6 +9,7 @@ $layout        = $s['archive_layout']      ?? 'grid';
 $width         = $s['content_width']       ?? '';
 $mode          = $s['display_mode']        ?? 'offcanvas';
 $btn_shape     = $s['button_shape']        ?? '';
+$font_size     = $s['font_size']           ?? '';
 $watch_layout  = $s['watch_page_layout']   ?? 'hero-top';
 $accent        = $s['default_accent']      ?? '#4f46e5';
 $page_bg       = $s['page_bg_color']       ?? '';
@@ -595,6 +596,17 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					</div>
 					<input type="hidden" data-setting="button_shape" id="pvc-btn-shape-val" value="<?php echo esc_attr( $btn_shape ); ?>">
 					<span class="pvc-hint">Applies to filter chips, sort buttons, playlist nav, and per-page selectors.</span>
+				</div>
+				<div class="pvc-divider"></div>
+				<div class="pvc-field">
+					<span class="pvc-label">Font Size</span>
+					<div class="pvc-segment" data-for="pvc-font-size-val">
+						<button class="pvc-seg-btn <?php echo 'small'   === $font_size ? 'pvc-seg-btn--active' : ''; ?>" data-value="small">Small</button>
+						<button class="pvc-seg-btn <?php echo ( '' === $font_size || 'default' === $font_size ) ? 'pvc-seg-btn--active' : ''; ?>" data-value="default">Default</button>
+						<button class="pvc-seg-btn <?php echo 'large'   === $font_size ? 'pvc-seg-btn--active' : ''; ?>" data-value="large">Large</button>
+					</div>
+					<input type="hidden" data-setting="font_size" id="pvc-font-size-val" value="<?php echo esc_attr( $font_size ); ?>">
+					<span class="pvc-hint">Scales card titles, metadata, and section headings. Instant preview.</span>
 				</div>
 			</div><!-- /#pvc-panel-style -->
 

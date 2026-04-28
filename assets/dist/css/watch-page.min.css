@@ -10,6 +10,9 @@
 	--pv-accent: #4f46e5;
 	--pv-accent-light: #818cf8;
 	--pv-dark: #08080f;
+	--pv-text: #ffffff;
+	--pv-text-muted: rgba(255,255,255,0.5);
+	--pv-font-scale: 1;
 	background: #0c0c18;
 }
 
@@ -1982,9 +1985,9 @@
 }
 
 .pv-bc-card__title a {
-	color: #fff;
+	color: var(--pv-text, #fff);
 	text-decoration: none;
-	font-size: 0.87rem;
+	font-size: calc(0.87rem * var(--pv-font-scale, 1));
 	font-weight: 600;
 	line-height: 1.32;
 	display: -webkit-box;
@@ -1994,12 +1997,12 @@
 }
 
 .pv-bc-card__title a:hover {
-	color: rgba(255, 255, 255, 0.8);
+	color: var(--pv-text-muted, rgba(255,255,255,0.8));
 }
 
 .pv-bc-card__meta {
-	font-size: 0.72rem;
-	color: rgba(255, 255, 255, 0.42);
+	font-size: calc(0.72rem * var(--pv-font-scale, 1));
+	color: var(--pv-text-muted, rgba(255,255,255,0.42));
 	display: flex;
 	align-items: center;
 	gap: 5px;
@@ -2119,14 +2122,14 @@
 	min-width: 0;
 }
 .pv-section-head__title {
-	color: #fff;
-	font-size: 1rem;
+	color: var(--pv-text, #fff);
+	font-size: calc(1rem * var(--pv-font-scale, 1));
 	font-weight: 700;
 	margin: 0;
 }
 .pv-section-head__count {
-	color: rgba(255,255,255,.45);
-	font-size: .8rem;
+	color: var(--pv-text-muted, rgba(255,255,255,.45));
+	font-size: calc(.8rem * var(--pv-font-scale, 1));
 	font-weight: 500;
 	flex-shrink: 0;
 }
@@ -2413,4 +2416,29 @@
 .pvc-bc-playlist-name {
 	font-size: 0.78rem;
 	color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── Light theme overrides (data-pv-theme="light") ────────────────────── */
+[data-pv-theme="light"] .pv-search-wrap {
+	background: rgba(0,0,0,0.06);
+	border-color: rgba(0,0,0,0.14);
+}
+[data-pv-theme="light"] .pv-search-wrap:focus-within {
+	background: rgba(0,0,0,0.09);
+	border-color: rgba(0,0,0,0.28);
+}
+[data-pv-theme="light"] .pv-search-icon,
+[data-pv-theme="light"] .pv-search-mic-btn { color: rgba(0,0,0,0.4); }
+[data-pv-theme="light"] .pv-search-input { color: #111; }
+[data-pv-theme="light"] .pv-search-input::placeholder { color: rgba(0,0,0,0.35); }
+[data-pv-theme="light"] .pv-bc-chip {
+	background: rgba(0,0,0,0.06);
+	border-color: rgba(0,0,0,0.12);
+	color: rgba(0,0,0,0.65);
+}
+[data-pv-theme="light"] .pv-bc-chip:hover,
+[data-pv-theme="light"] .pv-bc-chip--active {
+	background: rgba(0,0,0,0.12);
+	color: #111;
+	border-color: rgba(0,0,0,0.25);
 }

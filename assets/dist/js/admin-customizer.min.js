@@ -359,7 +359,13 @@
 				this.classList.add('pvc-seg-btn--active');
 				var targetId = seg.dataset.for;
 				var hidden = targetId ? document.getElementById(targetId) : null;
-				if (hidden) hidden.value = this.dataset.value;
+				if (hidden) {
+					hidden.value = this.dataset.value;
+					if (hidden.dataset.setting === 'font_size') {
+						var scaleMap = { 'small': '0.875', 'default': '1', 'large': '1.125' };
+						sendMessage({ type: 'pv-update', font_scale: scaleMap[this.dataset.value] || '1' });
+					}
+				}
 				triggerSave(false);
 			});
 		});
@@ -510,7 +516,7 @@
 					if (key === 'default_accent')      { msg.accent            = hex; }
 					if (key === 'hero_title_color')    { msg.hero_title_color  = hex; }
 					if (key === 'hero_subtitle_color') { msg.hero_sub_color    = hex; }
-					if (key === 'page_bg_color')       { msg.page_bg           = hex; }
+					if (key === 'page_bg_color') { var tv = pvTextVars(hex); msg.page_bg = hex; msg.pv_theme = tv.pv_theme; msg.pv_text = tv.pv_text; msg.pv_muted = tv.pv_muted; }
 					if (key === 'sidebar_bg_color')    { msg.sidebar_bg        = hex; }
 					sendMessage(msg);
 					triggerSave(true); // color: save only, no reload
@@ -520,7 +526,7 @@
 					if (key === 'default_accent')      { msg.accent           = '#4f46e5'; }
 					if (key === 'hero_title_color')    { msg.hero_title_color = '#ffffff'; }
 					if (key === 'hero_subtitle_color') { msg.hero_sub_color   = ''; }
-					if (key === 'page_bg_color')       { msg.page_bg          = '#0c0c18'; }
+					if (key === 'page_bg_color') { var cv = pvTextVars('#0c0c18'); msg.page_bg = '#0c0c18'; msg.pv_theme = cv.pv_theme; msg.pv_text = cv.pv_text; msg.pv_muted = cv.pv_muted; }
 					if (key === 'sidebar_bg_color')    { msg.sidebar_bg       = '#0f0f1e'; }
 					sendMessage(msg);
 					triggerSave(true);
@@ -793,6 +799,20 @@
 			if (vid) url += '&pv_test_video_id=' + encodeURIComponent(vid);
 		}
 		iframe.src = url;
+	}
+
+	function pvLuminance(hex) {
+		hex = hex.replace('#', '');
+		if (hex.length === 3) { hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]; }
+		if (hex.length !== 6) return 0;
+		var r = parseInt(hex.slice(0,2),16)/255, g = parseInt(hex.slice(2,4),16)/255, b = parseInt(hex.slice(4,6),16)/255;
+		var lin = function(c) { return c <= 0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); };
+		return 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b);
+	}
+
+	function pvTextVars(hex) {
+		var light = pvLuminance(hex) > 0.179;
+		return { pv_theme: light ? 'light' : 'dark', pv_text: light ? '#111111' : '#ffffff', pv_muted: light ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)' };
 	}
 
 	function sendMessage(data) {

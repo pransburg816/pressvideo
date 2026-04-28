@@ -259,6 +259,7 @@ class PV_Customizer_Page {
 			'hero_inner_width'  => [ 'full', 'contained' ],
 			'search_bar_align'  => [ 'left', 'center', 'right' ],
 			'button_shape'      => [ 'pill', 'radius', 'square', '' ],
+			'font_size'         => [ 'small', 'default', 'large', '' ],
 		];
 		foreach ( $map_enum as $key => $allowed ) {
 			if ( isset( $raw[ $key ] ) && in_array( $raw[ $key ], $allowed, true ) ) {

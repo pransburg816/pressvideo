@@ -290,6 +290,27 @@ if ( '' !== $_pv_btn_radius ) {
 	$_pv_wrap_style .= ';--pv-btn-radius:' . $_pv_btn_radius;
 }
 
+// Compute text colors from background luminance (WCAG formula, threshold 0.179)
+$_pv_bg_hex = ltrim( $_pv_page_bg ?: '#0c0c18', '#' );
+if ( strlen( $_pv_bg_hex ) === 3 ) { $_pv_bg_hex = $_pv_bg_hex[0].$_pv_bg_hex[0].$_pv_bg_hex[1].$_pv_bg_hex[1].$_pv_bg_hex[2].$_pv_bg_hex[2]; }
+$_pv_lum = 0;
+if ( strlen( $_pv_bg_hex ) === 6 ) {
+	$_pv_c = [ hexdec( substr( $_pv_bg_hex, 0, 2 ) ) / 255, hexdec( substr( $_pv_bg_hex, 2, 2 ) ) / 255, hexdec( substr( $_pv_bg_hex, 4, 2 ) ) / 255 ];
+	foreach ( $_pv_c as &$_pv_v ) { $_pv_v = $_pv_v <= 0.03928 ? $_pv_v / 12.92 : ( ( $_pv_v + 0.055 ) / 1.055 ) ** 2.4; }
+	unset( $_pv_v );
+	$_pv_lum = 0.2126 * $_pv_c[0] + 0.7152 * $_pv_c[1] + 0.0722 * $_pv_c[2];
+}
+$_pv_is_light = $_pv_lum > 0.179;
+$_pv_theme    = $_pv_is_light ? 'light' : 'dark';
+$_pv_text     = $_pv_is_light ? '#111111' : '#ffffff';
+$_pv_muted    = $_pv_is_light ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+$_pv_wrap_style .= ';--pv-text:' . $_pv_text . ';--pv-text-muted:' . $_pv_muted;
+
+// Font scale from font_size setting
+$_pv_font_scale_map = [ 'small' => '0.875', 'large' => '1.125' ];
+$_pv_font_scale = $_pv_font_scale_map[ $pv_settings['font_size'] ?? '' ] ?? '1';
+$_pv_wrap_style .= ';--pv-font-scale:' . $_pv_font_scale;
+
 // Build content div style now that $_pv_page_bg is available
 $_pv_content_style = $_pv_max_w ? 'max-width:' . esc_attr( $_pv_max_w ) . ';margin:0 auto;' : '';
 if ( $_pv_page_bg ) {
@@ -297,7 +318,7 @@ if ( $_pv_page_bg ) {
 }
 $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '';
 ?>
-<div class="pv-archive-wrap" style="<?php echo $_pv_wrap_style; // phpcs:ignore ?>">
+<div class="pv-archive-wrap" data-pv-theme="<?php echo esc_attr( $_pv_theme ); ?>" style="<?php echo $_pv_wrap_style; // phpcs:ignore ?>">
 
 	<?php if ( $pv_hero_show ) : ?>
 	<div class="pv-archive-hero<?php
@@ -1011,9 +1032,21 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 window.addEventListener('message', function(e) {
 	if (!e.data || e.data.type !== 'pv-update') return;
 	var d = e.data;
+	var wrap = document.querySelector('.pv-archive-wrap');
 	if (d.accent) {
 		document.querySelectorAll('[style*="--pv-accent"]').forEach(function(el) { el.style.setProperty('--pv-accent', d.accent); });
 		document.documentElement.style.setProperty('--pv-accent', d.accent);
+	}
+	if (d.page_bg !== undefined) {
+		if (wrap) {
+			wrap.style.backgroundColor = d.page_bg || '';
+			if (d.pv_theme !== undefined) { wrap.dataset.pvTheme = d.pv_theme; }
+			if (d.pv_text  !== undefined) { wrap.style.setProperty('--pv-text', d.pv_text); }
+			if (d.pv_muted !== undefined) { wrap.style.setProperty('--pv-text-muted', d.pv_muted); }
+		}
+	}
+	if (d.font_scale !== undefined) {
+		if (wrap) { wrap.style.setProperty('--pv-font-scale', d.font_scale); }
 	}
 	if (d.hero_title !== undefined) { var t = document.querySelector('[data-pv-hero-title]'); if (t) t.textContent = d.hero_title || t.textContent; }
 	if (d.hero_subtitle !== undefined) { var s = document.querySelector('[data-pv-hero-sub]'); if (s) s.textContent = d.hero_subtitle || s.textContent; }

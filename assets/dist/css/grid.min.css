@@ -86,9 +86,9 @@
 }
 
 .pv-card__title {
-	font-size: 0.925rem;
+	font-size: calc(0.925rem * var(--pv-font-scale, 1));
 	font-weight: 600;
-	color: #fff;
+	color: var(--pv-text, #fff);
 	margin: 0;
 	line-height: 1.35;
 	display: -webkit-box;
@@ -97,8 +97,8 @@
 	overflow: hidden;
 }
 .pv-card__meta {
-	font-size: 0.68rem;
-	color: rgba(255,255,255,0.5);
+	font-size: calc(0.68rem * var(--pv-font-scale, 1));
+	color: var(--pv-text-muted, rgba(255,255,255,0.5));
 	margin: 0;
 	white-space: nowrap;
 	overflow: hidden;
@@ -556,4 +556,25 @@ button.pv-pl-nav-back {
 @media (max-width: 480px) {
 	.pv-per-page__label { display: none; }
 	.pv-pagination .page-numbers { min-width: 32px; height: 32px; font-size: 0.78rem; }
+}
+
+/* ── Light theme overrides (data-pv-theme="light") ────────────────────── */
+[data-pv-theme="light"] .pv-filter-btn {
+	background: rgba(0,0,0,0.06);
+	border-color: rgba(0,0,0,0.14);
+	color: rgba(0,0,0,0.6);
+}
+[data-pv-theme="light"] .pv-filter-btn:hover {
+	background: rgba(0,0,0,0.1);
+	border-color: var(--pv-accent);
+	color: var(--pv-accent);
+}
+[data-pv-theme="light"] .pv-filter-btn--active {
+	background: var(--pv-accent);
+	border-color: var(--pv-accent);
+	color: #fff;
+}
+[data-pv-theme="light"] .pv-filter-btn__count {
+	background: rgba(0,0,0,0.1);
+	color: rgba(0,0,0,0.6);
 }
