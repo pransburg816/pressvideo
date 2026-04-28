@@ -11,6 +11,7 @@ class PV_Analytics_Page {
 		add_action( 'admin_menu',            [ $this, 'add_menu'       ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		add_filter( 'admin_body_class',      [ $this, 'body_class'     ] );
+		add_action( 'admin_init',            [ $this, 'handle_oauth_callback' ] );
 	}
 
 	public function body_class( string $classes ): string {
@@ -19,6 +20,23 @@ class PV_Analytics_Page {
 			$classes .= ' pva-page';
 		}
 		return $classes;
+	}
+
+	public function handle_oauth_callback(): void {
+		if ( ! isset( $_GET['pv_yta_callback'], $_GET['code'], $_GET['state'] ) ) { // phpcs:ignore
+			return;
+		}
+		if ( ! current_user_can( 'manage_options' ) ) return;
+
+		$code  = sanitize_text_field( wp_unslash( $_GET['code']  ) ); // phpcs:ignore
+		$state = sanitize_text_field( wp_unslash( $_GET['state'] ) ); // phpcs:ignore
+
+		if ( PV_YouTube_OAuth::handle_callback( $code, $state ) ) {
+			wp_safe_redirect( admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics&pv_yta_status=connected' ) );
+		} else {
+			wp_safe_redirect( admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics&pv_yta_status=error' ) );
+		}
+		exit;
 	}
 
 	public function add_menu(): void {
@@ -101,19 +119,31 @@ class PV_Analytics_Page {
 			}
 		}
 
+		// ── YouTube Analytics state ───────────────────────────────────────
+		$yt_connected    = $is_platinum && PV_YouTube_OAuth::is_connected();
+		$yt_has_creds    = $is_platinum && PV_YouTube_OAuth::has_credentials();
+		$yt_auth_url     = ( $is_platinum && $yt_has_creds && ! $yt_connected )
+			? PV_YouTube_OAuth::get_auth_url()
+			: '';
+		$yt_disconnect_nonce = $yt_connected ? wp_create_nonce( 'pv_yt_disconnect' ) : '';
+
 		wp_localize_script( 'pv-analytics-admin', 'pvAnalytics', [
-			'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
-			'nonce'       => wp_create_nonce( 'pv_analytics_admin' ),
-			'hasData'     => $this->has_any_data(),
-			'siteName'    => get_bloginfo( 'name' ),
-			'siteUrl'     => home_url(),
-			'aiMoves'     => $ai_moves,
-			'aiSummary'   => $ai_summary,
-			'aiCachedAt'  => $ai_cached_at,
-			'hasAiKey'    => $has_ai_key,
-			'isPlatinum'  => $is_platinum,
-			'settingsUrl' => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
-			'aiDebug'     => [
+			'ajaxUrl'            => admin_url( 'admin-ajax.php' ),
+			'nonce'              => wp_create_nonce( 'pv_analytics_admin' ),
+			'hasData'            => $this->has_any_data(),
+			'siteName'           => get_bloginfo( 'name' ),
+			'siteUrl'            => home_url(),
+			'aiMoves'            => $ai_moves,
+			'aiSummary'          => $ai_summary,
+			'aiCachedAt'         => $ai_cached_at,
+			'hasAiKey'           => $has_ai_key,
+			'isPlatinum'         => $is_platinum,
+			'settingsUrl'        => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
+			'ytConnected'        => $yt_connected,
+			'ytHasCreds'         => $yt_has_creds,
+			'ytAuthUrl'          => $yt_auth_url,
+			'ytDisconnectNonce'  => $yt_disconnect_nonce,
+			'aiDebug'            => [
 				'source'          => $ai_source,
 				'constantDefined' => defined( 'PV_ANTHROPIC_KEY' ),
 				'keyResolved'     => $has_ai_key,
@@ -161,6 +191,20 @@ class PV_Analytics_Page {
 				</div>
 
 			</div><!-- .pva-hero -->
+
+			<!-- ── Data source toggle (Site / YouTube) ──────────── -->
+			<?php if ( $is_platinum ) : ?>
+			<div class="pva-source-toggle" id="pva-source-toggle" role="group" aria-label="<?php esc_attr_e( 'Data source', 'pv-youtube-importer' ); ?>">
+				<button class="pva-source-btn pva-source-btn--active" data-source="site" type="button">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+					<?php esc_html_e( 'Site Stats', 'pv-youtube-importer' ); ?>
+				</button>
+				<button class="pva-source-btn" data-source="youtube" type="button">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
+					<?php esc_html_e( 'YouTube Stats', 'pv-youtube-importer' ); ?>
+				</button>
+			</div>
+			<?php endif; ?>
 
 			<!-- ── Export bar ────────────────────────────────────── -->
 			<div class="pva-export-bar">
@@ -413,6 +457,100 @@ class PV_Analytics_Page {
 				</div>
 
 			</div><!-- .pva-ga-card -->
+
+			<!-- ── YouTube Analytics connection card ─────────────── -->
+			<?php
+			$yt_status_msg = '';
+			if ( isset( $_GET['pv_yta_status'] ) ) { // phpcs:ignore
+				$yt_status_msg = sanitize_key( $_GET['pv_yta_status'] ); // phpcs:ignore
+			}
+			?>
+			<div class="pva-yta-card <?php echo $yt_connected ? 'pva-yta-card--connected' : ( $is_platinum ? 'pva-yta-card--disconnected' : 'pva-yta-card--locked' ); ?>"
+			     id="pva-yta-card">
+
+				<div class="pva-yta-card__icon" aria-hidden="true">
+					<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<rect width="44" height="44" rx="10" fill="#fef2f2"/>
+						<path d="M34.582 14.186a2.506 2.506 0 00-1.768-1.768C31.254 12 22 12 22 12s-9.254 0-10.814.418a2.506 2.506 0 00-1.768 1.768C9 15.746 9 22 9 22s0 6.254.418 7.814a2.506 2.506 0 001.768 1.768C12.746 32 22 32 22 32s9.254 0 10.814-.418a2.506 2.506 0 001.768-1.768C35 28.254 35 22 35 22s0-6.254-.418-7.814zM19.5 26.464v-8.928L26.5 22l-7 4.464z" fill="#ef4444"/>
+					</svg>
+				</div>
+
+				<div class="pva-yta-card__body">
+					<div class="pva-yta-card__head-row">
+						<h3 class="pva-yta-card__title">
+							<?php esc_html_e( 'YouTube Analytics', 'pv-youtube-importer' ); ?>
+							<?php if ( ! $is_platinum ) : ?>
+								<span class="pv-tier-lock-badge" style="font-size:.75rem;vertical-align:middle">Platinum</span>
+							<?php endif; ?>
+						</h3>
+						<?php if ( $yt_connected ) : ?>
+							<span class="pva-ga-badge pva-ga-badge--on">
+								<span class="pva-ga-badge__dot"></span>
+								<?php esc_html_e( 'Connected', 'pv-youtube-importer' ); ?>
+							</span>
+						<?php elseif ( $is_platinum ) : ?>
+							<span class="pva-ga-badge pva-ga-badge--off">
+								<?php esc_html_e( 'Not connected', 'pv-youtube-importer' ); ?>
+							</span>
+						<?php endif; ?>
+					</div>
+
+					<?php if ( $yt_status_msg === 'connected' ) : ?>
+						<p class="pva-yta-card__notice pva-yta-card__notice--success">
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+							<?php esc_html_e( 'Successfully connected! Your YouTube stats are now available.', 'pv-youtube-importer' ); ?>
+						</p>
+					<?php elseif ( $yt_status_msg === 'error' ) : ?>
+						<p class="pva-yta-card__notice pva-yta-card__notice--error">
+							<?php esc_html_e( 'Authorization failed. Please try connecting again.', 'pv-youtube-importer' ); ?>
+						</p>
+					<?php endif; ?>
+
+					<?php if ( $yt_connected ) : ?>
+						<p class="pva-ga-card__desc">
+							<?php esc_html_e( 'Your YouTube channel is authorized. Use the "YouTube Stats" toggle above to view channel-level views, watch time, and engagement data alongside your site analytics.', 'pv-youtube-importer' ); ?>
+						</p>
+					<?php elseif ( $is_platinum && $yt_has_creds ) : ?>
+						<p class="pva-ga-card__desc">
+							<?php esc_html_e( 'OAuth credentials are saved. Click Connect to authorize PressVideo to read your YouTube Analytics data. You\'ll be redirected to Google\'s authorization screen.', 'pv-youtube-importer' ); ?>
+						</p>
+					<?php elseif ( $is_platinum ) : ?>
+						<p class="pva-ga-card__desc">
+							<?php esc_html_e( 'Pull your YouTube channel views, watch time, subscriber growth, and per-video performance directly into this dashboard. Add your OAuth credentials in Settings to get started.', 'pv-youtube-importer' ); ?>
+						</p>
+					<?php else : ?>
+						<p class="pva-ga-card__desc">
+							<?php esc_html_e( 'Platinum feature: see your YouTube channel stats and compare them against your site plays to identify your biggest growth opportunities.', 'pv-youtube-importer' ); ?>
+						</p>
+					<?php endif; ?>
+				</div>
+
+				<div class="pva-ga-card__action">
+					<?php if ( $yt_connected ) : ?>
+						<button class="pva-ga-btn pva-ga-btn--danger" id="pva-yta-disconnect" type="button"
+						        data-nonce="<?php echo esc_attr( $yt_disconnect_nonce ); ?>">
+							<?php esc_html_e( 'Disconnect', 'pv-youtube-importer' ); ?>
+						</button>
+					<?php elseif ( $is_platinum && $yt_has_creds ) : ?>
+						<a href="<?php echo esc_url( $yt_auth_url ); ?>" class="pva-ga-btn pva-ga-btn--yt">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
+							<?php esc_html_e( 'Connect YouTube Analytics', 'pv-youtube-importer' ); ?>
+						</a>
+					<?php elseif ( $is_platinum ) : ?>
+						<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ); ?>"
+						   class="pva-ga-btn pva-ga-btn--secondary">
+							<?php esc_html_e( 'Add Credentials in Settings', 'pv-youtube-importer' ); ?>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+						</a>
+					<?php else : ?>
+						<a href="https://pressvideo.com" target="_blank" rel="noopener" class="pva-ga-btn pva-ga-btn--secondary">
+							<?php esc_html_e( 'Upgrade to Platinum', 'pv-youtube-importer' ); ?>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+						</a>
+					<?php endif; ?>
+				</div>
+
+			</div><!-- .pva-yta-card -->
 
 		</div><!-- .pva-inner -->
 		</div><!-- .pva-wrap -->

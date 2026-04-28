@@ -334,6 +334,9 @@
 				showLoading();
 				if ( demoMode ) {
 					render( buildDemoData( activeDays ) );
+				} else if ( activeSource === 'youtube' ) {
+					lastYtData = null;
+					fetchYtData( days );
 				} else {
 					fetchData( days );
 				}
@@ -1856,6 +1859,441 @@
 			+ '<div style="font-size:.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-top:6px;">' + label + '</div>'
 			+ '</div>';
 	}
+
+	// ══════════════════════════════════════════════════════════════════
+	//  DATA SOURCE TOGGLE (Site / YouTube)
+	// ══════════════════════════════════════════════════════════════════
+
+	var activeSource = 'site';
+	var lastYtData   = null;
+
+	function bindSourceToggle() {
+		var toggle = document.getElementById('pva-source-toggle');
+		if (!toggle) return;
+
+		toggle.querySelectorAll('.pva-source-btn').forEach(function(btn) {
+			btn.addEventListener('click', function() {
+				var src = btn.dataset.source;
+				if (src === activeSource) return;
+				activeSource = src;
+				toggle.querySelectorAll('.pva-source-btn').forEach(function(b) {
+					b.classList.toggle('pva-source-btn--active', b.dataset.source === src);
+				});
+
+				if (src === 'youtube') {
+					switchToYouTube();
+				} else {
+					switchToSite();
+				}
+			});
+		});
+	}
+
+	function switchToSite() {
+		var chartsSection = document.getElementById('pva-charts-section');
+		var ytSection     = document.getElementById('pva-yt-section');
+		var statsRow      = document.querySelector('.pva-stats-row');
+		var aiRow         = document.getElementById('pva-ai-row');
+		var tableRow      = document.getElementById('pva-table-row');
+		var featureRow    = document.getElementById('pva-feature-section');
+		var summaryRow    = document.getElementById('pva-summary-section');
+
+		if (ytSection)     ytSection.hidden     = true;
+		if (chartsSection) chartsSection.hidden = false;
+		if (statsRow)      statsRow.hidden      = false;
+		if (tableRow)      tableRow.hidden      = false;
+		if (aiRow)         aiRow.hidden         = false;
+		if (featureRow)    featureRow.hidden    = false;
+		if (summaryRow)    summaryRow.hidden    = false;
+
+		// Re-render site stats with last known data.
+		if (lastData) render(lastData);
+	}
+
+	function switchToYouTube() {
+		var chartsSection = document.getElementById('pva-charts-section');
+		var statsRow      = document.querySelector('.pva-stats-row');
+		var aiRow         = document.getElementById('pva-ai-row');
+		var tableRow      = document.getElementById('pva-table-row');
+		var featureRow    = document.getElementById('pva-feature-section');
+		var summaryRow    = document.getElementById('pva-summary-section');
+		var emptySection  = document.getElementById('pva-empty');
+
+		// Hide site-only sections.
+		if (chartsSection) chartsSection.hidden = true;
+		if (statsRow)      statsRow.hidden      = true;
+		if (aiRow)         aiRow.hidden         = true;
+		if (tableRow)      tableRow.hidden      = true;
+		if (featureRow)    featureRow.hidden    = true;
+		if (summaryRow)    summaryRow.hidden    = true;
+		if (emptySection)  emptySection.hidden  = true;
+
+		if (!cfg.ytConnected) {
+			renderYouTubeNotConnected();
+			return;
+		}
+
+		// Use cached data or fetch fresh.
+		if (lastYtData) {
+			renderYouTube(lastYtData);
+		} else {
+			fetchYtData(activeDays);
+		}
+	}
+
+	function fetchYtData(days) {
+		var ytSection = getOrCreateYtSection();
+		ytSection.hidden = false;
+		ytSection.innerHTML = '<div class="pva-yt-loading">'
+			+ '<div class="pva-skeleton pva-skeleton--chart" style="height:280px;margin-bottom:16px;"></div>'
+			+ '<div class="pva-skeleton pva-skeleton--chart" style="height:200px;"></div>'
+			+ '</div>';
+
+		var body = new URLSearchParams({
+			action: 'pv_yt_analytics_data',
+			nonce:  nonce,
+			days:   days,
+		});
+
+		fetch(ajaxUrl, { method: 'POST', body: body })
+			.then(function(r) { return r.json(); })
+			.then(function(resp) {
+				if (resp && resp.success) {
+					lastYtData = resp.data;
+					renderYouTube(resp.data);
+				} else {
+					var code = (resp && resp.data) ? resp.data : 'unknown';
+					renderYouTubeError(code);
+				}
+			})
+			.catch(function() {
+				renderYouTubeError('network');
+			});
+	}
+
+	function getOrCreateYtSection() {
+		var s = document.getElementById('pva-yt-section');
+		if (!s) {
+			s = document.createElement('div');
+			s.id = 'pva-yt-section';
+			var chartsSection = document.getElementById('pva-charts-section');
+			if (chartsSection) chartsSection.insertAdjacentElement('beforebegin', s);
+			else document.querySelector('.pva-inner').appendChild(s);
+		}
+		return s;
+	}
+
+	function renderYouTube(data) {
+		var section = getOrCreateYtSection();
+		section.hidden = false;
+
+		var ch   = data.channel    || {};
+		var top  = data.top_videos || [];
+		var trend = data.trend     || { labels: [], values: [] };
+
+		var views    = (ch.views          || 0);
+		var watchMin = (ch.watch_minutes  || 0);
+		var avgPct   = (ch.avg_view_pct   || 0).toFixed(1);
+		var likes    = (ch.likes          || 0);
+		var comments = (ch.comments       || 0);
+		var shares   = (ch.shares         || 0);
+		var subs     = (ch.subs_gained    || 0);
+
+		// Stat cards
+		var statCards = '<div class="pva-yt-stats-row">'
+			+ ytStatCard('YouTube Views', fmt(views),
+				'M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814z',
+				'#ef4444')
+			+ ytStatCard('Watch Time (min)', fmt(watchMin),
+				'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-.5 5v5.25l4.5 2.67-.75 1.23L10 13V7h1.5z',
+				'#f97316')
+			+ ytStatCard('Avg Viewed', avgPct + '%',
+				'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z',
+				'#10b981')
+			+ ytStatCard('Subscribers Gained', fmt(subs),
+				'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
+				'#6366f1')
+			+ '</div>';
+
+		// Trend chart canvas
+		var trendCard = '<div class="pv-card pva-yt-card" data-card-id="yt-trend" style="margin-bottom:20px;">'
+			+ '<div class="pv-card__head">'
+			+   '<h2 class="pv-card__title">YouTube View Trend</h2>'
+			+   '<span class="pva-chart-sub">' + fmt(views) + ' views this period</span>'
+			+ '</div>'
+			+ '<div class="pv-card__body">'
+			+   '<div class="pva-chart-wrap pva-chart-wrap--trend">'
+			+     '<canvas id="pva-yt-trend-chart" role="img" aria-label="YouTube view trend"></canvas>'
+			+   '</div>'
+			+ '</div>'
+			+ '</div>';
+
+		// Top videos bar chart
+		var topCard = '<div class="pv-card pva-yt-card" data-card-id="yt-top-videos" style="margin-bottom:20px;">'
+			+ '<div class="pv-card__head">'
+			+   '<h2 class="pv-card__title">Top Videos on YouTube</h2>'
+			+   '<span class="pva-chart-sub">By YouTube views this period</span>'
+			+ '</div>'
+			+ '<div class="pv-card__body">'
+			+   '<div class="pva-chart-wrap pva-chart-wrap--top">'
+			+     '<canvas id="pva-yt-top-chart" role="img" aria-label="Top YouTube videos"></canvas>'
+			+   '</div>'
+			+ '</div>'
+			+ '</div>';
+
+		// Engagement donut
+		var engagementTotal = likes + comments + shares;
+		var engCard = '<div class="pv-card pva-yt-card" data-card-id="yt-engagement" style="margin-bottom:20px;">'
+			+ '<div class="pv-card__head">'
+			+   '<h2 class="pv-card__title">Engagement Breakdown</h2>'
+			+   '<span class="pva-chart-sub">Likes · Comments · Shares</span>'
+			+ '</div>'
+			+ '<div class="pv-card__body">'
+			+   '<div class="pva-chart-wrap pva-chart-wrap--donut">'
+			+     '<canvas id="pva-yt-eng-chart" role="img" aria-label="Engagement breakdown"></canvas>'
+			+   '</div>'
+			+ '</div>'
+			+ '</div>';
+
+		// Per-video table
+		var tableRows = top.map(function(v) {
+			var thumb = v.thumb
+				? '<img src="' + esc(v.thumb) + '" alt="" class="pva-thumb" loading="lazy">'
+				: '<span class="pva-thumb-empty"></span>';
+			var title = v.edit
+				? '<a href="' + esc(v.edit) + '" class="pva-title-link">' + esc(v.title) + '</a>'
+				: '<span class="pva-title-link">' + esc(v.title) + '</span>';
+			var ytLink = v.yt_id
+				? '<a href="https://www.youtube.com/watch?v=' + esc(v.yt_id) + '" target="_blank" rel="noopener" class="pva-yt-link" title="View on YouTube">YT ↗</a>'
+				: '';
+			return '<tr>'
+				+ '<td class="pva-col-thumb">' + thumb + '</td>'
+				+ '<td>' + title + ' ' + ytLink + '</td>'
+				+ '<td class="pva-col-plays">' + fmt(v.views || 0) + '</td>'
+				+ '<td class="pva-col-last">' + (v.avg_pct || 0) + '%</td>'
+				+ '<td class="pva-col-last">' + fmt(v.likes || 0) + '</td>'
+				+ '</tr>';
+		}).join('');
+
+		var tableCard = '<div class="pv-card pva-yt-card" data-card-id="yt-videos-table">'
+			+ '<div class="pv-card__head">'
+			+   '<h2 class="pv-card__title">Videos — YouTube Performance</h2>'
+			+ '</div>'
+			+ '<div class="pva-table-wrap">'
+			+   (tableRows
+				? '<table class="pva-table"><thead><tr><th colspan="2">Video</th><th>YT Views</th><th>Avg Viewed</th><th>Likes</th></tr></thead><tbody>' + tableRows + '</tbody></table>'
+				: '<p class="pva-no-data" style="padding:32px 16px;">No YouTube analytics data for this period.</p>')
+			+ '</div>'
+			+ '</div>';
+
+		section.innerHTML = statCards
+			+ '<div class="pva-yt-charts-row">'
+			+   trendCard
+			+   '<div class="pva-yt-charts-right">' + topCard + engCard + '</div>'
+			+ '</div>'
+			+ tableCard;
+
+		// Render charts
+		renderYtTrend(trend);
+		renderYtTop(top);
+		if (engagementTotal > 0) renderYtEngagement(likes, comments, shares);
+	}
+
+	function ytStatCard(label, value, iconPath, color) {
+		return '<div class="pva-stat-card pva-yt-stat-card">'
+			+ '<div class="pva-stat-icon" style="background:linear-gradient(135deg,' + color + ',' + color + 'cc)">'
+			+   '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="' + iconPath + '"/></svg>'
+			+ '</div>'
+			+ '<div class="pva-stat-body">'
+			+   '<div class="pva-stat-value">' + value + '</div>'
+			+   '<div class="pva-stat-label">' + esc(label) + '</div>'
+			+ '</div>'
+			+ '</div>';
+	}
+
+	// ── YouTube View Trend line chart ─────────────────────────────────
+
+	var ytTrendChart = null;
+
+	function renderYtTrend(trend) {
+		var ctx = document.getElementById('pva-yt-trend-chart');
+		if (!ctx) return;
+
+		var chart2d  = ctx.getContext('2d');
+		var gradient = chart2d.createLinearGradient(0, 0, 0, 280);
+		gradient.addColorStop(0,   'rgba(239, 68, 68, 0.28)');
+		gradient.addColorStop(0.6, 'rgba(239, 68, 68, 0.08)');
+		gradient.addColorStop(1,   'rgba(239, 68, 68, 0)');
+
+		var labels = (trend.labels || []).map(function(d) {
+			var p = d.split('-');
+			return new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString(undefined, { month:'short', day:'numeric' });
+		});
+
+		if (ytTrendChart) ytTrendChart.destroy();
+		ytTrendChart = new Chart(ctx, {
+			type: 'line',
+			data: {
+				labels: labels,
+				datasets: [{
+					label:               'YouTube Views',
+					data:                trend.values || [],
+					borderColor:         '#f87171',
+					backgroundColor:     gradient,
+					tension:             0.42,
+					pointBackgroundColor: '#f87171',
+					pointBorderColor:    'rgba(255,255,255,0.25)',
+					pointBorderWidth:    1.5,
+					pointRadius:         3.5,
+					pointHoverRadius:    7,
+					fill:                true,
+					borderWidth:         2.5,
+				}],
+			},
+			options: {
+				responsive: true, maintainAspectRatio: false,
+				interaction: { mode: 'index', intersect: false },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: TIP_BG, titleColor: TIP_TITLE, bodyColor: '#fff',
+						padding: 12, cornerRadius: 8,
+						callbacks: { label: function(c){ return '  ' + c.parsed.y + ' view' + (c.parsed.y !== 1 ? 's' : ''); } },
+					},
+				},
+				scales: {
+					x: { grid: { display: false }, ticks: { color: C_MUTED, maxRotation: 0, maxTicksLimit: 10, font: { size: 11 } }, border: { display: false } },
+					y: { grid: { color: C_GRID, drawTicks: false }, border: { display: false }, ticks: { color: C_MUTED, precision: 0, font: { size: 11 }, padding: 6 }, beginAtZero: true },
+				},
+			},
+		});
+	}
+
+	// ── YouTube Top Videos bar chart ──────────────────────────────────
+
+	var ytTopChart = null;
+
+	function renderYtTop(topVideos) {
+		var ctx = document.getElementById('pva-yt-top-chart');
+		if (!ctx) return;
+		if (!topVideos || !topVideos.length) return;
+
+		var labels = topVideos.map(function(v){ return v.title.length > 38 ? v.title.substring(0,38) + '…' : v.title; });
+		var values = topVideos.map(function(v){ return v.views || 0; });
+		var colors = topVideos.map(function(_, i){
+			var alpha = 1 - (i / Math.max(topVideos.length, 1)) * 0.62;
+			return 'rgba(248, 113, 113, ' + alpha.toFixed(2) + ')';
+		});
+
+		if (ytTopChart) ytTopChart.destroy();
+		ytTopChart = new Chart(ctx, {
+			type: 'bar',
+			data: { labels: labels, datasets: [{ label: 'YouTube Views', data: values, backgroundColor: colors, borderRadius: 6, borderSkipped: false }] },
+			options: {
+				indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						backgroundColor: TIP_BG, titleColor: TIP_TITLE, bodyColor: '#fff', padding: 12, cornerRadius: 8,
+						callbacks: { label: function(c){ return '  ' + c.parsed.x + ' view' + (c.parsed.x !== 1 ? 's' : ''); } },
+					},
+				},
+				scales: {
+					x: { grid: { color: C_GRID }, border: { display: false }, ticks: { color: C_MUTED, precision: 0, font: { size: 11 } }, beginAtZero: true },
+					y: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.70)', font: { size: 12 }, padding: 4 } },
+				},
+			},
+		});
+	}
+
+	// ── YouTube Engagement donut ──────────────────────────────────────
+
+	var ytEngChart = null;
+
+	function renderYtEngagement(likes, comments, shares) {
+		var ctx = document.getElementById('pva-yt-eng-chart');
+		if (!ctx) return;
+		var total = likes + comments + shares;
+		if (!total) return;
+
+		if (ytEngChart) ytEngChart.destroy();
+		ytEngChart = new Chart(ctx, {
+			type: 'doughnut',
+			data: {
+				labels: ['Likes', 'Comments', 'Shares'],
+				datasets: [{ data: [likes, comments, shares], backgroundColor: ['#f87171','#fb923c','#fbbf24'], borderWidth: 0, hoverOffset: 8 }],
+			},
+			options: {
+				responsive: true, maintainAspectRatio: false, cutout: '72%',
+				animation: { animateRotate: true, duration: 700 },
+				plugins: {
+					legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.70)', padding: 16, font: { size: 12 }, boxWidth: 12, boxHeight: 12, borderRadius: 3 } },
+					tooltip: {
+						backgroundColor: TIP_BG, titleColor: TIP_TITLE, bodyColor: '#fff', padding: 12, cornerRadius: 8,
+						callbacks: { label: function(c){ var pct = total ? Math.round((c.parsed / total) * 100) : 0; return '  ' + fmt(c.parsed) + ' (' + pct + '%)'; } },
+					},
+					pvDonutCenter: { value: fmt(total) },
+				},
+			},
+		});
+	}
+
+	function renderYouTubeNotConnected() {
+		var section = getOrCreateYtSection();
+		section.hidden = false;
+		var connectCta = cfg.ytHasCreds
+			? '<a href="' + esc(cfg.ytAuthUrl || '#') + '" class="pva-ga-btn pva-ga-btn--yt" style="display:inline-flex;align-items:center;gap:8px;margin-top:16px;text-decoration:none;">Connect YouTube Analytics</a>'
+			: '<a href="' + esc((cfg.settingsUrl || '') + '') + '" class="pva-ga-btn pva-ga-btn--secondary" style="display:inline-flex;align-items:center;gap:8px;margin-top:16px;text-decoration:none;">Add Credentials in Settings</a>';
+		section.innerHTML = '<div class="pva-yt-not-connected">'
+			+ '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+			+   '<circle cx="12" cy="12" r="12" fill="#fef2f2"/>'
+			+   '<path d="M19.582 8.186a2 2 0 00-1.414-1.414C16.826 6.4 12 6.4 12 6.4s-4.826 0-6.168.372a2 2 0 00-1.414 1.414C4 9.524 4 12 4 12s0 2.476.418 3.814a2 2 0 001.414 1.414C7.174 17.6 12 17.6 12 17.6s4.826 0 6.168-.372a2 2 0 001.414-1.414C20 14.476 20 12 20 12s0-2.476-.418-3.814zM10.4 14.4V9.6l4 2.4-4 2.4z" fill="#ef4444"/>'
+			+ '</svg>'
+			+ '<h3 class="pva-yt-connect-title">Connect YouTube Analytics</h3>'
+			+ '<p class="pva-yt-connect-desc">Authorize PressVideo to pull your real YouTube channel data — views, watch time, subscriber growth, and per-video performance — right into this dashboard.</p>'
+			+ connectCta
+			+ '</div>';
+	}
+
+	function renderYouTubeError(code) {
+		var section = getOrCreateYtSection();
+		section.hidden = false;
+		var msg = code === 'not_connected' ? 'YouTube Analytics is not connected.'
+				: code === 'token_failed'   ? 'Could not refresh your Google token. Try disconnecting and reconnecting.'
+				: 'Could not load YouTube Analytics data. Please try again.';
+		section.innerHTML = '<div class="pva-yt-not-connected"><p class="pva-yt-connect-desc">' + esc(msg) + '</p></div>';
+	}
+
+	// ── YouTube disconnect button ─────────────────────────────────────
+
+	function bindYtDisconnect() {
+		document.addEventListener('click', function(e) {
+			var btn = e.target.closest('#pva-yta-disconnect');
+			if (!btn) return;
+			if (!confirm('Disconnect YouTube Analytics? You can reconnect at any time.')) return;
+
+			var body = new URLSearchParams({
+				action: 'pv_yt_disconnect',
+				nonce:  btn.dataset.nonce || '',
+			});
+			fetch(ajaxUrl, { method: 'POST', body: body })
+				.then(function(r) { return r.json(); })
+				.then(function(resp) {
+					if (resp && resp.success) {
+						window.location.reload();
+					}
+				});
+		});
+	}
+
+	// ── Update init to wire YouTube features ─────────────────────────
+
+	var _origInit = init;
+	init = function() {
+		_origInit();
+		bindSourceToggle();
+		bindYtDisconnect();
+	};
 
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', init);

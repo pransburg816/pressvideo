@@ -77,6 +77,10 @@ class PV_Settings_Page {
 		// Anthropic API key (powers AI Coach in Analytics)
 		$clean['anthropic_api_key'] = sanitize_text_field( $input['anthropic_api_key'] ?? '' );
 
+		// YouTube Analytics OAuth2 credentials (Platinum)
+		$clean['yt_client_id']     = sanitize_text_field( $input['yt_client_id']     ?? '' );
+		$clean['yt_client_secret'] = sanitize_text_field( $input['yt_client_secret'] ?? '' );
+
 		return $clean;
 	}
 
@@ -355,6 +359,145 @@ class PV_Settings_Page {
 				</div>
 
 				</div><!-- /.pvs-two-col -->
+
+				<!-- YouTube Analytics (full-width, Platinum) -->
+				<div class="pvs-two-col">
+
+				<div class="pv-card <?php echo ! PV_Tier::meets( 'platinum' ) ? 'pv-card--locked' : ''; ?>">
+					<div class="pv-card__head">
+						<div class="pv-card__icon" style="background:linear-gradient(135deg,#ef4444,#f97316)">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
+						</div>
+						<div class="pv-card__head-text">
+							<h2>
+								<?php esc_html_e( 'YouTube Analytics', 'pv-youtube-importer' ); ?>
+								<?php if ( ! PV_Tier::meets( 'platinum' ) ) : ?>
+									<span class="pv-tier-lock-badge">Platinum</span>
+								<?php endif; ?>
+							</h2>
+							<p><?php esc_html_e( 'Pull your real YouTube channel stats — views, watch time, CTR, and subscriber growth — directly into your PressVideo Analytics dashboard.', 'pv-youtube-importer' ); ?></p>
+						</div>
+					</div>
+					<div class="pv-card__body">
+
+						<?php if ( ! PV_Tier::meets( 'platinum' ) ) : ?>
+							<div class="pv-ai-upgrade-notice">
+								<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+								<div>
+									<strong><?php esc_html_e( 'Platinum feature', 'pv-youtube-importer' ); ?></strong>
+									<p>
+										<a href="https://pressvideo.com" target="_blank" rel="noopener"><?php esc_html_e( 'Upgrade to Platinum', 'pv-youtube-importer' ); ?></a>
+										<?php esc_html_e( 'to pull your YouTube channel stats into the Analytics dashboard and see site vs. YouTube performance side by side.', 'pv-youtube-importer' ); ?>
+									</p>
+								</div>
+							</div>
+						<?php else : ?>
+
+							<!-- Setup instructions -->
+							<div class="pv-api-instructions">
+								<div class="pv-api-instructions__head">
+									<span class="dashicons dashicons-info-outline"></span>
+									<strong><?php esc_html_e( 'How to set up YouTube Analytics OAuth', 'pv-youtube-importer' ); ?></strong>
+								</div>
+								<ol class="pv-api-instructions__steps">
+									<li><?php printf(
+										wp_kses( __( 'Go to the <a href="%s" target="_blank" rel="noopener">Google Cloud Console</a> and open your existing PressVideo project.', 'pv-youtube-importer' ), [ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ] ] ),
+										'https://console.cloud.google.com/'
+									); ?></li>
+									<li><?php printf(
+										wp_kses( __( 'Open the <a href="%s" target="_blank" rel="noopener">API Library</a> and enable the <strong>YouTube Analytics API</strong>.', 'pv-youtube-importer' ), [ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ], 'strong' => [] ] ),
+										'https://console.cloud.google.com/apis/library'
+									); ?></li>
+									<li><?php printf(
+										wp_kses( __( 'Go to <a href="%s" target="_blank" rel="noopener">Credentials</a> → <strong>Create Credentials</strong> → <strong>OAuth client ID</strong>. Choose <strong>Web application</strong>.', 'pv-youtube-importer' ), [ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ], 'strong' => [] ] ),
+										'https://console.cloud.google.com/apis/credentials'
+									); ?></li>
+									<li><?php printf(
+										/* translators: %s = the redirect URI */
+										wp_kses( __( 'Add this <strong>Authorized redirect URI</strong>: <code>%s</code>', 'pv-youtube-importer' ), [ 'strong' => [], 'code' => [] ] ),
+										esc_html( PV_YouTube_OAuth::redirect_uri() )
+									); ?></li>
+									<li><?php esc_html_e( 'Copy the Client ID and Client Secret below, save settings, then click Connect in the Analytics page.', 'pv-youtube-importer' ); ?></li>
+								</ol>
+							</div>
+
+							<div class="pv-field-rows">
+
+								<div class="pv-field-row">
+									<div class="pv-field-row__label">
+										<label for="pv_yt_client_id"><?php esc_html_e( 'Client ID', 'pv-youtube-importer' ); ?></label>
+									</div>
+									<div class="pv-field-row__control">
+										<input type="text"
+										       name="pv_settings[yt_client_id]"
+										       id="pv_yt_client_id"
+										       value="<?php echo esc_attr( $settings['yt_client_id'] ?? '' ); ?>"
+										       class="large-text"
+										       autocomplete="off"
+										       placeholder="xxxxxx.apps.googleusercontent.com" />
+										<p class="pv-field-row__desc">
+											<?php esc_html_e( 'OAuth 2.0 Client ID from Google Cloud Console.', 'pv-youtube-importer' ); ?>
+										</p>
+									</div>
+								</div>
+
+								<div class="pv-field-row">
+									<div class="pv-field-row__label">
+										<label for="pv_yt_client_secret"><?php esc_html_e( 'Client Secret', 'pv-youtube-importer' ); ?></label>
+									</div>
+									<div class="pv-field-row__control">
+										<input type="password"
+										       name="pv_settings[yt_client_secret]"
+										       id="pv_yt_client_secret"
+										       value="<?php echo esc_attr( $settings['yt_client_secret'] ?? '' ); ?>"
+										       class="regular-text"
+										       autocomplete="off" />
+										<?php if ( ! empty( $settings['yt_client_secret'] ) ) : ?>
+											<span class="pv-key-status pv-key-status--saved">
+												<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+												<?php esc_html_e( 'Secret saved', 'pv-youtube-importer' ); ?>
+											</span>
+										<?php endif; ?>
+										<p class="pv-field-row__desc">
+											<?php esc_html_e( 'OAuth 2.0 Client Secret. Stored securely, never exposed publicly.', 'pv-youtube-importer' ); ?>
+										</p>
+									</div>
+								</div>
+
+							</div><!-- /.pv-field-rows -->
+
+							<?php if ( PV_YouTube_OAuth::is_connected() ) : ?>
+								<div class="pv-ai-included-notice" style="margin-top:16px">
+									<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+									<div>
+										<strong><?php esc_html_e( 'YouTube Analytics connected', 'pv-youtube-importer' ); ?></strong>
+										<p>
+											<?php esc_html_e( 'Your channel is authorized. Visit the ', 'pv-youtube-importer' ); ?>
+											<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ) ); ?>">
+												<?php esc_html_e( 'Analytics dashboard', 'pv-youtube-importer' ); ?>
+											</a>
+											<?php esc_html_e( 'to view your YouTube stats.', 'pv-youtube-importer' ); ?>
+										</p>
+									</div>
+								</div>
+							<?php elseif ( ! empty( $settings['yt_client_id'] ) && ! empty( $settings['yt_client_secret'] ) ) : ?>
+								<p style="margin-top:14px;font-size:.875rem;color:#6b7280">
+									<?php esc_html_e( 'Credentials saved. Go to the ', 'pv-youtube-importer' ); ?>
+									<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ) ); ?>">
+										<?php esc_html_e( 'Analytics page', 'pv-youtube-importer' ); ?>
+									</a>
+									<?php esc_html_e( 'and click "Connect YouTube Analytics" to authorize.', 'pv-youtube-importer' ); ?>
+								</p>
+							<?php endif; ?>
+
+						<?php endif; ?>
+
+					</div>
+				</div>
+
+				<div></div><!-- spacer for two-col grid -->
+
+				</div><!-- /.pvs-two-col (youtube analytics) -->
 
 				<?php submit_button( __( 'Save Settings', 'pv-youtube-importer' ) ); ?>
 			</form>

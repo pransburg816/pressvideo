@@ -45,6 +45,8 @@ class PV_Plugin {
 
 		// Analytics tracker (AJAX handlers needed on front end too for guest tracking).
 		require_once PV_PLUGIN_DIR . 'includes/analytics/class-analytics-tracker.php';
+		require_once PV_PLUGIN_DIR . 'includes/analytics/class-youtube-oauth.php';
+		require_once PV_PLUGIN_DIR . 'includes/analytics/class-youtube-analytics-api.php';
 
 		// Admin UI
 		if ( is_admin() ) {

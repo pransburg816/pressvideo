@@ -1,0 +1,232 @@
+<?php
+/**
+ * YouTube Analytics API v2 — fetch channel and per-video metrics.
+ *
+ * All results are cached in transients (6 hours).
+ * Requires a valid OAuth2 access token from PV_YouTube_OAuth.
+ *
+ * Metrics pulled:
+ *   views, estimatedMinutesWatched, averageViewDuration,
+ *   averageViewPercentage, likes, comments, shares, subscribersGained
+ */
+
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+class PV_YouTube_Analytics_API {
+
+	const API_BASE     = 'https://youtubeanalytics.googleapis.com/v2/reports';
+	const DATA_API     = 'https://www.googleapis.com/youtube/v3';
+	const CACHE_TTL    = 6 * HOUR_IN_SECONDS;
+
+	private string $access_token;
+
+	public function __construct( string $access_token ) {
+		$this->access_token = $access_token;
+	}
+
+	// ── Channel-level stats ──────────────────────────────────────────────
+
+	public function get_channel_stats( int $days = 30 ): array {
+		$cache_key = 'pv_yta_channel_' . $days;
+		$cached    = get_transient( $cache_key );
+		if ( is_array( $cached ) ) return $cached;
+
+		$end_date   = gmdate( 'Y-m-d' );
+		$start_date = gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+
+		$response = $this->api_get( [
+			'ids'        => 'channel==MINE',
+			'startDate'  => $start_date,
+			'endDate'    => $end_date,
+			'metrics'    => 'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,comments,shares,subscribersGained',
+		] );
+
+		if ( empty( $response['rows'][0] ) ) return [];
+
+		$row    = $response['rows'][0];
+		$result = [
+			'views'              => (int)   ( $row[0] ?? 0 ),
+			'watch_minutes'      => (int)   ( $row[1] ?? 0 ),
+			'avg_view_duration'  => (float) ( $row[2] ?? 0 ),
+			'avg_view_pct'       => round( (float) ( $row[3] ?? 0 ), 1 ),
+			'likes'              => (int)   ( $row[4] ?? 0 ),
+			'comments'           => (int)   ( $row[5] ?? 0 ),
+			'shares'             => (int)   ( $row[6] ?? 0 ),
+			'subs_gained'        => (int)   ( $row[7] ?? 0 ),
+		];
+
+		set_transient( $cache_key, $result, self::CACHE_TTL );
+		return $result;
+	}
+
+	// ── Daily view trend ─────────────────────────────────────────────────
+
+	public function get_view_trend( int $days = 30 ): array {
+		$cache_key = 'pv_yta_trend_' . $days;
+		$cached    = get_transient( $cache_key );
+		if ( is_array( $cached ) ) return $cached;
+
+		$end_date   = gmdate( 'Y-m-d' );
+		$start_date = gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+
+		$response = $this->api_get( [
+			'ids'        => 'channel==MINE',
+			'startDate'  => $start_date,
+			'endDate'    => $end_date,
+			'metrics'    => 'views',
+			'dimensions' => 'day',
+			'sort'       => 'day',
+		] );
+
+		// Build a full date map so missing days are zero.
+		$trend = [];
+		for ( $i = $days - 1; $i >= 0; $i-- ) {
+			$trend[ gmdate( 'Y-m-d', strtotime( "-{$i} days" ) ) ] = 0;
+		}
+		foreach ( $response['rows'] ?? [] as $row ) {
+			if ( isset( $trend[ $row[0] ] ) ) {
+				$trend[ $row[0] ] = (int) $row[1];
+			}
+		}
+
+		$result = [
+			'labels' => array_keys( $trend ),
+			'values' => array_values( $trend ),
+		];
+
+		set_transient( $cache_key, $result, self::CACHE_TTL );
+		return $result;
+	}
+
+	// ── Top videos by views on YouTube ───────────────────────────────────
+
+	public function get_top_videos( int $days = 30, int $limit = 10 ): array {
+		$cache_key = 'pv_yta_top_' . $days . '_' . $limit;
+		$cached    = get_transient( $cache_key );
+		if ( is_array( $cached ) ) return $cached;
+
+		$end_date   = gmdate( 'Y-m-d' );
+		$start_date = gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+
+		$response = $this->api_get( [
+			'ids'        => 'channel==MINE',
+			'startDate'  => $start_date,
+			'endDate'    => $end_date,
+			'metrics'    => 'views,estimatedMinutesWatched,averageViewPercentage,likes',
+			'dimensions' => 'video',
+			'sort'       => '-views',
+			'maxResults' => $limit,
+		] );
+
+		$videos = [];
+		foreach ( $response['rows'] ?? [] as $row ) {
+			$yt_id = sanitize_text_field( $row[0] ?? '' );
+			if ( ! $yt_id ) continue;
+
+			// Resolve to WP post for title + thumb.
+			$posts = get_posts( [
+				'post_type'      => 'pv_youtube',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'meta_key'       => '_pv_youtube_id',
+				'meta_value'     => $yt_id,
+				'fields'         => 'ids',
+			] );
+
+			$post_id   = ! empty( $posts ) ? (int) $posts[0] : 0;
+			$post      = $post_id ? get_post( $post_id ) : null;
+
+			$videos[] = [
+				'yt_id'      => $yt_id,
+				'post_id'    => $post_id,
+				'title'      => $post ? $post->post_title : ( 'Video ' . $yt_id ),
+				'thumb'      => $post_id ? ( get_the_post_thumbnail_url( $post_id, 'thumbnail' ) ?: '' ) : '',
+				'edit'       => $post_id ? ( get_edit_post_link( $post_id, 'raw' ) ?: '' ) : '',
+				'views'      => (int)   ( $row[1] ?? 0 ),
+				'watch_min'  => (int)   ( $row[2] ?? 0 ),
+				'avg_pct'    => round( (float) ( $row[3] ?? 0 ), 1 ),
+				'likes'      => (int)   ( $row[4] ?? 0 ),
+			];
+		}
+
+		set_transient( $cache_key, $videos, self::CACHE_TTL );
+		return $videos;
+	}
+
+	// ── Per-video stats for a specific YouTube ID ────────────────────────
+
+	public function get_video_stats( string $yt_id, int $days = 30 ): array {
+		$cache_key = 'pv_yta_vid_' . md5( $yt_id ) . '_' . $days;
+		$cached    = get_transient( $cache_key );
+		if ( is_array( $cached ) ) return $cached;
+
+		$end_date   = gmdate( 'Y-m-d' );
+		$start_date = gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+
+		$response = $this->api_get( [
+			'ids'        => 'channel==MINE',
+			'startDate'  => $start_date,
+			'endDate'    => $end_date,
+			'metrics'    => 'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,comments,shares,subscribersGained',
+			'dimensions' => 'video',
+			'filters'    => 'video==' . rawurlencode( $yt_id ),
+		] );
+
+		if ( empty( $response['rows'][0] ) ) return [];
+
+		$row    = $response['rows'][0];
+		$result = [
+			'yt_id'             => $yt_id,
+			'views'             => (int)   ( $row[1] ?? 0 ),
+			'watch_minutes'     => (int)   ( $row[2] ?? 0 ),
+			'avg_view_duration' => (float) ( $row[3] ?? 0 ),
+			'avg_view_pct'      => round( (float) ( $row[4] ?? 0 ), 1 ),
+			'likes'             => (int)   ( $row[5] ?? 0 ),
+			'comments'          => (int)   ( $row[6] ?? 0 ),
+			'shares'            => (int)   ( $row[7] ?? 0 ),
+			'subs_gained'       => (int)   ( $row[8] ?? 0 ),
+		];
+
+		set_transient( $cache_key, $result, self::CACHE_TTL );
+		return $result;
+	}
+
+	// ── Build the full dashboard payload ─────────────────────────────────
+
+	public function get_dashboard_data( int $days = 30 ): array {
+		return [
+			'channel'    => $this->get_channel_stats( $days ),
+			'trend'      => $this->get_view_trend( $days ),
+			'top_videos' => $this->get_top_videos( $days ),
+		];
+	}
+
+	// ── Clear all cached YouTube analytics transients ────────────────────
+
+	public static function flush_cache(): void {
+		global $wpdb;
+		$wpdb->query( // phpcs:ignore
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_pv_yta_%' OR option_name LIKE '_transient_timeout_pv_yta_%'"
+		);
+	}
+
+	// ── Internal HTTP helper ─────────────────────────────────────────────
+
+	private function api_get( array $params ): array {
+		$url = add_query_arg( $params, self::API_BASE );
+
+		$response = wp_remote_get( $url, [
+			'timeout' => 15,
+			'headers' => [
+				'Authorization' => 'Bearer ' . $this->access_token,
+			],
+		] );
+
+		if ( is_wp_error( $response ) ) return [];
+
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! is_array( $body ) || isset( $body['error'] ) ) return [];
+
+		return $body;
+	}
+}

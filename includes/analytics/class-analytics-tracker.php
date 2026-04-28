@@ -41,6 +41,8 @@ class PV_Analytics_Tracker {
 		add_action( 'wp_ajax_nopriv_pv_track_event',    [ $this, 'ajax_track'           ] );
 		add_action( 'wp_ajax_pv_analytics_data',        [ $this, 'ajax_data'            ] );
 		add_action( 'wp_ajax_pv_refresh_ai_insights',   [ $this, 'ajax_refresh_ai'      ] );
+		add_action( 'wp_ajax_pv_yt_analytics_data',     [ $this, 'ajax_yt_data'         ] );
+		add_action( 'wp_ajax_pv_yt_disconnect',         [ $this, 'ajax_yt_disconnect'   ] );
 	}
 
 	public function ajax_track(): void {
@@ -263,9 +265,19 @@ class PV_Analytics_Tracker {
 			return;
 		}
 
-		$days   = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
-		$data   = self::get_dashboard_data( $days );
-		$result = $this->get_ai_insights( $data, $api_key, $days );
+		$days = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
+		$data = self::get_dashboard_data( $days );
+
+		$yt_data = [];
+		if ( PV_Tier::meets( 'platinum' ) && PV_YouTube_OAuth::is_connected() ) {
+			$access_token = PV_YouTube_OAuth::get_access_token();
+			if ( $access_token ) {
+				$yt_api  = new PV_YouTube_Analytics_API( $access_token );
+				$yt_data = $yt_api->get_dashboard_data( $days );
+			}
+		}
+
+		$result = $this->get_ai_insights( $data, $api_key, $days, $yt_data );
 
 		$transient = 'pv_ai_insights_' . get_current_user_id() . '_' . $days;
 		if ( ! empty( $result['moves'] ) ) {
@@ -276,9 +288,54 @@ class PV_Analytics_Tracker {
 		wp_send_json_success( $result );
 	}
 
-	// ── AI coaching via Claude API ────────────────────────────────────────
+	// ── AJAX: fetch YouTube Analytics data (Platinum only) ───────────────
 
-	public function get_ai_insights( array $data, string $api_key, int $days = 30 ): array {
+	public function ajax_yt_data(): void {
+		check_ajax_referer( 'pv_analytics_admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'forbidden' );
+			return;
+		}
+
+		if ( ! PV_Tier::meets( 'platinum' ) ) {
+			wp_send_json_error( 'upgrade_required' );
+			return;
+		}
+
+		if ( ! PV_YouTube_OAuth::is_connected() ) {
+			wp_send_json_error( 'not_connected' );
+			return;
+		}
+
+		$access_token = PV_YouTube_OAuth::get_access_token();
+		if ( ! $access_token ) {
+			wp_send_json_error( 'token_failed' );
+			return;
+		}
+
+		$days = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
+		$api  = new PV_YouTube_Analytics_API( $access_token );
+		wp_send_json_success( $api->get_dashboard_data( $days ) );
+	}
+
+	// ── AJAX: disconnect YouTube Analytics OAuth ─────────────────────────
+
+	public function ajax_yt_disconnect(): void {
+		check_ajax_referer( 'pv_yt_disconnect', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'forbidden' );
+			return;
+		}
+
+		PV_YouTube_OAuth::disconnect();
+		wp_send_json_success();
+	}
+
+	// ── Build AI insights prompt (site stats + optional YouTube stats) ───
+
+	public function get_ai_insights( array $data, string $api_key, int $days = 30, array $yt_data = [] ): array {
 		$stats     = $data['stats']      ?? [];
 		$depth     = $data['depth']      ?? [];
 		$top_vids  = $data['top_videos'] ?? [];
@@ -288,9 +345,49 @@ class PV_Analytics_Tracker {
 		$top_plays  = (int) ( $top_vids[0]['plays'] ?? 0 );
 		$trend_vals = implode( ',', array_map( 'intval', $trend['values'] ?? [] ) );
 
+		// ── YouTube Analytics data (Platinum, when connected) ────────────
+		$yt_channel = $yt_data['channel'] ?? [];
+		$yt_top     = $yt_data['top_videos'] ?? [];
+		$has_yt     = ! empty( $yt_channel );
+
+		$yt_section = '';
+		if ( $has_yt ) {
+			$yt_top_title = sanitize_text_field( $yt_top[0]['title'] ?? 'your top YouTube video' );
+			$yt_top_views = (int) ( $yt_top[0]['views'] ?? 0 );
+
+			// Detect site vs YouTube performance gaps on top 5 videos.
+			$crossover_notes = [];
+			$site_play_index = [];
+			foreach ( $top_vids as $sv ) {
+				$site_play_index[ sanitize_text_field( $sv['yt_id'] ?? '' ) ] = (int) $sv['plays'];
+			}
+			foreach ( array_slice( $yt_top, 0, 5 ) as $yv ) {
+				$yt_id     = sanitize_text_field( $yv['yt_id'] ?? '' );
+				$yt_views  = (int) $yv['views'];
+				$site_plays = $site_play_index[ $yt_id ] ?? 0;
+				if ( $yt_views > 0 && $site_plays === 0 ) {
+					$crossover_notes[] = '"' . sanitize_text_field( $yv['title'] ) . '" gets ' . $yt_views . ' YouTube views but 0 site plays';
+				} elseif ( $yt_views > 200 && $site_plays < 5 ) {
+					$crossover_notes[] = '"' . sanitize_text_field( $yv['title'] ) . '" gets ' . $yt_views . ' YouTube views but only ' . $site_plays . ' site plays';
+				}
+			}
+
+			$yt_section = "\n\nYouTube Analytics ({$days} days — channel performance on youtube.com):\n"
+				. '- YouTube views: ' . (int) ( $yt_channel['views'] ?? 0 )
+					. ' | Watch time: ' . (int) ( $yt_channel['watch_minutes'] ?? 0 ) . " min\n"
+				. '- Avg view %: ' . (float) ( $yt_channel['avg_view_pct'] ?? 0 )
+					. '% | Likes: ' . (int) ( $yt_channel['likes'] ?? 0 )
+					. ' | Subs gained: ' . (int) ( $yt_channel['subs_gained'] ?? 0 ) . "\n"
+				. '- Top YouTube video: "' . $yt_top_title . '" (' . $yt_top_views . " YouTube views)\n";
+
+			if ( $crossover_notes ) {
+				$yt_section .= '- Performance gaps (YouTube hits with low site plays): ' . implode( '; ', $crossover_notes ) . "\n";
+			}
+		}
+
 		$prompt = "You are a video content growth coach for a WordPress creator who embeds their YouTube videos on their own site.\n\n"
 			. "Analyze these {$days}-day analytics. Respond ONLY with valid JSON — no markdown, no backticks, no extra text.\n\n"
-			. "Data:\n"
+			. "Site Analytics (plays on their WordPress site):\n"
 			. '- Total plays: ' . (int) ( $stats['total_plays'] ?? 0 )
 				. ' | Unique videos: ' . (int) ( $stats['unique_videos'] ?? 0 )
 				. ' | Avg completion: ' . (int) ( $stats['avg_completion'] ?? 0 ) . "%\n"
@@ -298,9 +395,10 @@ class PV_Analytics_Tracker {
 				. ' sessions, 50%=' . (int) ( $depth['d50'] ?? 0 )
 				. ', 75%=' . (int) ( $depth['d75'] ?? 0 )
 				. ', 100%=' . (int) ( $depth['d100'] ?? 0 ) . "\n"
-			. '- Top video: "' . $top_title . '" (' . $top_plays . " plays)\n"
-			. '- Daily trend (' . $days . ' days): [' . $trend_vals . "]\n\n"
-			. "Return this exact JSON structure:\n"
+			. '- Top site video: "' . $top_title . '" (' . $top_plays . " site plays)\n"
+			. '- Daily site trend (' . $days . ' days): [' . $trend_vals . ']'
+			. $yt_section
+			. "\n\nReturn this exact JSON structure:\n"
 			. '{"summary":{"grade":"...","title":"...","body":"...","tips":[{"title":"...","desc":"..."},{"title":"...","desc":"..."},{"title":"...","desc":"..."}]},"moves":[{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
 			. "summary.grade: exactly one of: Getting Started, Growing, Holding Steady, Needs Attention, Strong Momentum\n"
 			. "summary.title: 8 words max — direct headline about their current situation\n"
@@ -308,9 +406,11 @@ class PV_Analytics_Tracker {
 			. "summary.tips[].title: 4 words max action label\n"
 			. "summary.tips[].desc: 1-2 sentences using their specific data — no generic advice\n\n"
 			. "moves[].title: 5 words max, action-oriented verb phrase\n"
-			. "moves[].edge: one sentence — the specific insight from their data\n"
+			. "moves[].edge: one sentence — the specific insight from their data"
+			. ( $has_yt ? " (when relevant, compare site vs YouTube performance directly)" : '' ) . "\n"
 			. "moves[].script: 2-3 sentences — exactly what to do or say\n"
-			. "moves[].impact: one sentence — expected measurable outcome";
+			. "moves[].impact: one sentence — expected measurable outcome"
+			. ( $has_yt ? "\n\nWhen YouTube data is present: at least one move must address a site vs YouTube performance gap if one exists, and at least one tip must reference the YouTube watch % vs site completion % comparison." : '' );
 
 		$response = wp_remote_post( 'https://api.anthropic.com/v1/messages', [
 			'timeout' => 15,
@@ -336,7 +436,6 @@ class PV_Analytics_Tracker {
 		if ( ! $json || ! isset( $json['content'][0]['text'] ) ) return [];
 
 		$text = trim( $json['content'][0]['text'] );
-		// Strip markdown code fences if the model wraps the JSON despite instructions
 		$text = preg_replace( '/^```(?:json)?\s*/i', '', $text );
 		$text = preg_replace( '/\s*```$/', '', $text );
 
