@@ -830,6 +830,58 @@ body.pva-page .pva-ga-event {
 }
 body.pva-page .pva-ga-event svg { color: #a5b4fc; }
 
+/* ── Dark-theme: source toggle ────────────────────────────── */
+body.pva-page .pva-source-toggle {
+	background: rgba(255,255,255,0.05);
+	border-color: rgba(255,255,255,0.1);
+}
+body.pva-page .pva-source-btn {
+	color: rgba(255,255,255,0.52);
+}
+body.pva-page .pva-source-btn:hover {
+	color: rgba(255,255,255,0.82);
+	background: rgba(255,255,255,0.08);
+}
+body.pva-page .pva-source-btn--active,
+body.pva-page .pva-source-btn--active:hover {
+	background: rgba(255,255,255,0.13);
+	color: #fff;
+	box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+}
+
+/* ── Dark-theme: YouTube Analytics connect card ───────────── */
+body.pva-page .pva-yta-card {
+	background: rgba(255,255,255,0.04);
+	border: 1px solid rgba(255,255,255,0.08);
+	box-shadow: 0 2px 20px rgba(0,0,0,0.35);
+}
+body.pva-page .pva-yta-card:hover {
+	box-shadow: 0 6px 28px rgba(0,0,0,0.5);
+}
+body.pva-page .pva-yta-card--connected {
+	border-left: 3px solid #ef4444;
+}
+body.pva-page .pva-yta-card--disconnected,
+body.pva-page .pva-yta-card--locked {
+	background: rgba(255,255,255,0.02);
+	border-left: 3px solid rgba(255,255,255,0.08);
+}
+body.pva-page .pva-yta-card__title {
+	color: rgba(255,255,255,0.9);
+}
+
+/* ── Dark-theme: YouTube not-connected block ──────────────── */
+body.pva-page .pva-yt-not-connected {
+	background: rgba(255,255,255,0.04);
+	border-color: rgba(255,255,255,0.08);
+}
+body.pva-page .pva-yt-connect-title {
+	color: rgba(255,255,255,0.9);
+}
+body.pva-page .pva-yt-connect-desc {
+	color: rgba(255,255,255,0.52);
+}
+
 /* ── No-data / empty states ───────────────────────────────── */
 body.pva-page .pva-no-data {
 	color: rgba(255,255,255,0.38);
