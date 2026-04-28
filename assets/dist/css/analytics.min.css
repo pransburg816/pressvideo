@@ -1950,3 +1950,43 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-pick { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
 	.pva-pick:last-child { border-bottom: none; }
 }
+
+/* ── Block collapse / expand ──────────────────────────────── */
+.pva-collapse-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: rgba(255,255,255,0.28);
+	padding: 4px 5px;
+	border-radius: 4px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	margin-left: auto;
+	line-height: 1;
+	transition: color 0.15s, background 0.15s;
+}
+.pva-collapse-btn:hover {
+	color: rgba(255,255,255,0.72);
+	background: rgba(255,255,255,0.07);
+}
+.pva-collapse-icon {
+	display: block;
+	transition: transform 0.2s ease;
+}
+.pv-card--collapsed .pva-collapse-icon {
+	transform: rotate(-90deg);
+}
+.pv-card--collapsed .pv-card__body,
+.pv-card--collapsed .pva-table-wrap {
+	display: none;
+}
+.pva-charts-row > .pv-card.pv-card--collapsed,
+.pva-table-row__all.pv-card--collapsed {
+	height: auto !important;
+}
+.pva-ai-row > div:has(.pv-card--collapsed),
+.pva-table-row__least:has(.pv-card--collapsed) {
+	height: auto;
+}

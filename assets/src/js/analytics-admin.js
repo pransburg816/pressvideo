@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PressVideo — Analytics admin dashboard.
  * Requires Chart.js 4.x loaded as a dependency.
  */
@@ -10,19 +10,132 @@
 	var nonce   = cfg.nonce   || '';
 
 	var activeDays  = 30;
+	var demoMode    = false;
 	var trendChart  = null;
 	var topChart    = null;
 	var depthChart  = null;
 
-	// PressVideo brand palette
-	var C_INDIGO    = '#4f46e5';
-	var C_INDIGO_LT = '#818cf8';
-	var C_INDIGO_XL = '#c7d2fe';
-	var C_DARK      = '#1e1b4b';
-	var C_MUTED     = '#6b7280';
-	var C_GRID      = '#f0f0f1';
-	var TIP_BG      = '#1e1b4b';
-	var TIP_TITLE   = '#c7d2fe';
+	// ── Sample AI moves shown in demo/preview mode ───────────────────
+	var DEMO_AI_MOVES = [
+		{
+			title:  'Sharpen your opening hook',
+			edge:   'Your 63% average completion is strong, but viewers who exit before 75% are missing your best content. A tighter 15-second hook keeps them past that drop-off point.',
+			script: 'Open your next video with the single most surprising result or takeaway. Say it before you introduce yourself. "In the next 8 minutes you\'re going to see exactly how I did X." Viewers who see the payoff upfront watch 35-40% longer on average.',
+			impact: 'Pushing completion from 63% to 72%+ can more than double your YouTube recommendation reach within 30 days.',
+		},
+		{
+			title:  'Cross-link your top 3 videos',
+			edge:   'Your top 3 videos are capturing a disproportionate share of plays while your other 7 are effectively invisible to visitors who would genuinely want them.',
+			script: 'Add a "Watch this next" mention at the 85% mark of each top video: say the title out loud and put the link in the description. One sentence tease is all it takes. This is the fastest way to multiply plays without filming anything new.',
+			impact: 'Internal links typically drive 15-25% additional plays on the linked video within the first week of adding them.',
+		},
+		{
+			title:  'Publish on a fixed weekly day',
+			edge:   'Your play trend is climbing, which is exactly the window most creators waste by going inconsistent right when the algorithm starts paying attention.',
+			script: 'Pick one day and commit publicly: post a short note to your audience: "New video every Thursday." Then send a one-paragraph email to your list each week with the video link. Consistency for 4 weeks is enough to establish a new baseline.',
+			impact: 'Channels on a consistent weekly schedule see 2-3x more impressions than sporadic publishers at the same video quality.',
+		},
+	];
+
+	// ── Sample data for demo preview ──────────────────────────────────
+	var DEMO_TITLES = [
+		'How I Grew My Channel to 10K Subscribers',
+		'Best Camera Setup for YouTube Beginners (2024)',
+		'My Full Studio Tour — $0 to $3K Setup',
+		'How to Edit Videos 10× Faster in Premiere',
+		'Growing on YouTube Without Buying Ads',
+		'The YouTube Algorithm: What Actually Works',
+		'3 Thumbnail Mistakes Killing Your CTR',
+		'One Year on YouTube: Honest Results',
+		'How to Script a Video Without Sounding Robotic',
+		'Repurposing YouTube Content for Every Platform',
+	];
+
+	function buildDemoData( days ) {
+		var now   = new Date();
+		var lbls  = [];
+		var seed30 = [45,38,62,71,58,34,51,67,89,94,78,65,187,142,96,88,95,72,63,49,77,93,108,86,62,74,94,117,129,134];
+		var vals  = [];
+		for ( var i = days - 1; i >= 0; i-- ) {
+			var dt  = new Date( now );
+			dt.setDate( now.getDate() - i );
+			var y   = dt.getFullYear();
+			var m   = String( dt.getMonth() + 1 ).padStart( 2, '0' );
+			var d   = String( dt.getDate() ).padStart( 2, '0' );
+			lbls.push( y + '-' + m + '-' + d );
+			// Scale values based on period
+			var base = seed30[ i % 30 ];
+			if ( days === 7 )       vals.push( Math.round( base * 1.15 ) );
+			else if ( days === 90 ) vals.push( Math.round( base * 0.85 ) );
+			else                    vals.push( base );
+		}
+		var totalPlays = vals.reduce( function(a,b){ return a+b; }, 0 );
+		var topVideos  = DEMO_TITLES.map( function( title, i ) {
+			return {
+				title:       title,
+				plays:       Math.max( 8, Math.round( totalPlays * (0.11 - i * 0.009) ) ),
+				thumb:       '',
+				edit:        '#',
+				last_played: i < 3 ? 'Today' : ( i < 6 ? 'Yesterday' : '3 days ago' ),
+			};
+		} );
+		return {
+			stats: {
+				total_plays:    totalPlays,
+				unique_videos:  10,
+				avg_completion: 63,
+			},
+			trend: { labels: lbls, values: vals },
+			top_videos: topVideos.slice( 0, 5 ),
+			depth: { d25: Math.round(totalPlays*0.64), d50: Math.round(totalPlays*0.43), d75: Math.round(totalPlays*0.24), d100: Math.round(totalPlays*0.11) },
+			all_videos: topVideos,
+		};
+	}
+
+	function enterDemoMode() {
+		demoMode = true;
+		var btn = document.getElementById( 'pva-demo-toggle' );
+		if ( btn ) btn.classList.add( 'pva-demo-btn--active' );
+
+		var existing = document.getElementById( 'pva-demo-notice' );
+		if ( ! existing ) {
+			var notice = document.createElement( 'div' );
+			notice.className = 'pva-demo-notice';
+			notice.id        = 'pva-demo-notice';
+			notice.innerHTML  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>'
+				+ '<span class="pva-demo-notice__text"><strong>Sample data:</strong> this is a preview of what your analytics will look like once real viewers start watching.</span>'
+				+ '<button class="pva-demo-exit" type="button">Exit preview</button>';
+
+			var chartsSection = document.getElementById( 'pva-charts-section' );
+			if ( chartsSection ) {
+				chartsSection.insertAdjacentElement( 'beforebegin', notice );
+			}
+			notice.querySelector( '.pva-demo-exit' ).addEventListener( 'click', exitDemoMode );
+		}
+
+		showLoading();
+		render( buildDemoData( activeDays ) );
+	}
+
+	function exitDemoMode() {
+		demoMode = false;
+		var btn = document.getElementById( 'pva-demo-toggle' );
+		if ( btn ) btn.classList.remove( 'pva-demo-btn--active' );
+		var notice = document.getElementById( 'pva-demo-notice' );
+		if ( notice ) notice.remove();
+		showLoading();
+		fetchData( activeDays );
+	}
+
+	// PressVideo brand palette — dark analytics theme
+	var C_INDIGO    = '#818cf8';   // bright indigo-400, readable on dark
+	var C_INDIGO_LT = '#a5b4fc';  // indigo-300, pops on dark
+	var C_INDIGO_XL = '#c7d2fe';  // indigo-200, lightest depth
+	var C_DARK      = '#ffffff';   // white — donut center value on dark bg
+	var C_MUTED     = 'rgba(255,255,255,0.45)'; // axis ticks on dark
+	var C_GRID      = 'rgba(255,255,255,0.07)'; // grid lines on dark
+	var TIP_BG      = 'rgba(10,10,24,0.96)';   // near-black tooltip
+	var TIP_TITLE   = '#a5b4fc';
 
 	// ── Custom Chart.js plugin: donut center text ─────────────────────
 	var donutCenterPlugin = {
@@ -39,15 +152,28 @@
 			ctx.save();
 
 			ctx.font         = '800 26px -apple-system, BlinkMacSystemFont, sans-serif';
-			ctx.fillStyle    = C_DARK;
+			ctx.fillStyle    = '#ffffff';
 			ctx.textAlign    = 'center';
 			ctx.textBaseline = 'middle';
 			ctx.fillText(opts.value, cx, cy - 10);
 
 			ctx.font      = '600 11px -apple-system, BlinkMacSystemFont, sans-serif';
-			ctx.fillStyle = C_MUTED;
+			ctx.fillStyle = 'rgba(255,255,255,0.45)';
 			ctx.fillText('avg completion', cx, cy + 14);
 
+			ctx.restore();
+		},
+	};
+
+	// Transparent canvas background plugin — lets the dark card show through.
+	var transparentBgPlugin = {
+		id: 'pvTransparentBg',
+		beforeDraw: function(chart) {
+			var ctx = chart.ctx;
+			ctx.save();
+			ctx.globalCompositeOperation = 'destination-over';
+			ctx.fillStyle = 'transparent';
+			ctx.fillRect(0, 0, chart.width, chart.height);
 			ctx.restore();
 		},
 	};
@@ -55,12 +181,143 @@
 	// Register globally so it applies to every chart instance.
 	if (window.Chart) {
 		Chart.register(donutCenterPlugin);
+		Chart.register(transparentBgPlugin);
+	}
+
+	// ── Last rendered data (used by export / report / insights) ──────
+	var lastData = null;
+
+	// ── Tooltip content ───────────────────────────────────────────────
+	var TIPS = {
+		'summary':      'Your overall analytics snapshot for the selected period. The letter grade and score reflect how well your video content performs across retention, reach, and SEO compared to a YouTube-only strategy.',
+		'trend':        'Daily play count over your selected period. Look for spikes (what drove them?) and flat stretches (when did promotion stop?). Consistent daily plays signal healthy distribution habits.',
+		'top-videos':   'Your best-performing videos by total plays this period. These are your proven performers. Promote them more, link to them from other posts, and create more content in the same format.',
+		'watch-depth':  'Shows how far into your videos viewers actually watch. Low numbers at 25% mean your opening hook isn\'t landing. A big drop at 75% means viewers leave just before the payoff. Tease what\'s coming to pull them through.',
+		'all-videos':   'Every video with play data this period. Use this to spot hidden performers, identify videos that need promotion, and track your full catalog in one place.',
+		'least-watched':'Videos with the fewest plays this period. These are your biggest opportunity for targeted promotion, a re-edited opening hook, or archiving if they consistently underperform.',
+		'coach':        'PressVideo AI analyzes your real analytics data and generates 3 specific growth moves tailored to your numbers. Each move is a concrete action targeting your weakest metric. Insights are cached for 24 hours. Hit Refresh to generate a new set anytime.',
+		'insights':     'Automated signals detected from your analytics, including traffic spikes, completion drop-offs, and trends worth your attention. These update each time your data refreshes.',
+		'feature-picks':'Videos recommended for active promotion right now, based on play momentum and engagement signals from your data. Feature these on your homepage, in emails, or on social this week.',
+	};
+
+	function tipBtn(key) {
+		return '<button class="pva-tip-btn" type="button" data-tip="' + key + '" aria-label="Learn about this section">?</button>';
+	}
+
+	function collapseBtn() {
+		return '<button class="pva-collapse-btn" type="button" aria-expanded="true" aria-label="Collapse section">'
+			+ '<svg class="pva-collapse-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>'
+			+ '</button>';
+	}
+
+	// ── Card collapse / expand ────────────────────────────────────────
+	var cardStates = {};
+	try { cardStates = JSON.parse(localStorage.getItem('pva_block_states') || '{}'); } catch(e) {}
+
+	function applyCardState(card, collapsed) {
+		card.classList.toggle('pv-card--collapsed', collapsed);
+		var btn = card.querySelector('.pva-collapse-btn');
+		if (btn) btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+	}
+
+	function saveCardState(id, collapsed) {
+		cardStates[id] = collapsed;
+		try { localStorage.setItem('pva_block_states', JSON.stringify(cardStates)); } catch(e) {}
+	}
+
+	function restoreCardStates() {
+		document.querySelectorAll('.pv-card[data-card-id]').forEach(function(card) {
+			var id = card.dataset.cardId;
+			if (id && cardStates[id]) applyCardState(card, true);
+		});
+	}
+
+	document.addEventListener('click', function(e) {
+		var cBtn = e.target.closest('.pva-collapse-btn');
+		if (!cBtn) return;
+		var card = cBtn.closest('.pv-card');
+		if (!card) return;
+		var nowCollapsed = !card.classList.contains('pv-card--collapsed');
+		applyCardState(card, nowCollapsed);
+		var id = card.dataset.cardId;
+		if (id) saveCardState(id, nowCollapsed);
+		if (!nowCollapsed) {
+			requestAnimationFrame(function() {
+				if (trendChart) trendChart.resize();
+				if (topChart)   topChart.resize();
+				if (depthChart) depthChart.resize();
+			});
+		}
+	});
+
+	function initTooltips() {
+		var pop     = document.getElementById('pva-tip-pop');
+		var textEl  = pop ? pop.querySelector('.pva-tip-pop__text') : null;
+		var arrowEl = pop ? pop.querySelector('.pva-tip-pop__arrow') : null;
+		var activeBtn = null;
+		if (!pop || !textEl) return;
+
+		document.addEventListener('click', function(e) {
+			var btn = e.target.closest('.pva-tip-btn');
+			if (btn) {
+				e.stopPropagation();
+				var key = btn.getAttribute('data-tip');
+				if (activeBtn === btn && !pop.hidden) {
+					pop.hidden = true;
+					btn.classList.remove('pva-tip-btn--active');
+					activeBtn = null;
+					return;
+				}
+				if (activeBtn) activeBtn.classList.remove('pva-tip-btn--active');
+				activeBtn = btn;
+				btn.classList.add('pva-tip-btn--active');
+				textEl.textContent = TIPS[key] || '';
+				pop.hidden = false;
+
+				// Position below the button (fixed, so no scroll offset needed)
+				var rect = btn.getBoundingClientRect();
+				var popW = 280;
+				var left = rect.left + rect.width / 2 - popW / 2;
+				left = Math.max(8, Math.min(left, document.documentElement.clientWidth - popW - 8));
+				pop.style.top  = (rect.bottom + 8) + 'px';
+				pop.style.left = left + 'px';
+
+				// Arrow offset relative to popover left edge
+				var arrowLeft = (rect.left + rect.width / 2) - left - 5;
+				if (arrowEl) arrowEl.style.left = Math.max(8, arrowLeft) + 'px';
+				return;
+			}
+			if (!pop.hidden) {
+				pop.hidden = true;
+				if (activeBtn) { activeBtn.classList.remove('pva-tip-btn--active'); activeBtn = null; }
+			}
+		});
+
+		// Close on scroll so the fixed popover doesn't drift from its button
+		window.addEventListener('scroll', function() {
+			if (!pop.hidden) {
+				pop.hidden = true;
+				if (activeBtn) { activeBtn.classList.remove('pva-tip-btn--active'); activeBtn = null; }
+			}
+		}, { passive: true });
 	}
 
 	// ── Boot ──────────────────────────────────────────────────────────
 	function init() {
+		if (cfg.aiDebug) {
+			console.log('[PressVideo AI Coach]', cfg.aiDebug);
+		}
 		bindPills();
-		fetchData(activeDays);
+		bindDemoBtn();
+		bindExportButtons();
+		bindCoachRefresh();
+		initTooltips();
+		// Auto-enter demo mode if site has no play data yet
+		if ( ! cfg.hasData ) {
+			enterDemoMode();
+		} else {
+			fetchData( activeDays );
+		}
 	}
 
 	function bindPills() {
@@ -75,9 +332,30 @@
 				this.classList.add('pva-pill--active');
 				activeDays = days;
 				showLoading();
-				fetchData(days);
+				if ( demoMode ) {
+					render( buildDemoData( activeDays ) );
+				} else {
+					fetchData( days );
+				}
 			});
 		});
+	}
+
+	function bindCoachRefresh() {
+		document.addEventListener('click', function(e) {
+			var btn = e.target.closest && e.target.closest('#pva-coach-refresh');
+			if (!btn) return;
+			refreshAiInsights();
+		});
+	}
+
+	function bindDemoBtn() {
+		var btn = document.getElementById( 'pva-demo-toggle' );
+		if ( btn ) {
+			btn.addEventListener( 'click', function() {
+				if ( demoMode ) exitDemoMode(); else enterDemoMode();
+			} );
+		}
 	}
 
 	function showLoading() {
@@ -113,14 +391,22 @@
 		fetch(ajaxUrl, { method: 'POST', body: body })
 			.then(function (r) { return r.json(); })
 			.then(function (resp) {
-				if (resp && resp.success) render(resp.data);
+				if (resp && resp.success) {
+					render(resp.data);
+				} else {
+					enterDemoMode();
+				}
 			})
 			.catch(function (err) {
 				console.error('[PressVideo Analytics]', err);
+				enterDemoMode();
 			});
 	}
 
 	function render(data) {
+		lastData = data;
+		enableExportButtons( data.stats.total_plays > 0 || demoMode );
+
 		var hasData = data.stats.total_plays > 0;
 
 		// ── Stats always visible ──────────────────────────────────────
@@ -131,9 +417,15 @@
 		// ── Toggle sections ───────────────────────────────────────────
 		var chartsSection = document.getElementById('pva-charts-section');
 		var emptySection  = document.getElementById('pva-empty');
+		var aiRow         = document.getElementById('pva-ai-row');
+		var tableRow      = document.getElementById('pva-table-row');
 
 		if (chartsSection) chartsSection.hidden = !hasData;
 		if (emptySection)  emptySection.hidden  = hasData;
+		if (aiRow)         aiRow.hidden         = !hasData;
+		if (tableRow)      tableRow.hidden      = !hasData;
+
+		renderSummary(data);
 
 		if (!hasData) return;
 
@@ -141,6 +433,11 @@
 		renderTop(data.top_videos);
 		renderDepth(data.depth, data.stats.avg_completion);
 		renderTable(data.all_videos);
+		renderCoach(data);
+		renderPerformanceInsights(data);
+		renderLeastWatched(data);
+		renderFeaturePicks(data);
+		restoreCardStates();
 	}
 
 	// ── Play Trend (line chart) ───────────────────────────────────────
@@ -158,9 +455,9 @@
 
 		var chart2d  = ctx.getContext('2d');
 		var gradient = chart2d.createLinearGradient(0, 0, 0, 280);
-		gradient.addColorStop(0,   'rgba(79, 70, 229, 0.22)');
-		gradient.addColorStop(0.7, 'rgba(79, 70, 229, 0.05)');
-		gradient.addColorStop(1,   'rgba(79, 70, 229, 0)');
+		gradient.addColorStop(0,   'rgba(165, 180, 252, 0.28)');
+		gradient.addColorStop(0.6, 'rgba(165, 180, 252, 0.08)');
+		gradient.addColorStop(1,   'rgba(165, 180, 252, 0)');
 
 		var labels = trend.labels.map(function (d) {
 			var parts = d.split('-');
@@ -176,14 +473,15 @@
 				datasets: [{
 					label:               'Plays',
 					data:                trend.values,
-					borderColor:         C_INDIGO,
+					borderColor:         '#a5b4fc',
 					backgroundColor:     gradient,
-					tension:             0.4,
-					pointBackgroundColor: C_INDIGO,
-					pointBorderColor:    '#fff',
-					pointBorderWidth:    2,
-					pointRadius:         4,
+					tension:             0.42,
+					pointBackgroundColor: '#a5b4fc',
+					pointBorderColor:    'rgba(255,255,255,0.25)',
+					pointBorderWidth:    1.5,
+					pointRadius:         3.5,
 					pointHoverRadius:    7,
+					pointHoverBackgroundColor: '#fff',
 					fill:                true,
 					borderWidth:         2.5,
 				}],
@@ -237,19 +535,28 @@
 		if (!ctx) return;
 
 		if (!topVideos || !topVideos.length) {
-			ctx.parentNode.innerHTML = '<p class="pva-no-data">No plays recorded yet.</p>';
+			ctx.style.display = 'none';
+			if (!ctx.parentNode.querySelector('.pva-no-data')) {
+				var noTop = document.createElement('p');
+				noTop.className = 'pva-no-data';
+				noTop.textContent = 'No plays recorded yet.';
+				ctx.parentNode.appendChild(noTop);
+			}
 			return;
 		}
+		ctx.style.display = '';
+		var topMsg = ctx.parentNode.querySelector('.pva-no-data');
+		if (topMsg) topMsg.remove();
 
 		var labels = topVideos.map(function (v) {
 			return v.title.length > 38 ? v.title.substring(0, 38) + '…' : v.title;
 		});
 		var values = topVideos.map(function (v) { return v.plays; });
 
-		// Indigo shades: full opacity for #1, fading to 40% for #10
+		// Bright indigo fading to muted — designed for dark card bg
 		var colors = topVideos.map(function (_, i) {
-			var alpha = 1 - (i / Math.max(topVideos.length, 1)) * 0.6;
-			return 'rgba(79, 70, 229, ' + alpha.toFixed(2) + ')';
+			var alpha = 1 - (i / Math.max(topVideos.length, 1)) * 0.62;
+			return 'rgba(129, 140, 248, ' + alpha.toFixed(2) + ')';
 		});
 
 		if (topChart) topChart.destroy();
@@ -293,7 +600,7 @@
 					},
 					y: {
 						grid:  { display: false },
-						ticks: { color: '#374151', font: { size: 12 }, padding: 4 },
+						ticks: { color: 'rgba(255,255,255,0.70)', font: { size: 12 }, padding: 4 },
 					},
 				},
 			},
@@ -314,9 +621,18 @@
 		var total = d25 + d50 + d75 + d100;
 
 		if (total === 0) {
-			ctx.parentNode.innerHTML = '<p class="pva-no-data">Depth tracking will appear once viewers watch past 25%.</p>';
+			ctx.style.display = 'none';
+			if (!ctx.parentNode.querySelector('.pva-no-data')) {
+				var noDepth = document.createElement('p');
+				noDepth.className = 'pva-no-data';
+				noDepth.textContent = 'Depth tracking will appear once viewers watch past 25%.';
+				ctx.parentNode.appendChild(noDepth);
+			}
 			return;
 		}
+		ctx.style.display = '';
+		var depthMsg = ctx.parentNode.querySelector('.pva-no-data');
+		if (depthMsg) depthMsg.remove();
 
 		if (depthChart) depthChart.destroy();
 		depthChart = new Chart(ctx, {
@@ -339,7 +655,7 @@
 					legend: {
 						position: 'bottom',
 						labels: {
-							color:        '#374151',
+							color:        'rgba(255,255,255,0.70)',
 							padding:      16,
 							font:         { size: 12 },
 							boxWidth:     12,
@@ -422,12 +738,1123 @@
 		return Number(n).toLocaleString();
 	}
 
+	function svgIcon(d, size) {
+		var sz  = (size || 16) + '';
+		var ns  = 'http://www.w3.org/2000/svg';
+		var svg = document.createElementNS(ns, 'svg');
+		svg.setAttribute('width',   sz);
+		svg.setAttribute('height',  sz);
+		svg.setAttribute('viewBox', '0 0 24 24');
+		svg.setAttribute('fill',    'currentColor');
+		var p = document.createElementNS(ns, 'path');
+		p.setAttribute('d', d);
+		svg.appendChild(p);
+		var tmp = document.createElement('div');
+		tmp.appendChild(svg);
+		return tmp.innerHTML;
+	}
+
+
 	function esc(str) {
 		return String(str || '')
 			.replace(/&/g, '&amp;')
 			.replace(/</g, '&lt;')
 			.replace(/>/g, '&gt;')
 			.replace(/"/g, '&quot;');
+	}
+
+	function formatCachedAt(ts) {
+		if (!ts) return '';
+		var now  = Math.floor(Date.now() / 1000);
+		var diff = now - ts;
+		if (diff < 60)    return 'Updated just now';
+		if (diff < 3600)  { var m = Math.floor(diff / 60);  return 'Updated ' + m + ' min ago'; }
+		if (diff < 86400) { var h = Math.floor(diff / 3600); return 'Updated ' + h + ' hr' + (h > 1 ? 's' : '') + ' ago'; }
+		var d = new Date(ts * 1000);
+		var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+		return 'Updated ' + months[d.getMonth()] + ' ' + d.getDate();
+	}
+
+	// ══════════════════════════════════════════════════════════════════
+	//  EXPORT — CSV + JSON
+	// ══════════════════════════════════════════════════════════════════
+
+	function bindExportButtons() {
+		var btnCsv    = document.getElementById('pva-export-csv');
+		var btnJson   = document.getElementById('pva-export-json');
+		var btnReport = document.getElementById('pva-report-btn');
+		if (btnCsv)    btnCsv.addEventListener('click',    function(){ exportCSV(lastData); });
+		if (btnJson)   btnJson.addEventListener('click',   function(){ exportJSON(lastData); });
+		if (btnReport) btnReport.addEventListener('click', function(){ generateReport(lastData); });
+	}
+
+	function enableExportButtons(enabled) {
+		['pva-export-csv','pva-export-json','pva-report-btn'].forEach(function(id){
+			var el = document.getElementById(id);
+			if (el) el.disabled = !enabled;
+		});
+	}
+
+	function exportCSV(data) {
+		if (!data) return;
+		var isDemoMode = demoMode;
+		var rows = [
+			['#', 'Title', 'Plays', '% of Total', 'Post URL', 'YouTube URL', 'Last Played']
+		];
+		var total = data.stats.total_plays || 1;
+		(data.all_videos || []).forEach(function(v, i) {
+			var share = total > 0 ? (v.plays / total * 100).toFixed(1) + '%' : '—';
+			var ytUrl = v.yt_id ? 'https://www.youtube.com/watch?v=' + v.yt_id : '';
+			rows.push([
+				i + 1,
+				'"' + (v.title || '').replace(/"/g, '""') + '"',
+				v.plays,
+				share,
+				'"' + (v.permalink || v.edit || '') + '"',
+				'"' + ytUrl + '"',
+				'"' + (v.last_played || '') + '"',
+			]);
+		});
+		var note = isDemoMode ? '\n\n"NOTE: This is sample data. Connect your YouTube channel to see real analytics."\n' : '';
+		var csv = rows.map(function(r){ return r.join(','); }).join('\n') + note;
+		var label = isDemoMode ? 'pressvideo-sample-analytics-' : 'pressvideo-analytics-';
+		downloadFile(csv, label + dateStamp() + '.csv', 'text/csv;charset=utf-8;');
+	}
+
+	function exportJSON(data) {
+		if (!data) return;
+		var payload = {
+			exported_at:   new Date().toISOString(),
+			period_days:   activeDays,
+			is_demo:       demoMode,
+			site:          cfg.siteName || '',
+			site_url:      cfg.siteUrl  || '',
+			stats:         data.stats,
+			trend:         data.trend,
+			top_videos:    data.top_videos,
+			watch_depth:   data.depth,
+			all_videos:    (data.all_videos || []).map(function(v){
+				return {
+					title:       v.title,
+					plays:       v.plays,
+					last_played: v.last_played,
+					post_url:    v.permalink || v.edit || '',
+					youtube_url: v.yt_id ? 'https://www.youtube.com/watch?v=' + v.yt_id : '',
+				};
+			}),
+		};
+		var label = demoMode ? 'pressvideo-sample-analytics-' : 'pressvideo-analytics-';
+		downloadFile(JSON.stringify(payload, null, 2), label + dateStamp() + '.json', 'application/json');
+	}
+
+	function downloadFile(content, filename, mime) {
+		var blob = new Blob([content], { type: mime });
+		var url  = URL.createObjectURL(blob);
+		var a    = document.createElement('a');
+		a.href     = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+
+	function dateStamp() {
+		var d = new Date();
+		return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+	}
+	function pad2(n){ return n < 10 ? '0' + n : '' + n; }
+
+	// ══════════════════════════════════════════════════════════════════
+	//  INSIGHTS ENGINE
+	// ══════════════════════════════════════════════════════════════════
+
+	// ══════════════════════════════════════════════════════════════════
+	//  CREATOR GROWTH COACH
+	// ══════════════════════════════════════════════════════════════════
+
+	function generateEdgeScore(data) {
+		var stats = data.stats || {};
+		var comp  = stats.avg_completion || 0;
+		var total = stats.total_plays    || 0;
+		var uniq  = stats.unique_videos  || 0;
+
+		// Retention Power (0–40): completion vs 85% excellent threshold
+		var retention = Math.min(40, Math.round((comp / 85) * 40));
+
+		// Reach Efficiency (0–35): plays-per-video; 120 = excellent
+		var playsPerVid = uniq > 0 ? total / uniq : 0;
+		var reach = Math.min(35, Math.round((playsPerVid / 120) * 35));
+
+		// SEO Surface Area (0–25): unique video count; 50 = excellent
+		var seo = Math.min(25, Math.round((uniq / 50) * 25));
+
+		return {
+			total:     retention + reach + seo,
+			retention: { score: retention, max: 40, label: 'Retention Power' },
+			reach:     { score: reach,     max: 35, label: 'Reach Efficiency' },
+			seo:       { score: seo,       max: 25, label: 'SEO Surface Area' },
+		};
+	}
+
+	function generatePlaybook(data) {
+		var stats   = data.stats    || {};
+		var trend   = data.trend    || { labels: [], values: [] };
+		var topVids = data.top_videos || [];
+		var comp    = stats.avg_completion || 0;
+		var total   = stats.total_plays    || 0;
+		var uniq    = stats.unique_videos  || 0;
+
+		var top1    = topVids[0] || { title: 'your best video', plays: 0, permalink: '' };
+		var top2    = topVids[1] || { title: 'your second video', plays: 0 };
+		var top3vid = topVids[2] || top2;
+		var top1URL = top1.permalink || top1.edit || '#';
+
+		var mid  = Math.floor(trend.values.length / 2);
+		var sum1 = trend.values.slice(0, mid).reduce(function(a,b){return a+b;},0);
+		var sum2 = trend.values.slice(mid).reduce(function(a,b){return a+b;},0);
+		var trendPct = sum1 > 0 ? Math.round((sum2 - sum1) / sum1 * 100) : 0;
+
+		var top3plays = topVids.slice(0,3).reduce(function(s,v){return s+v.plays;},0);
+		var top3pct   = total > 0 ? Math.round(top3plays / total * 100) : 0;
+
+		var pool = [
+			{
+				priority: comp < 45 ? 100 : comp < 60 ? 65 : 22,
+				type: 'Video Strategy', color: '#f59e0b',
+				icon: svgIcon('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z'),
+				title: 'Rewrite your hook on "' + truncStr(top1.title, 40) + '"',
+				edge: 'YouTube rewards watch time above everything else. Your ' + comp + '% avg completion tells us viewers are leaving before they hit your best content. A stronger 15-second hook on your top video alone can lift the whole channel recommendation score.',
+				scriptLabel: 'New intro script (first 20 seconds):',
+				script: 'Stop. Before I show you anything else: [tease the single most surprising thing in this video]. If that\'s been your struggle, you\'re in exactly the right place. I\'m [your name], and in the next [X] minutes I\'m going to walk you through [main promise] step by step. Let\'s go.',
+				impact: '+10-20% avg watch time, which directly increases YouTube recommendation reach.',
+			},
+			{
+				priority: trendPct <= -10 ? 95 : 42,
+				type: 'Email Marketing', color: '#10b981',
+				icon: svgIcon('M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'),
+				title: 'Send an email blast for "' + truncStr(top1.title, 38) + '"',
+				edge: 'Email subscribers are 5-10x more likely to watch than cold traffic. Creators who send a simple "here\'s what you missed" email see 30-50% more plays from their existing list within 48 hours, with zero ad spend.',
+				scriptLabel: 'Email subject + body (copy and send today):',
+				script: 'Subject: Have you seen this yet?\n\nHey [first name],\n\nI just posted something I think you\'ll want to see: "' + top1.title + '"\n\nIt\'s already getting traction and the feedback has been really encouraging. If you\'ve ever struggled with [topic], this one\'s for you.\n\n-> Watch it here: ' + top1URL + '\n\nI read every reply. Let me know what you think.\n\n[Your name]',
+				impact: '30-50% more plays from your existing list within 48 hours of sending.',
+			},
+			{
+				priority: top3pct > 65 && topVids.length > 3 ? 85 : 32,
+				type: 'On-Page Strategy', color: '#6366f1',
+				icon: svgIcon('M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z'),
+				title: 'Link "' + truncStr(top1.title, 35) + '" to your other videos',
+				edge: 'You have ' + uniq + ' videos but ' + top3pct + '% of plays go to just 3. Adding a "you might also like" mention at the 90% mark is the fastest way to redistribute traffic without creating new content.',
+				scriptLabel: 'End-of-video CTA (add this at the 90% mark):',
+				script: 'If you got value from this, I think you\'ll love "' + truncStr(top2.title, 50) + '". I\'ll link it in the description. And if you haven\'t subscribed yet, hit that button. I post new videos every week and you don\'t want to miss what\'s coming next.',
+				impact: 'Each linked video sees 15-40% more plays purely from internal referrals.',
+			},
+			{
+				priority: top3pct > 60 ? 78 : 28,
+				type: 'Thumbnail Test', color: '#818cf8',
+				icon: svgIcon('M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z'),
+				title: 'Test a new thumbnail on "' + truncStr(top3vid.title, 38) + '"',
+				edge: 'Thumbnail CTR is the #1 factor in how many new people discover your content. A video with a mediocre thumbnail can be sitting on gold. Changing one element (emotion, text, or color contrast) often doubles CTR overnight.',
+				scriptLabel: 'Social post to announce the experiment:',
+				script: 'Running a thumbnail experiment this week.\n\nTesting 3 new versions on "' + truncStr(top3vid.title, 45) + '" to see which drives more clicks.\n\nI\'ll share the data next week. If you want to follow along, subscribe or follow for the results.\n\n#YouTubeStrategy #ContentCreator',
+				impact: '2-5x click-through rate uplift, which multiplies YouTube impressions directly.',
+			},
+			{
+				priority: trendPct >= 20 ? 92 : trendPct >= 10 ? 68 : 18,
+				type: 'Momentum Play', color: '#22c55e',
+				icon: svgIcon('M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z'),
+				title: 'Double down. Your momentum is up ' + Math.abs(trendPct) + '%',
+				edge: 'Your plays are up ' + trendPct + '% in the second half of this period. This is exactly when most creators go quiet. The ones who double down right now (more shares, engagement, posts) are the ones who break through to the next level.',
+				scriptLabel: 'Social post to share right now:',
+				script: 'Something\'s clicking.\n\nI\'ve been watching the numbers on "' + truncStr(top1.title, 45) + '" and the response has been really encouraging.\n\nIf you\'ve been on the fence, now\'s the time. ' + fmt(top1.plays) + ' people have already watched.\n\n-> ' + top1URL + '\n\n#ContentCreator',
+				impact: 'Riding a momentum window can extend a growth spike from days to weeks.',
+			},
+			{
+				priority: uniq < 10 ? 75 : uniq < 20 ? 52 : 15,
+				type: 'SEO & Discovery', color: '#a78bfa',
+				icon: svgIcon('M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'),
+				title: 'Build a SEO hub page for "' + truncStr(top1.title, 35) + '"',
+				edge: 'Unlike YouTube where content disappears in the feed, your video lives permanently on your site. A keyword-optimized page with a meta description and transcript can rank in Google and drive organic traffic, something YouTube-only creators can never do.',
+				scriptLabel: 'Meta description to use on the page:',
+				script: 'Want to learn [main topic]? In this video, [your name] breaks down [key promise] in plain language. Whether you\'re a beginner or you\'ve been struggling with [problem] for years, this is the most practical guide you\'ll find. Watch now. ' + fmt(top1.plays) + ' people already have.',
+				impact: 'Organic Google traffic, a revenue channel YouTube-only creators cannot access.',
+			},
+			{
+				priority: 24,
+				type: 'Content Calendar', color: '#0ea5e9',
+				icon: svgIcon('M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11z'),
+				title: 'Commit to a 4-week publishing sprint',
+				edge: 'YouTube rewards channels that post consistently. Channels on a regular schedule see 2-3x more impressions than sporadic ones, even at the same video quality. One month of consistency can permanently lift your baseline discovery rate.',
+				scriptLabel: 'Accountability post to share with your audience:',
+				script: 'New commitment: I\'m posting every [day of week] for the next 4 weeks. Starting this [date].\n\nI\'m doing this to give you a consistent reason to come back, and to hold myself accountable.\n\nIf you\'ve been meaning to check out my videos, now\'s the time to subscribe.\n\n[Link to your video page]',
+				impact: '2-3x baseline impressions for channels that post on a consistent schedule for 4+ weeks.',
+			},
+		];
+
+		pool.sort(function(a, b) { return b.priority - a.priority; });
+		return pool.slice(0, 3);
+	}
+
+	// ── AI Coach helpers ──────────────────────────────────────────────
+
+	var AI_MOVE_COLORS = ['#818cf8', '#10b981', '#f59e0b'];
+	var AI_MOVE_ICONS  = [
+		'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z',
+		'M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z',
+		'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+	];
+
+	function adaptAiMoves(moves) {
+		return moves.map(function(move, i) {
+			return {
+				type:        'AI Insight',
+				color:       AI_MOVE_COLORS[i % AI_MOVE_COLORS.length],
+				icon:        svgIcon(AI_MOVE_ICONS[i % AI_MOVE_ICONS.length]),
+				title:       move.title  || '',
+				edge:        move.edge   || '',
+				scriptLabel: 'Recommended action:',
+				script:      move.script || '',
+				impact:      move.impact || '',
+			};
+		});
+	}
+
+	function refreshAiInsights() {
+		var coachCard = document.querySelector('.pva-coach');
+		if (coachCard) coachCard.classList.add('pva-coach--loading');
+
+		var body = new URLSearchParams({
+			action: 'pv_refresh_ai_insights',
+			nonce:  nonce,
+			days:   activeDays,
+		});
+
+		fetch(ajaxUrl, { method: 'POST', body: body })
+			.then(function(r) { return r.json(); })
+			.then(function(resp) {
+				if (resp && resp.success && resp.data) {
+					if (Array.isArray(resp.data.moves) && resp.data.moves.length) {
+						cfg.aiMoves = resp.data.moves;
+					}
+					if (resp.data.summary && resp.data.summary.title) {
+						cfg.aiSummary = resp.data.summary;
+					}
+					if (resp.data.cached_at) {
+						cfg.aiCachedAt = resp.data.cached_at;
+					}
+				}
+				if (lastData) renderSummary(lastData);
+				if (lastData) renderCoach(lastData);
+			})
+			.catch(function() {
+				if (lastData) renderCoach(lastData);
+			})
+			.then(function() {
+				var card = document.querySelector('.pva-coach');
+				if (card) card.classList.remove('pva-coach--loading');
+			});
+	}
+
+	function renderCoach(data) {
+		var coachCol = document.getElementById('pva-coach-col');
+		if (!coachCol) return;
+
+		var hasAiKey = !! cfg.hasAiKey;
+
+		var edge  = generateEdgeScore(data);
+		var score = edge.total;
+		var stats    = data.stats || {};
+		var comp     = stats.avg_completion || 0;
+		var total    = stats.total_plays    || 0;
+		var uniq     = stats.unique_videos  || 0;
+
+		var scoreColor = score >= 75 ? '#10b981' : score >= 50 ? '#818cf8' : '#f59e0b';
+		var narrative  = score >= 75
+			? 'You\'re outperforming most YouTube-only creators. Your content is indexed, searchable, and permanently owned by you.'
+			: score >= 50
+			? 'You\'re ahead of the curve. Most creators never get their video content indexed or searchable outside YouTube.'
+			: 'You\'re building a foundation most creators never have. Every video you publish is permanent, SEO-optimized, and owned by you.';
+
+		var ARC_LEN   = 251.3;
+		var arcTarget = (ARC_LEN * (1 - score / 100)).toFixed(1);
+
+		// Benchmark comparison chips
+		var playsPerVid = uniq > 0 ? Math.round(total / uniq) : 0;
+		var UP_ICO  = svgIcon('M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z', 10);
+		var DN_ICO  = svgIcon('M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6z', 10);
+		var VID_ICO = svgIcon('M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z', 10);
+		var benches = [
+			{ val: comp + '%',     label: 'completion vs 52% avg', cls: comp > 52 ? 'pva-bench--good' : 'pva-bench--warn', icon: comp > 52 ? UP_ICO : DN_ICO },
+			{ val: fmt(playsPerVid), label: 'plays/video vs 60 avg', cls: playsPerVid > 60 ? 'pva-bench--good' : 'pva-bench--warn', icon: playsPerVid > 60 ? UP_ICO : DN_ICO },
+			{ val: fmt(uniq),      label: uniq === 1 ? 'video catalogued' : 'videos catalogued', cls: 'pva-bench--neutral', icon: VID_ICO },
+		];
+		var benchHtml = benches.map(function(b){
+			return '<span class="pva-bench ' + b.cls + '">' + b.icon + '<strong>' + esc(b.val) + '</strong> ' + esc(b.label) + '</span>';
+		}).join('');
+
+		var subBars = [edge.retention, edge.reach, edge.seo].map(function(s){
+			var pct = Math.round((s.score / s.max) * 100);
+			return '<div class="pva-coach-subbar">'
+				+ '<div class="pva-coach-subbar__row">'
+				+   '<span class="pva-coach-subbar__label">' + s.label + '</span>'
+				+   '<span class="pva-coach-subbar__val">' + s.score + '<span class="pva-coach-subbar__max">/' + s.max + '</span></span>'
+				+ '</div>'
+				+ '<div class="pva-coach-subbar__track"><div class="pva-coach-subbar__fill" style="width:' + pct + '%;background:' + scoreColor + '"></div></div>'
+				+ '</div>';
+		}).join('');
+
+		var isPlatinum = !! cfg.isPlatinum;
+		var aiMoves = demoMode ? DEMO_AI_MOVES : ( cfg.aiMoves && cfg.aiMoves.length ? cfg.aiMoves : null );
+		var playbook = aiMoves ? adaptAiMoves(aiMoves) : generatePlaybook(data);
+
+		var moveCards = playbook.map(function(move, idx){
+			var sid = 'pva-script-' + idx;
+			return '<div class="pva-coach-move" style="--move-clr:' + move.color + '">'
+				+ '<div class="pva-coach-move__header">'
+				+   '<div class="pva-coach-move__icon">' + move.icon + '</div>'
+				+   '<div class="pva-coach-move__meta">'
+				+     '<span class="pva-coach-move__type">' + esc(move.type) + '</span>'
+				+     '<h4 class="pva-coach-move__title">' + esc(move.title) + '</h4>'
+				+   '</div>'
+				+ '</div>'
+				+ '<p class="pva-coach-move__edge">' + esc(move.edge) + '</p>'
+				+ '<div class="pva-coach-script-wrap">'
+				+   '<div class="pva-coach-script-label">' + esc(move.scriptLabel) + '</div>'
+				+   '<div class="pva-coach-script" id="' + sid + '">' + esc(move.script) + '</div>'
+				+   '<button class="pva-coach-copy" data-target="' + sid + '" type="button">'
+				+     svgIcon('M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z', 13)
+				+     '<span>Copy Script</span>'
+				+   '</button>'
+				+ '</div>'
+				+ '<p class="pva-coach-move__impact"><strong>Expected impact:</strong> ' + esc(move.impact) + '</p>'
+				+ '</div>';
+		}).join('');
+
+		var aiBadge = '<span class="pva-coach__ai-badge">'
+			+ svgIcon('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z', 10)
+			+ 'AI-powered</span>';
+
+		var coachSub = aiMoves
+			? aiBadge + ( demoMode
+				? '<span class="pva-chart-sub">Sample AI output. Activate with your API key.</span>'
+				: ( isPlatinum
+					? '<span class="pva-chart-sub">Included in your Platinum plan</span>'
+					: '<span class="pva-chart-sub">Personalized to your real data</span>' ) )
+			: '<span class="pva-chart-sub">Personalized strategy based on your data</span>';
+
+		var cachedAtTs  = cfg.aiCachedAt || 0;
+		var cachedAtHtml = (hasAiKey && cachedAtTs)
+			? '<span class="pva-coach__last-refreshed">' + formatCachedAt(cachedAtTs) + '</span>'
+			: '';
+
+		var refreshBtnHtml = hasAiKey
+			? '<div class="pv-card__head-action">'
+				+ '<button class="pva-coach__refresh-btn" id="pva-coach-refresh" type="button" title="Refresh AI insights">'
+				+ svgIcon('M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z', 14)
+				+ '<span>Refresh</span></button>'
+				+ cachedAtHtml
+				+ '</div>'
+			: '';
+
+		var playbookTitle = aiMoves ? 'Your AI-Powered Growth Playbook' : 'Your 3-Move Growth Playbook';
+		var playbookSub   = aiMoves
+			? ( demoMode ? 'Sample AI recommendations. Your real insights will be based on your actual data.' : 'Generated by PressVideo AI based on your real data' )
+			: 'Data-driven scripts personalized to your content';
+
+		coachCol.innerHTML = '<div class="pv-card pva-coach" data-card-id="coach">'
+			+ '<div class="pv-card__head">'
+			+   '<h2 class="pv-card__title">Creator Growth Coach</h2>'
+			+   tipBtn('coach')
+			+   coachSub
+			+   refreshBtnHtml
+			+   collapseBtn()
+			+ '</div>'
+			+ '<div class="pv-card__body pva-coach__body">'
+			+   ( aiMoves
+				? ( demoMode
+					? '<div class="pva-ai-status pva-ai-status--demo">'
+						+ '<span class="pva-ai-status__dot"></span>'
+						+ '<span class="pva-ai-status__text"><strong>AI Coach preview</strong> · Sample output. Add your API key or upgrade to Platinum to activate.</span>'
+						+ '</div>'
+					: '<div class="pva-ai-status">'
+						+ '<span class="pva-ai-status__dot"></span>'
+						+ '<span class="pva-ai-status__text"><strong>PressVideo AI is active</strong>'
+						+ ( isPlatinum ? ' · Included in your Platinum plan' : ' · Using your API key' )
+						+ '</span></div>'
+				)
+				: ( hasAiKey
+					? ''
+					: '<div class="pva-ai-status pva-ai-status--off">'
+						+ svgIcon('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z', 13)
+						+ '<span class="pva-ai-status__text">Add an Anthropic API key in <a href="' + esc(cfg.settingsUrl || '') + '">Settings</a> to unlock AI coaching.</span>'
+						+ '</div>'
+				)
+			)
+			+   '<div class="pva-coach__benchmarks">' + benchHtml + '</div>'
+			+   '<div class="pva-coach__gauge-row">'
+			+     '<svg class="pva-coach__gauge" viewBox="0 0 200 110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+			+       '<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="14" stroke-linecap="round"/>'
+			+       '<path class="pva-coach__arc" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="' + scoreColor + '" stroke-width="14" stroke-linecap="round"'
+			+         ' stroke-dasharray="' + ARC_LEN + '" stroke-dashoffset="' + ARC_LEN + '" data-offset="' + arcTarget + '"/>'
+			+       '<text x="100" y="86" text-anchor="middle" fill="' + scoreColor + '" font-size="34" font-weight="800" font-family="-apple-system,BlinkMacSystemFont,sans-serif">' + score + '</text>'
+			+       '<text x="100" y="103" text-anchor="middle" fill="rgba(255,255,255,0.42)" font-size="10.5" font-family="-apple-system,BlinkMacSystemFont,sans-serif">Competitive Edge Score</text>'
+			+     '</svg>'
+			+     '<div class="pva-coach__gauge-aside">'
+			+       '<p class="pva-coach__narrative">' + esc(narrative) + '</p>'
+			+       '<div class="pva-coach__subbars">' + subBars + '</div>'
+			+     '</div>'
+			+   '</div>'
+			+   '<div class="pva-coach__playbook">'
+			+     '<h4 class="pva-coach__playbook-title">' + playbookTitle + '</h4>'
+			+     '<p class="pva-coach__playbook-sub">' + playbookSub + '</p>'
+			+     moveCards
+			+   '</div>'
+			+ '</div>'
+			+ '</div>';
+
+		var arc = coachCol.querySelector('.pva-coach__arc');
+		if (arc) {
+			var target = parseFloat(arc.getAttribute('data-offset'));
+			requestAnimationFrame(function(){
+				requestAnimationFrame(function(){
+					arc.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(0.4,0,0.2,1)';
+					arc.style.strokeDashoffset = target;
+				});
+			});
+		}
+
+		coachCol.querySelectorAll('.pva-coach-copy').forEach(function(btn){
+			btn.addEventListener('click', function(){
+				var targetId = btn.getAttribute('data-target');
+				var scriptEl = document.getElementById(targetId);
+				if (!scriptEl) return;
+				var text = scriptEl.textContent || '';
+				var label = btn.querySelector('span');
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					navigator.clipboard.writeText(text).then(function(){
+						if (label) { label.textContent = 'Copied!'; setTimeout(function(){ label.textContent = 'Copy Script'; }, 2000); }
+					});
+				} else {
+					var ta = document.createElement('textarea');
+					ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+					document.body.appendChild(ta); ta.focus(); ta.select();
+					try { document.execCommand('copy'); if (label) { label.textContent = 'Copied!'; setTimeout(function(){ label.textContent = 'Copy Script'; }, 2000); } } catch(e){}
+					document.body.removeChild(ta);
+				}
+			});
+		});
+	}
+
+	function generateInsights(data) {
+		var list     = [];
+		var stats    = data.stats    || {};
+		var trend    = data.trend    || { labels: [], values: [] };
+		var topVids  = data.top_videos || [];
+		var depth    = data.depth    || {};
+		var total    = stats.total_plays || 0;
+		var comp     = stats.avg_completion || 0;
+
+		// 1. Top performer → promote
+		if (topVids.length > 0) {
+			list.push({
+				icon:    svgIcon('M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2z'),
+				badge:   'Feature This',
+				color:   '#22c55e',
+				title:   truncStr( topVids[0].title, 48 ) + ', your top video',
+				desc:    fmt(topVids[0].plays) + ' plays this period. Pin it to your homepage, link it in your email signature, or write a companion blog post to drive more traffic.',
+				action:  topVids[0].permalink ? { label: 'View Post', href: topVids[0].permalink } : null,
+			});
+		}
+
+		// 2. Trend direction (compare halves)
+		if (trend.values.length >= 14) {
+			var mid  = Math.floor(trend.values.length / 2);
+			var sum1 = trend.values.slice(0, mid).reduce(function(a,b){return a+b;}, 0);
+			var sum2 = trend.values.slice(mid).reduce(function(a,b){return a+b;}, 0);
+			var pct  = sum1 > 0 ? Math.round((sum2 - sum1) / sum1 * 100) : 0;
+			if (pct >= 10) {
+				list.push({
+					icon:  svgIcon('M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z'),
+					badge: 'Growing ↑ ' + pct + '%',
+					color: '#10b981',
+					title: 'Momentum is building',
+					desc:  'The second half of this period drove ' + pct + '% more plays than the first half. Capitalize now: post consistently and share your video page link across your channels.',
+					action: null,
+				});
+			} else if (pct <= -15) {
+				list.push({
+					icon:  svgIcon('M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6z'),
+					badge: 'Declining ↓ ' + Math.abs(pct) + '%',
+					color: '#f59e0b',
+					title: 'Traffic dropped in the second half',
+					desc:  'Engagement fell ' + Math.abs(pct) + '% vs the first half. Try promoting your video page in an email or social post to re-engage your existing audience.',
+					action: null,
+				});
+			}
+		}
+
+		// 3. Completion rate insight
+		if (comp >= 70) {
+			list.push({
+				icon:  svgIcon('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z'),
+				badge: 'Strong Retention',
+				color: '#818cf8',
+				title: comp + '% average watch depth, excellent',
+				desc:  'Viewers are staying engaged all the way through. This signals quality to YouTube\'s algorithm and positions you well for SEO. Consider adding a CTA at the 75% mark.',
+				action: null,
+			});
+		} else if (comp > 0 && comp < 45) {
+			list.push({
+				icon:  svgIcon('M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'),
+				badge: 'Improve Hook',
+				color: '#f59e0b',
+				title: 'Viewers drop off before the halfway point',
+				desc:  comp + '% avg depth means most viewers exit early. Lead with your strongest content, add chapter markers to aid navigation, or trim your intro to under 30 seconds.',
+				action: null,
+			});
+		}
+
+		// 4. Content concentration — many plays on few videos
+		if (topVids.length >= 3 && total > 0) {
+			var top3plays = topVids.slice(0,3).reduce(function(s,v){return s+v.plays;},0);
+			var top3pct   = Math.round(top3plays / total * 100);
+			if (top3pct > 65) {
+				list.push({
+					icon:  svgIcon('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'),
+					badge: 'Hidden Gems',
+					color: '#a78bfa',
+					title: top3pct + '% of plays concentrate on just 3 videos',
+					desc:  'Your other ' + (stats.unique_videos - 3) + ' videos are underexposed. Consider featuring them in a "You might also like" section or linking between related videos.',
+					action: null,
+				});
+			}
+		}
+
+		// 5. Best publishing day from trend
+		if (trend.values.length > 0) {
+			var maxVal  = Math.max.apply(null, trend.values);
+			var maxIdx  = trend.values.indexOf(maxVal);
+			if (maxIdx >= 0 && trend.labels[maxIdx]) {
+				var parts   = trend.labels[maxIdx].split('-');
+				var bestDay = new Date(+parts[0], +parts[1]-1, +parts[2]);
+				var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+				list.push({
+					icon:  svgIcon('M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11z'),
+					badge: 'Best Day',
+					color: '#6366f1',
+					title: dayNames[bestDay.getDay()] + 's drive your peak traffic',
+					desc:  'Your audience is most active on ' + dayNames[bestDay.getDay()] + 's (' + fmt(maxVal) + ' plays on your best day). Schedule new releases, emails, and social posts to land on this day.',
+					action: null,
+				});
+			}
+		}
+
+		return list.slice(0, 5);
+	}
+
+	function generateFeaturePicks(data) {
+		var topVids = data.top_videos || [];
+		if (!topVids.length) return [];
+		var labels = ['Most Watched', 'Top Performer', 'Worth Featuring'];
+		return topVids.slice(0, 3).map(function(v, i){
+			return { video: v, label: labels[i] || 'Feature This' };
+		});
+	}
+
+	function scoreToGrade(score) {
+		if (score >= 90) return { letter: 'A+', color: '#10b981' };
+		if (score >= 80) return { letter: 'A',  color: '#10b981' };
+		if (score >= 70) return { letter: 'B+', color: '#6366f1' };
+		if (score >= 60) return { letter: 'B',  color: '#818cf8' };
+		if (score >= 50) return { letter: 'C',  color: '#f59e0b' };
+		if (score >= 40) return { letter: 'D',  color: '#f97316' };
+		return { letter: 'F', color: '#ef4444' };
+	}
+
+	function renderSummary(data) {
+		var section = document.getElementById('pva-summary-section');
+		if (!section) return;
+
+		var plays      = data.stats.total_plays    || 0;
+		var completion = data.stats.avg_completion || 0;
+		var videos     = data.stats.unique_videos  || 0;
+		var trend      = data.trend;
+
+		// ── Trend direction: compare first vs second half of period ──
+		var trendDir = 'flat';
+		if (trend && trend.values && trend.values.length >= 14) {
+			var half       = Math.floor(trend.values.length / 2);
+			var firstHalf  = trend.values.slice(0, half).reduce(function(a,b){ return a+b; }, 0);
+			var secondHalf = trend.values.slice(half).reduce(function(a,b){ return a+b; }, 0);
+			if      (secondHalf > firstHalf * 1.15) trendDir = 'up';
+			else if (secondHalf < firstHalf * 0.85) trendDir = 'down';
+		}
+
+		// ── Competitive Edge Score → letter grade ────────────────
+		var edgeForGrade = plays > 0 ? generateEdgeScore(data) : null;
+		var letterGrade  = edgeForGrade ? scoreToGrade(edgeForGrade.total) : { letter: '—', color: '#9ca3af' };
+
+		// ── Grade + headline + body ───────────────────────────────────
+		var grade, gradeColor, headline, body, tips = [];
+
+		var GRADE_COLORS = {
+			'Getting Started': '#f59e0b', 'Growing': '#6366f1',
+			'Holding Steady': '#0ea5e9',  'Needs Attention': '#ef4444',
+			'Strong Momentum': '#10b981',
+		};
+		var TIP_STYLES = [
+			{ icon: svgIcon('M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 3.21-1.81 6-4.72 7.72L13 17v5h5l-1.78-1.78C19.14 18.45 22 15.3 22 12c0-5.18-3.94-9.45-9-9.95zM11 2.05C5.95 2.55 2 6.82 2 12c0 3.3 1.61 6.23 4.11 8.07L4.5 21.5H9v-5.02L6.97 18.7C5.09 17.22 4 15.19 4 12c0-4.08 3.05-7.44 7-7.93V2.05z'), color: '#f59e0b' },
+			{ icon: svgIcon('M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z'), color: '#10b981' },
+			{ icon: svgIcon('M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z'), color: '#8b5cf6' },
+		];
+
+		var usedAiSummary = false;
+		if ( cfg.aiSummary && cfg.aiSummary.title && plays > 0 ) {
+			var s  = cfg.aiSummary;
+			grade      = s.grade || 'Growing';
+			gradeColor = GRADE_COLORS[grade] || '#6366f1';
+			headline   = s.title || '';
+			body       = s.body  || '';
+			tips = (s.tips || []).slice(0, 3).map(function(t, i) {
+				return { icon: TIP_STYLES[i].icon, color: TIP_STYLES[i].color, title: t.title || '', desc: t.desc || '' };
+			});
+			usedAiSummary = true;
+		}
+
+		if (!usedAiSummary) {
+		if (plays === 0) {
+			grade      = 'Ready to Track';
+			gradeColor = '#9ca3af';
+			headline   = 'Your analytics are live. Start sharing your videos.';
+			body       = 'No plays have been recorded yet this period. Once your audience starts watching, you\'ll see detailed trends, completion rates, and personalized growth tips right here.';
+		} else if (plays < 20 || completion < 25) {
+			grade      = 'Getting Started';
+			gradeColor = '#f59e0b';
+			headline   = 'Early signals: every play tells a story';
+			body       = 'You have ' + fmt(plays) + ' play' + (plays !== 1 ? 's' : '') + ' across ' + fmt(videos) + ' video' + (videos !== 1 ? 's' : '') + ' this period. Focus on getting your content in front of more viewers and sharpening your opening hook so people stay through the first minute.';
+		} else if (completion >= 65 && plays >= 50 && trendDir !== 'down') {
+			grade      = 'Strong Momentum';
+			gradeColor = '#10b981';
+			headline   = 'Your audience is dialed in. Keep pushing.';
+			body       = fmt(plays) + ' plays with an average ' + completion + '% watch-through rate. That kind of completion is well above average for on-site video. The playbook now is to amplify your best performers and stay consistent.';
+		} else if (trendDir === 'up') {
+			grade      = 'Growing';
+			gradeColor = '#6366f1';
+			headline   = 'Plays are climbing. Ride the momentum.';
+			body       = 'You\'re trending upward with ' + fmt(plays) + ' plays this period and a ' + completion + '% average completion rate. Viewers are engaging, so now is the time to promote your best content harder and publish more consistently.';
+		} else if (trendDir === 'down') {
+			grade      = 'Needs Attention';
+			gradeColor = '#ef4444';
+			headline   = 'Plays are sliding. Here\'s how to reverse it.';
+			body       = 'Your plays trended down this period. With a ' + completion + '% average completion, the audience that finds your content does engage, and the gap is visibility, not quality. A single targeted share or featured post placement can reset the curve.';
+		} else {
+			grade      = 'Holding Steady';
+			gradeColor = '#0ea5e9';
+			headline   = 'Consistent viewership. Time to scale it.';
+			body       = fmt(plays) + ' plays with a ' + completion + '% average completion rate. Your audience is engaged and returning. The next unlock is expanding reach by bringing new viewers into the funnel and letting the content do the rest.';
+		}
+
+		// ── Tips: 3 max, based on their specific metrics ──────────────
+		var tips = [];
+
+		// Completion-based tip
+		if (completion < 25) {
+			tips.push({
+				icon: svgIcon('M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 3.21-1.81 6-4.72 7.72L13 17v5h5l-1.78-1.78C19.14 18.45 22 15.3 22 12c0-5.18-3.94-9.45-9-9.95zM11 2.05C5.95 2.55 2 6.82 2 12c0 3.3 1.61 6.23 4.11 8.07L4.5 21.5H9v-5.02L6.97 18.7C5.09 17.22 4 15.19 4 12c0-4.08 3.05-7.44 7-7.93V2.05z'),
+				color: '#ef4444',
+				title: 'Sharpen your opening hook',
+				desc: 'Most viewers leave in the first 30 seconds. Open with a bold statement, surprising fact, or immediate value. Make it crystal clear why this video matters right now.',
+			});
+		} else if (completion < 50) {
+			tips.push({
+				icon: svgIcon('M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'),
+				color: '#f59e0b',
+				title: 'Fix your mid-video pacing',
+				desc: 'Viewers pass the intro but drop before halfway. Review your videos between the 30% and 50% marks, where slow, repetitive, or low-value sections kill retention.',
+			});
+		} else if (completion < 75) {
+			tips.push({
+				icon: svgIcon('M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z'),
+				color: '#6366f1',
+				title: 'Tease the payoff at 75%',
+				desc: 'Viewers make it past halfway but not to the end. Add a value tease around the 75% mark ("the biggest takeaway is coming up") to pull them through to completion.',
+			});
+		} else {
+			tips.push({
+				icon: svgIcon('M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'),
+				color: '#10b981',
+				title: 'Convert completions into action',
+				desc: completion + '% average completion is excellent. Place a strong CTA in your final 30 seconds (subscribe, visit your site, or join your list) while viewer attention and trust are at their peak.',
+			});
+		}
+
+		// Trend-based tip
+		if (trendDir === 'down') {
+			tips.push({
+				icon: svgIcon('M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z'),
+				color: '#ef4444',
+				title: 'Re-promote your top performers',
+				desc: 'Plays are trending down. Reshare your best 2-3 videos in email or social, since returning traffic is free and often restarts growth faster than publishing something new.',
+			});
+		} else if (trendDir === 'up') {
+			tips.push({
+				icon: svgIcon('M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z'),
+				color: '#10b981',
+				title: 'Double down on what\'s growing',
+				desc: 'You\'re on an upward trend. Look at your recent top performers and publish more in the same format, topic, and length. Replication is faster than reinvention.',
+			});
+		} else {
+			tips.push({
+				icon: svgIcon('M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z'),
+				color: '#0ea5e9',
+				title: 'Break the plateau with one push',
+				desc: 'Plays are flat. A single email blast to your list featuring your best video, or adding it as a featured post on a high-traffic page, is usually enough to restart the growth curve.',
+			});
+		}
+
+		// Video spread tip
+		if (plays > 0 && videos > 0) {
+			if (plays / videos < 5) {
+				tips.push({
+					icon: svgIcon('M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z'),
+					color: '#8b5cf6',
+					title: 'Focus your promotion',
+					desc: 'Plays are spread thin across ' + fmt(videos) + ' videos. Pick your top 2 performers and actively promote them, since concentrated traffic builds social proof and momentum faster.',
+				});
+			} else {
+				tips.push({
+					icon: svgIcon('M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'),
+					color: '#8b5cf6',
+					title: 'Feature your star video',
+					desc: 'Embed your best performer at the top of your homepage or most-visited post. A single well-placed video converts more visitors than a scattered grid of equally-promoted content.',
+				});
+			}
+		}
+
+		} // end if (!usedAiSummary)
+
+		// ── First-visit badge ─────────────────────────────────────────
+		var isFirstVisit = !localStorage.getItem('pv_analytics_visited');
+		if (isFirstVisit && plays > 0) localStorage.setItem('pv_analytics_visited', '1');
+
+		var tipsHtml = tips.slice(0, 3).map(function(t) {
+			return '<div class="pva-summary__tip">'
+				+ '<div class="pva-summary__tip-icon" style="background:' + t.color + '1a;color:' + t.color + '">' + t.icon + '</div>'
+				+ '<div class="pva-summary__tip-body">'
+				+   '<strong class="pva-summary__tip-title">' + esc(t.title) + '</strong>'
+				+   '<p class="pva-summary__tip-desc">' + esc(t.desc) + '</p>'
+				+ '</div>'
+				+ '</div>';
+		}).join('');
+
+		section.innerHTML = '<div class="pva-summary">'
+			+ '<div class="pva-summary__head">'
+			+   '<div class="pva-summary__head-content">'
+			+     (isFirstVisit && plays > 0 ? '<span class="pva-summary__welcome">Welcome to your analytics</span>' : '')
+			+     '<div class="pva-summary__grade-row">'
+			+       '<span class="pva-summary__grade-name">' + esc(grade) + '</span>'
+			+       tipBtn('summary')
+			+       (edgeForGrade ? '<span class="pva-summary__grade-score">Score: ' + edgeForGrade.total + ' / 100</span>' : '')
+			+     '</div>'
+			+     '<h2 class="pva-summary__title">' + esc(headline) + '</h2>'
+			+     '<p class="pva-summary__body">' + esc(body) + '</p>'
+			+   '</div>'
+			+   '<div class="pva-summary__grade-badge" style="--grade-clr:' + letterGrade.color + '">'
+			+     '<span class="pva-summary__grade-letter">' + letterGrade.letter + '</span>'
+			+   '</div>'
+			+ '</div>'
+			+ (tipsHtml ? '<div class="pva-summary__tips">' + tipsHtml + '</div>' : '')
+			+ '</div>';
+		section.hidden = false;
+	}
+
+	function renderPerformanceInsights(data) {
+		var col = document.getElementById('pva-insights-col');
+		if (!col) return;
+
+		var insights = generateInsights(data);
+		if (!insights.length) { col.innerHTML = ''; return; }
+
+		var insightItems = insights.map(function(ins){
+			var actionHtml = ins.action
+				? '<a href="' + esc(ins.action.href) + '" target="_blank" rel="noopener" class="pva-insight__action">' + esc(ins.action.label) + '</a>'
+				: '';
+			return '<div class="pva-insight-item">'
+				+ '<div class="pva-insight-icon" style="color:' + ins.color + '">' + ins.icon + '</div>'
+				+ '<div class="pva-insight-body">'
+				+   '<div class="pva-insight-meta">'
+				+     '<span class="pva-insight-badge" style="background:' + ins.color + '22;color:' + ins.color + ';border-color:' + ins.color + '44">' + ins.badge + '</span>'
+				+   '</div>'
+				+   '<p class="pva-insight-title">' + esc(ins.title) + '</p>'
+				+   '<p class="pva-insight-desc">'  + esc(ins.desc)  + '</p>'
+				+   actionHtml
+				+ '</div>'
+				+ '</div>';
+		}).join('');
+
+		col.innerHTML = '<div class="pv-card pva-insights-card" data-card-id="insights">'
+			+ '<div class="pv-card__head">'
+			+   '<h2 class="pv-card__title">Performance Insights</h2>'
+			+   tipBtn('insights')
+			+   '<span class="pva-chart-sub">Signals from your last ' + activeDays + ' days</span>'
+			+   collapseBtn()
+			+ '</div>'
+			+ '<div class="pv-card__body pva-insights-card__body">'
+			+   (insightItems ? '<div class="pva-insights-list">' + insightItems + '</div>' : '<p class="pva-no-data" style="padding:28px 22px;">No insights available yet.</p>')
+			+ '</div>'
+			+ '</div>';
+	}
+
+	function renderFeaturePicks(data) {
+		var section = document.getElementById('pva-feature-section');
+		if (!section) return;
+
+		var picks = generateFeaturePicks(data);
+		if (!picks.length) { section.hidden = true; return; }
+
+		var pickCards = picks.map(function(p){
+			var thumb = p.video.thumb
+				? '<img src="' + esc(p.video.thumb) + '" alt="" class="pva-pick__thumb">'
+				: '<div class="pva-pick__thumb pva-pick__thumb--empty"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>';
+			var actionBtns = '';
+			if (p.video.permalink) {
+				actionBtns += '<a href="' + esc(p.video.permalink) + '" target="_blank" rel="noopener" class="pva-pick__action">View Post</a>';
+			}
+			if (p.video.edit) {
+				actionBtns += '<a href="' + esc(p.video.edit) + '" class="pva-pick__action pva-pick__action--edit">Edit</a>';
+			}
+			return '<div class="pva-pick">'
+				+ thumb
+				+ '<div class="pva-pick__body">'
+				+   '<span class="pva-pick__label">' + esc(p.label) + '</span>'
+				+   '<p class="pva-pick__title">' + esc(truncStr(p.video.title, 56)) + '</p>'
+				+   '<div class="pva-pick__meta"><strong>' + fmt(p.video.plays) + '</strong> plays</div>'
+				+   (actionBtns ? '<div class="pva-pick__actions">' + actionBtns + '</div>' : '')
+				+ '</div></div>';
+		}).join('');
+
+		section.innerHTML = '<div class="pv-card" data-card-id="feature">'
+			+ '<div class="pv-card__head">'
+			+   '<h2 class="pv-card__title">What to Feature</h2>'
+			+   tipBtn('feature-picks')
+			+   '<span class="pva-chart-sub">Top content to drive engagement now</span>'
+			+   collapseBtn()
+			+ '</div>'
+			+ '<div class="pv-card__body">'
+			+   '<div class="pva-picks-grid">' + pickCards + '</div>'
+			+ '</div>'
+			+ '</div>';
+		section.hidden = false;
+	}
+
+	function renderLeastWatched(data) {
+		var col = document.getElementById('pva-least-col');
+		if (!col) return;
+
+		var all = (data.all_videos || []).slice();
+		if (!all.length) { col.innerHTML = ''; return; }
+
+		all.sort(function(a, b) { return (a.plays || 0) - (b.plays || 0); });
+		var least = all.slice(0, 8);
+
+		var rows = least.map(function(v) {
+			var plays = v.plays || 0;
+			var thumb = v.thumb
+				? '<img src="' + esc(v.thumb) + '" alt="" class="pva-least__thumb">'
+				: '<div class="pva-least__thumb pva-least__thumb--empty">'
+					+ svgIcon('M8 5v14l11-7z', 16)
+					+ '</div>';
+			var zeroBadge = plays === 0 ? '<span class="pva-least__zero">No plays</span>' : '';
+			return '<div class="pva-least__row">'
+				+ thumb
+				+ '<div class="pva-least__info">'
+				+   '<p class="pva-least__title">' + esc(truncStr(v.title, 46)) + '</p>'
+				+   '<span class="pva-least__plays">' + fmt(plays) + ' play' + (plays !== 1 ? 's' : '') + '</span>'
+				+ '</div>'
+				+ zeroBadge
+				+ '</div>';
+		}).join('');
+
+		col.innerHTML = '<div class="pv-card pva-least-card" data-card-id="least-watched">'
+			+ '<div class="pv-card__head">'
+			+   '<h2 class="pv-card__title">Least Watched</h2>'
+			+   tipBtn('least-watched')
+			+   '<span class="pva-chart-sub">Content needing attention this period</span>'
+			+   collapseBtn()
+			+ '</div>'
+			+ '<div class="pv-card__body pva-least__body">' + rows + '</div>'
+			+ '</div>';
+	}
+
+	function truncStr(s, n) {
+		return s && s.length > n ? s.substring(0, n) + '…' : (s || '');
+	}
+
+	// ══════════════════════════════════════════════════════════════════
+	//  REPORT GENERATOR
+	// ══════════════════════════════════════════════════════════════════
+
+	function generateReport(data) {
+		if (!data) return;
+
+		var trendImg = '';
+		var trendCanvas = document.getElementById('pva-trend-chart');
+		if (trendCanvas) trendImg = trendCanvas.toDataURL('image/png');
+
+		var insights = generateInsights(data);
+		var total    = data.stats.total_plays || 1;
+		var period   = activeDays + '-day';
+		var rangeLabel = 'Last ' + activeDays + ' Days';
+		var siteName = cfg.siteName || 'Your Site';
+		var today    = new Date().toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+
+		var topRows = (data.top_videos || []).map(function(v, i){
+			var share = total > 0 ? (v.plays / total * 100).toFixed(1) : '0.0';
+			var ytLink = v.yt_id
+				? '<a href="https://www.youtube.com/watch?v=' + esc(v.yt_id) + '" style="color:#818cf8;font-size:11px;text-decoration:none;">YT ↗</a>'
+				: '';
+			return '<tr>'
+				+ '<td style="padding:9px 12px;color:#6b7280;font-size:12px;">' + (i+1) + '</td>'
+				+ '<td style="padding:9px 12px;font-size:13px;font-weight:500;color:#1e293b;">' + esc(truncStr(v.title,55)) + ' ' + ytLink + '</td>'
+				+ '<td style="padding:9px 12px;font-size:13px;font-weight:700;color:#4f46e5;text-align:right;">' + fmt(v.plays) + '</td>'
+				+ '<td style="padding:9px 12px;font-size:12px;color:#94a3b8;text-align:right;">' + share + '%</td>'
+				+ '</tr>';
+		}).join('');
+
+		var depthRows = [
+			['25% watched', data.depth.d25 || 0],
+			['50% watched', data.depth.d50 || 0],
+			['75% watched', data.depth.d75 || 0],
+			['100% watched', data.depth.d100 || 0],
+		].map(function(r){
+			var pct = total > 0 ? (r[1] / total * 100).toFixed(0) : '0';
+			var w   = Math.max(4, Math.min(100, parseFloat(pct)));
+			return '<div style="margin-bottom:12px;">'
+				+ '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
+				+   '<span style="font-size:12px;color:#475569;">' + r[0] + '</span>'
+				+   '<span style="font-size:12px;font-weight:600;color:#1e293b;">' + fmt(r[1]) + ' (' + pct + '%)</span>'
+				+ '</div>'
+				+ '<div style="height:6px;background:#f1f5f9;border-radius:3px;">'
+				+   '<div style="height:6px;width:' + w + '%;background:linear-gradient(90deg,#818cf8,#4f46e5);border-radius:3px;"></div>'
+				+ '</div></div>';
+		}).join('');
+
+		var insightHtml = insights.map(function(ins){
+			return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #f1f5f9;">'
+				+   '<div style="width:32px;height:32px;border-radius:8px;background:' + ins.color + '18;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:' + ins.color + '">' + ins.icon + '</div>'
+				+   '<div style="flex:1;">'
+				+     '<span style="font-size:11px;font-weight:700;color:' + ins.color + ';letter-spacing:.04em;text-transform:uppercase;">' + ins.badge + '</span>'
+				+     '<p style="margin:3px 0 4px;font-size:13px;font-weight:600;color:#1e293b;">' + esc(ins.title) + '</p>'
+				+     '<p style="margin:0;font-size:12px;color:#64748b;line-height:1.5;">' + esc(ins.desc) + '</p>'
+				+   '</div>'
+				+ '</div>';
+		}).join('');
+
+		var demoNote = demoMode
+			? '<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:6px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:#92400e;">'
+			+   '⚠️ <strong>Sample data:</strong> this report uses preview data. Connect your YouTube channel to generate a real report.'
+			+   '</div>'
+			: '';
+
+		var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+			+ '<title>PressVideo Analytics Report: ' + esc(siteName) + '</title>'
+			+ '<style>'
+			+   'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;padding:0;background:#f8fafc;color:#1e293b;}'
+			+   '@media print{body{background:#fff;} .no-print{display:none;} @page{margin:1cm 1.5cm;}}'
+			+ '</style>'
+			+ '</head><body>'
+
+			// Header
+			+ '<div style="background:linear-gradient(135deg,#0f0c29 0%,#1e1b4b 35%,#4338ca 75%,#4f46e5 100%);padding:32px 40px;color:#fff;">'
+			+   '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">'
+			+     '<div>'
+			+       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">'
+			+         '<div style="width:34px;height:34px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;">'
+			+           '<svg width="18" height="18" viewBox="0 0 24 24" fill="#a5b4fc"><path d="M8 5v14l11-7z"/></svg>'
+			+         '</div>'
+			+         '<span style="font-size:1rem;font-weight:800;letter-spacing:-.01em;">PressVideo</span>'
+			+       '</div>'
+			+       '<h1 style="margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-.02em;">Analytics Report</h1>'
+			+       '<p style="margin:4px 0 0;font-size:.875rem;color:rgba(255,255,255,.65);">' + esc(siteName) + ' &nbsp;·&nbsp; ' + rangeLabel + '</p>'
+			+     '</div>'
+			+     '<div style="text-align:right;">'
+			+       '<div style="font-size:.75rem;color:rgba(255,255,255,.55);margin-bottom:4px;">Generated</div>'
+			+       '<div style="font-size:.9rem;font-weight:600;">' + today + '</div>'
+			+     '</div>'
+			+   '</div>'
+			+ '</div>'
+
+			// Body
+			+ '<div style="padding:32px 40px;max-width:900px;margin:0 auto;">'
+			+   demoNote
+
+			// KPI row
+			+   '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;">'
+			+     kpiBox('Total Plays', fmt(data.stats.total_plays), '#4f46e5')
+			+     kpiBox('Videos Played', fmt(data.stats.unique_videos), '#0ea5e9')
+			+     kpiBox('Avg Watch Depth', data.stats.avg_completion + '%', '#10b981')
+			+   '</div>'
+
+			// Trend chart
+			+   (trendImg ? '<div style="margin-bottom:32px;">'
+			+     '<h2 style="font-size:1rem;font-weight:700;color:#1e293b;margin:0 0 12px;">Play Trend: ' + rangeLabel + '</h2>'
+			+     '<img src="' + trendImg + '" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;display:block;">'
+			+   '</div>' : '')
+
+			// Top videos table
+			+   '<div style="margin-bottom:32px;">'
+			+     '<h2 style="font-size:1rem;font-weight:700;color:#1e293b;margin:0 0 12px;">Top Performing Videos</h2>'
+			+     '<table style="width:100%;border-collapse:collapse;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">'
+			+       '<thead><tr style="background:#f8fafc;">'
+			+         '<th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #e2e8f0;">#</th>'
+			+         '<th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #e2e8f0;">Video</th>'
+			+         '<th style="padding:8px 12px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #e2e8f0;">Plays</th>'
+			+         '<th style="padding:8px 12px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #e2e8f0;">Share</th>'
+			+       '</tr></thead>'
+			+       '<tbody>' + topRows + '</tbody>'
+			+     '</table>'
+			+   '</div>'
+
+			// Watch depth
+			+   '<div style="margin-bottom:32px;">'
+			+     '<h2 style="font-size:1rem;font-weight:700;color:#1e293b;margin:0 0 16px;">Watch Depth</h2>'
+			+     depthRows
+			+   '</div>'
+
+			// Insights
+			+   (insights.length ? '<div style="margin-bottom:32px;">'
+			+     '<h2 style="font-size:1rem;font-weight:700;color:#1e293b;margin:0 0 4px;">Performance Insights</h2>'
+			+     '<p style="font-size:12px;color:#94a3b8;margin:0 0 8px;">Recommendations for the next ' + activeDays + ' days</p>'
+			+     insightHtml
+			+   '</div>' : '')
+
+			// Footer
+			+   '<div style="border-top:1px solid #e2e8f0;padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'
+			+     '<span style="font-size:11px;color:#94a3b8;">Generated with <strong style="color:#4f46e5;">PressVideo</strong> &nbsp;·&nbsp; pressvideo.com</span>'
+			+     '<span style="font-size:11px;color:#94a3b8;">' + today + '</span>'
+			+   '</div>'
+			+ '</div>'
+
+			// Print button (hidden in print)
+			+ '<div class="no-print" style="position:fixed;bottom:24px;right:24px;">'
+			+   '<button onclick="window.print()" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(79,70,229,.4);">Save as PDF</button>'
+			+ '</div>'
+
+			+ '</body></html>';
+
+		var win = window.open('', '_blank');
+		if (win) {
+			win.document.write(html);
+			win.document.close();
+			win.focus();
+		}
+	}
+
+	function kpiBox(label, value, color) {
+		return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;border-top:3px solid ' + color + ';">'
+			+ '<div style="font-size:2rem;font-weight:800;color:' + color + ';letter-spacing:-.03em;line-height:1;">' + value + '</div>'
+			+ '<div style="font-size:.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-top:6px;">' + label + '</div>'
+			+ '</div>';
 	}
 
 	if (document.readyState === 'loading') {

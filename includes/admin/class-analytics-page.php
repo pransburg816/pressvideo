@@ -138,6 +138,7 @@ class PV_Analytics_Page {
 		$settings = get_option( 'pv_settings', [] );
 		$ga_id    = sanitize_text_field( $settings['ga_measurement_id'] ?? '' );
 		$settings_url = admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' );
+		$_cbtn = '<button class="pva-collapse-btn" type="button" aria-expanded="true" aria-label="' . esc_attr__( 'Collapse section', 'pv-youtube-importer' ) . '"><svg class="pva-collapse-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></button>';
 		?>
 		<div class="wrap pva-wrap">
 		<div class="pva-inner">
@@ -237,11 +238,12 @@ class PV_Analytics_Page {
 			<div class="pva-charts-row" id="pva-charts-section">
 
 				<!-- Play Trend -->
-				<div class="pv-card">
+				<div class="pv-card" data-card-id="trend">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'Play Trend', 'pv-youtube-importer' ); ?></h2>
 						<span class="pva-chart-sub" id="pva-trend-sub"></span>
 						<button class="pva-tip-btn" type="button" data-tip="trend" aria-label="<?php esc_attr_e( 'About Play Trend', 'pv-youtube-importer' ); ?>">?</button>
+						<?php echo $_cbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pv-card__body">
 						<div class="pva-chart-wrap pva-chart-wrap--trend">
@@ -254,10 +256,11 @@ class PV_Analytics_Page {
 				</div>
 
 				<!-- Top Videos -->
-				<div class="pv-card">
+				<div class="pv-card" data-card-id="top-videos">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'Top Videos', 'pv-youtube-importer' ); ?></h2>
 						<button class="pva-tip-btn" type="button" data-tip="top-videos" aria-label="<?php esc_attr_e( 'About Top Videos', 'pv-youtube-importer' ); ?>">?</button>
+						<?php echo $_cbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pv-card__body">
 						<div class="pva-chart-wrap pva-chart-wrap--top">
@@ -270,10 +273,11 @@ class PV_Analytics_Page {
 				</div>
 
 				<!-- Watch Depth -->
-				<div class="pv-card">
+				<div class="pv-card" data-card-id="watch-depth">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'Watch Depth', 'pv-youtube-importer' ); ?></h2>
 						<button class="pva-tip-btn" type="button" data-tip="watch-depth" aria-label="<?php esc_attr_e( 'About Watch Depth', 'pv-youtube-importer' ); ?>">?</button>
+						<?php echo $_cbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pv-card__body">
 						<div class="pva-chart-wrap pva-chart-wrap--donut">
@@ -290,10 +294,11 @@ class PV_Analytics_Page {
 			<!-- ── Row 3: Tables — All Videos + Least Watched ────── -->
 			<div class="pva-table-row" id="pva-table-row" hidden>
 
-				<div class="pv-card pva-table-row__all">
+				<div class="pv-card pva-table-row__all" data-card-id="all-videos">
 					<div class="pv-card__head">
 						<h2 class="pv-card__title"><?php esc_html_e( 'All Videos', 'pv-youtube-importer' ); ?></h2>
 						<button class="pva-tip-btn" type="button" data-tip="all-videos" aria-label="<?php esc_attr_e( 'About All Videos', 'pv-youtube-importer' ); ?>">?</button>
+						<?php echo $_cbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pva-table-wrap" id="pva-table-wrap">
 						<div class="pva-loading" style="padding:16px">
