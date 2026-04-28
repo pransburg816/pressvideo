@@ -99,30 +99,34 @@ body.pv-customizer-fullscreen .wrap {
 	flex-shrink: 0;
 }
 
-/* ── Header nav (Dashboard / Settings / Analytics) ──────────────── */
-.pvc-header-nav {
+/* ── Preview bar nav (Dashboard / Settings / Analytics) ─────────── */
+.pvc-preview-nav {
 	display: flex;
 	align-items: center;
 	gap: 2px;
+	border-left: 1px solid rgba(255,255,255,0.08);
+	padding-left: 8px;
+	margin-left: 4px;
+	flex-shrink: 0;
 }
-.pvc-header-nav-btn {
+.pvc-preview-nav-btn {
 	display: flex;
 	align-items: center;
 	gap: 5px;
-	padding: 5px 10px;
+	padding: 5px 9px;
 	border-radius: 6px;
-	color: rgba(255,255,255,0.38);
+	color: rgba(255,255,255,0.42);
 	text-decoration: none;
 	font-size: 0.7rem;
 	font-weight: 600;
 	white-space: nowrap;
 	transition: background 0.15s, color 0.15s;
 }
-.pvc-header-nav-btn:hover {
+.pvc-preview-nav-btn:hover {
 	background: rgba(255,255,255,0.09);
 	color: #fff;
 }
-.pvc-header-nav-btn svg { flex-shrink: 0; }
+.pvc-preview-nav-btn svg { flex-shrink: 0; }
 
 .pvc-header-actions {
 	display: flex;

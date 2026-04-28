@@ -75,20 +75,6 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
 				PressVideo
 			</a>
-			<nav class="pvc-header-nav" aria-label="PressVideo sections">
-				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ) ); ?>" class="pvc-header-nav-btn" title="Dashboard">
-					<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-					<span>Dashboard</span>
-				</a>
-				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ); ?>" class="pvc-header-nav-btn" title="Settings">
-					<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06z"/></svg>
-					<span>Settings</span>
-				</a>
-				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ) ); ?>" class="pvc-header-nav-btn" title="Analytics">
-					<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>
-					<span>Analytics</span>
-				</a>
-			</nav>
 			<div class="pvc-header-actions">
 				<button id="pvc-refresh-btn" class="pvc-icon-btn" title="Refresh preview">
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
@@ -721,6 +707,20 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 				<button class="pvc-device-btn" data-device="tablet" title="Tablet"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 0h-14C3.12 0 2 1.12 2 2.5v19C2 22.88 3.12 24 4.5 24h14c1.38 0 2.5-1.12 2.5-2.5v-19C21 1.12 19.88 0 18.5 0zm-7 23c-.83 0-1.5-.67-1.5-1.5S10.67 20 11.5 20s1.5.67 1.5 1.5S12.33 23 11.5 23zm7.5-4H4V3h15v16z"/></svg></button>
 				<button class="pvc-device-btn" data-device="mobile" title="Mobile"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 1h-8C6.12 1 5 2.12 5 3.5v17C5 21.88 6.12 23 7.5 23h8c1.38 0 2.5-1.12 2.5-2.5v-17C18 2.12 16.88 1 15.5 1zm-4 21c-.83 0-1.5-.67-1.5-1.5S10.67 19 11.5 19s1.5.67 1.5 1.5S12.33 22 11.5 22zm4.5-4H7V4h9v14z"/></svg></button>
 			</div>
+			<nav class="pvc-preview-nav" aria-label="PressVideo sections">
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ) ); ?>" class="pvc-preview-nav-btn" title="Dashboard">
+					<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+					<span>Dashboard</span>
+				</a>
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ); ?>" class="pvc-preview-nav-btn" title="Settings">
+					<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06z"/></svg>
+					<span>Settings</span>
+				</a>
+				<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ) ); ?>" class="pvc-preview-nav-btn" title="Analytics">
+					<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>
+					<span>Analytics</span>
+				</a>
+			</nav>
 			<div class="pvc-preview-url" id="pvc-url-display"><?php echo esc_html( $archive_url ); ?></div>
 			<div class="pvc-preview-status" id="pvc-status"><span class="pvc-preview-status__dot"></span><span class="pvc-preview-status__text">Ready</span></div>
 		</div>
