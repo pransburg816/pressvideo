@@ -278,131 +278,132 @@ class PV_Analytics_Page {
 
 			</div><!-- .pva-stats-row -->
 
-			<!-- ── Integration Cards — GA4 + YouTube Analytics ─── -->
+			<!-- ── YouTube stat cards (JS-rendered, visible on YouTube tab) ── -->
+			<div id="pva-yt-stats-row" class="pva-yt-stats-outer" hidden></div>
+
+			<!-- ── Dynamic Analytics Summary (JS-rendered) ──────── -->
+			<div id="pva-summary-section" hidden></div>
+
+			<!-- ── Row 1: AI Blocks — Coach + Insights + Integrations ── -->
 			<?php
 			$yt_status_msg = '';
 			if ( isset( $_GET['pv_yta_status'] ) ) { // phpcs:ignore
 				$yt_status_msg = sanitize_key( $_GET['pv_yta_status'] ); // phpcs:ignore
 			}
 			?>
-			<div class="pva-integrations-row">
-
-				<!-- Google Analytics 4 -->
-				<div class="pva-ga-card <?php echo $ga_id ? 'pva-ga-card--connected' : 'pva-ga-card--disconnected'; ?>">
-					<div class="pva-ga-card__icon" aria-hidden="true">
-						<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<rect width="44" height="44" rx="10" fill="#fff5e6"/>
-							<rect x="9"  y="26" width="8" height="11" rx="2" fill="#F9AB00"/>
-							<rect x="21" y="18" width="8" height="19" rx="2" fill="#E37400"/>
-							<rect x="27" y="18" width="8" height="19" rx="2" fill="#E37400" opacity="0.4"/>
-							<rect x="9"  y="26" width="8" height="11" rx="2" fill="#F9AB00"/>
-							<polyline points="10,24 18,18 26,20 35,11" fill="none" stroke="#E37400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
-							<circle cx="35" cy="11" r="2.5" fill="#E37400"/>
-						</svg>
-					</div>
-					<div class="pva-ga-card__body">
-						<div class="pva-ga-card__head-row">
-							<h3 class="pva-ga-card__title">Google Analytics 4</h3>
-							<?php if ( $ga_id ) : ?>
-								<span class="pva-ga-badge pva-ga-badge--on"><span class="pva-ga-badge__dot"></span><?php esc_html_e( 'Active', 'pv-youtube-importer' ); ?></span>
-							<?php else : ?>
-								<span class="pva-ga-badge pva-ga-badge--off"><?php esc_html_e( 'Not connected', 'pv-youtube-importer' ); ?></span>
-							<?php endif; ?>
-						</div>
-						<?php if ( $ga_id ) : ?>
-							<p class="pva-ga-card__id"><?php esc_html_e( 'Measurement ID:', 'pv-youtube-importer' ); ?> <code><?php echo esc_html( $ga_id ); ?></code></p>
-							<div class="pva-ga-events">
-								<span class="pva-ga-event"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>pv_video_play</span>
-								<span class="pva-ga-event"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>pv_watch_depth (25 / 50 / 75 / 100%)</span>
-							</div>
-						<?php else : ?>
-							<p class="pva-ga-card__desc"><?php esc_html_e( 'Add your GA4 Measurement ID to automatically send video play events and watch depth milestones to Google Analytics.', 'pv-youtube-importer' ); ?></p>
-						<?php endif; ?>
-					</div>
-					<div class="pva-ga-card__action">
-						<?php if ( $ga_id ) : ?>
-							<a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer" class="pva-ga-btn pva-ga-btn--primary">
-								<?php esc_html_e( 'Open Google Analytics', 'pv-youtube-importer' ); ?>
-								<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
-							</a>
-						<?php else : ?>
-							<a href="<?php echo esc_url( $settings_url ); ?>" class="pva-ga-btn pva-ga-btn--secondary">
-								<?php esc_html_e( 'Connect in Settings', 'pv-youtube-importer' ); ?>
-								<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-							</a>
-						<?php endif; ?>
-					</div>
-				</div><!-- .pva-ga-card -->
-
-				<!-- YouTube Analytics -->
-				<div class="pva-yta-card <?php echo $yt_connected ? 'pva-yta-card--connected' : ( $is_platinum ? 'pva-yta-card--disconnected' : 'pva-yta-card--locked' ); ?>" id="pva-yta-card">
-					<div class="pva-yta-card__icon" aria-hidden="true">
-						<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<rect width="44" height="44" rx="10" fill="#fef2f2"/>
-							<path d="M34.582 14.186a2.506 2.506 0 00-1.768-1.768C31.254 12 22 12 22 12s-9.254 0-10.814.418a2.506 2.506 0 00-1.768 1.768C9 15.746 9 22 9 22s0 6.254.418 7.814a2.506 2.506 0 001.768 1.768C12.746 32 22 32 22 32s9.254 0 10.814-.418a2.506 2.506 0 001.768-1.768C35 28.254 35 22 35 22s0-6.254-.418-7.814zM19.5 26.464v-8.928L26.5 22l-7 4.464z" fill="#ef4444"/>
-						</svg>
-					</div>
-					<div class="pva-yta-card__body">
-						<div class="pva-yta-card__head-row">
-							<h3 class="pva-yta-card__title">
-								<?php esc_html_e( 'YouTube Analytics', 'pv-youtube-importer' ); ?>
-								<?php if ( ! $is_platinum ) : ?><span class="pv-tier-lock-badge" style="font-size:.75rem;vertical-align:middle">Platinum</span><?php endif; ?>
-							</h3>
-							<?php if ( $yt_connected ) : ?>
-								<span class="pva-ga-badge pva-ga-badge--on"><span class="pva-ga-badge__dot"></span><?php esc_html_e( 'Connected', 'pv-youtube-importer' ); ?></span>
-							<?php elseif ( $is_platinum ) : ?>
-								<span class="pva-ga-badge pva-ga-badge--off"><?php esc_html_e( 'Not connected', 'pv-youtube-importer' ); ?></span>
-							<?php endif; ?>
-						</div>
-						<?php if ( $yt_status_msg === 'connected' ) : ?>
-							<p class="pva-yta-card__notice pva-yta-card__notice--success">
-								<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-								<?php esc_html_e( 'Successfully connected! Your YouTube stats are now available.', 'pv-youtube-importer' ); ?>
-							</p>
-						<?php elseif ( $yt_status_msg === 'error' ) : ?>
-							<p class="pva-yta-card__notice pva-yta-card__notice--error"><?php esc_html_e( 'Authorization failed. Please try connecting again.', 'pv-youtube-importer' ); ?></p>
-						<?php endif; ?>
-						<?php if ( $yt_connected ) : ?>
-							<p class="pva-ga-card__desc"><?php esc_html_e( 'Your YouTube channel is authorized. Use the "YouTube Stats" toggle above to view channel-level views, watch time, and engagement data.', 'pv-youtube-importer' ); ?></p>
-						<?php elseif ( $is_platinum && $yt_has_creds ) : ?>
-							<p class="pva-ga-card__desc"><?php esc_html_e( 'OAuth credentials saved. Click Connect to authorize PressVideo to read your YouTube Analytics data.', 'pv-youtube-importer' ); ?></p>
-						<?php elseif ( $is_platinum ) : ?>
-							<p class="pva-ga-card__desc"><?php esc_html_e( 'Pull YouTube channel views, watch time, and subscriber growth directly into this dashboard.', 'pv-youtube-importer' ); ?></p>
-						<?php else : ?>
-							<p class="pva-ga-card__desc"><?php esc_html_e( 'Platinum feature: compare YouTube channel stats against your site plays to find your biggest growth opportunities.', 'pv-youtube-importer' ); ?></p>
-						<?php endif; ?>
-					</div>
-					<div class="pva-ga-card__action">
-						<?php if ( $yt_connected ) : ?>
-							<button class="pva-ga-btn pva-ga-btn--danger" id="pva-yta-disconnect" type="button" data-nonce="<?php echo esc_attr( $yt_disconnect_nonce ); ?>"><?php esc_html_e( 'Disconnect', 'pv-youtube-importer' ); ?></button>
-						<?php elseif ( $is_platinum && $yt_has_creds ) : ?>
-							<a href="<?php echo esc_url( $yt_auth_url ); ?>" class="pva-ga-btn pva-ga-btn--yt">
-								<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
-								<?php esc_html_e( 'Connect YouTube Analytics', 'pv-youtube-importer' ); ?>
-							</a>
-						<?php elseif ( $is_platinum ) : ?>
-							<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ); ?>" class="pva-ga-btn pva-ga-btn--secondary">
-								<?php esc_html_e( 'Add Credentials in Settings', 'pv-youtube-importer' ); ?>
-								<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-							</a>
-						<?php else : ?>
-							<a href="https://pressvideo.com" target="_blank" rel="noopener" class="pva-ga-btn pva-ga-btn--secondary">
-								<?php esc_html_e( 'Upgrade to Platinum', 'pv-youtube-importer' ); ?>
-								<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-							</a>
-						<?php endif; ?>
-					</div>
-				</div><!-- .pva-yta-card -->
-
-			</div><!-- .pva-integrations-row -->
-
-			<!-- ── Dynamic Analytics Summary (JS-rendered) ──────── -->
-			<div id="pva-summary-section" hidden></div>
-
-			<!-- ── Row 1: AI Blocks — Coach + Performance Insights ── -->
 			<div class="pva-ai-row" id="pva-ai-row" hidden>
 				<div class="pva-ai-row__coach" id="pva-coach-col"></div>
 				<div class="pva-ai-row__insights" id="pva-insights-col"></div>
+
+				<!-- Third column: GA4 + YouTube Analytics cards (shown on YouTube tab only) -->
+				<div class="pva-ai-row__integrations" id="pva-integrations-col" hidden>
+
+					<div class="pva-ga-card <?php echo $ga_id ? 'pva-ga-card--connected' : 'pva-ga-card--disconnected'; ?>">
+						<div class="pva-ga-card__icon" aria-hidden="true">
+							<svg width="36" height="36" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<rect width="44" height="44" rx="10" fill="#fff5e6"/>
+								<rect x="9"  y="26" width="8" height="11" rx="2" fill="#F9AB00"/>
+								<rect x="21" y="18" width="8" height="19" rx="2" fill="#E37400"/>
+								<rect x="27" y="18" width="8" height="19" rx="2" fill="#E37400" opacity="0.4"/>
+								<rect x="9"  y="26" width="8" height="11" rx="2" fill="#F9AB00"/>
+								<polyline points="10,24 18,18 26,20 35,11" fill="none" stroke="#E37400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+								<circle cx="35" cy="11" r="2.5" fill="#E37400"/>
+							</svg>
+						</div>
+						<div class="pva-ga-card__body">
+							<div class="pva-ga-card__head-row">
+								<h3 class="pva-ga-card__title">Google Analytics 4</h3>
+								<?php if ( $ga_id ) : ?>
+									<span class="pva-ga-badge pva-ga-badge--on"><span class="pva-ga-badge__dot"></span><?php esc_html_e( 'Active', 'pv-youtube-importer' ); ?></span>
+								<?php else : ?>
+									<span class="pva-ga-badge pva-ga-badge--off"><?php esc_html_e( 'Not connected', 'pv-youtube-importer' ); ?></span>
+								<?php endif; ?>
+							</div>
+							<?php if ( $ga_id ) : ?>
+								<p class="pva-ga-card__id"><?php esc_html_e( 'ID:', 'pv-youtube-importer' ); ?> <code><?php echo esc_html( $ga_id ); ?></code></p>
+								<div class="pva-ga-events">
+									<span class="pva-ga-event"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>pv_video_play</span>
+									<span class="pva-ga-event"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>pv_watch_depth</span>
+								</div>
+							<?php else : ?>
+								<p class="pva-ga-card__desc"><?php esc_html_e( 'Add your GA4 Measurement ID in Settings to track video events.', 'pv-youtube-importer' ); ?></p>
+							<?php endif; ?>
+						</div>
+						<div class="pva-ga-card__action">
+							<?php if ( $ga_id ) : ?>
+								<a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer" class="pva-ga-btn pva-ga-btn--primary">
+									<?php esc_html_e( 'Open GA4', 'pv-youtube-importer' ); ?>
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+								</a>
+							<?php else : ?>
+								<a href="<?php echo esc_url( $settings_url ); ?>" class="pva-ga-btn pva-ga-btn--secondary">
+									<?php esc_html_e( 'Connect in Settings', 'pv-youtube-importer' ); ?>
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+								</a>
+							<?php endif; ?>
+						</div>
+					</div><!-- .pva-ga-card -->
+
+					<div class="pva-yta-card <?php echo $yt_connected ? 'pva-yta-card--connected' : ( $is_platinum ? 'pva-yta-card--disconnected' : 'pva-yta-card--locked' ); ?>" id="pva-yta-card">
+						<div class="pva-yta-card__icon" aria-hidden="true">
+							<svg width="36" height="36" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<rect width="44" height="44" rx="10" fill="#fef2f2"/>
+								<path d="M34.582 14.186a2.506 2.506 0 00-1.768-1.768C31.254 12 22 12 22 12s-9.254 0-10.814.418a2.506 2.506 0 00-1.768 1.768C9 15.746 9 22 9 22s0 6.254.418 7.814a2.506 2.506 0 001.768 1.768C12.746 32 22 32 22 32s9.254 0 10.814-.418a2.506 2.506 0 001.768-1.768C35 28.254 35 22 35 22s0-6.254-.418-7.814zM19.5 26.464v-8.928L26.5 22l-7 4.464z" fill="#ef4444"/>
+							</svg>
+						</div>
+						<div class="pva-yta-card__body">
+							<div class="pva-yta-card__head-row">
+								<h3 class="pva-yta-card__title">
+									<?php esc_html_e( 'YouTube Analytics', 'pv-youtube-importer' ); ?>
+									<?php if ( ! $is_platinum ) : ?><span class="pv-tier-lock-badge" style="font-size:.75rem;vertical-align:middle">Platinum</span><?php endif; ?>
+								</h3>
+								<?php if ( $yt_connected ) : ?>
+									<span class="pva-ga-badge pva-ga-badge--on"><span class="pva-ga-badge__dot"></span><?php esc_html_e( 'Connected', 'pv-youtube-importer' ); ?></span>
+								<?php elseif ( $is_platinum ) : ?>
+									<span class="pva-ga-badge pva-ga-badge--off"><?php esc_html_e( 'Not connected', 'pv-youtube-importer' ); ?></span>
+								<?php endif; ?>
+							</div>
+							<?php if ( $yt_status_msg === 'connected' ) : ?>
+								<p class="pva-yta-card__notice pva-yta-card__notice--success">
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+									<?php esc_html_e( 'Connected! YouTube stats are now available.', 'pv-youtube-importer' ); ?>
+								</p>
+							<?php elseif ( $yt_status_msg === 'error' ) : ?>
+								<p class="pva-yta-card__notice pva-yta-card__notice--error"><?php esc_html_e( 'Authorization failed. Please try again.', 'pv-youtube-importer' ); ?></p>
+							<?php endif; ?>
+							<?php if ( $yt_connected ) : ?>
+								<p class="pva-ga-card__desc"><?php esc_html_e( 'Channel authorized. YouTube tab shows live channel data.', 'pv-youtube-importer' ); ?></p>
+							<?php elseif ( $is_platinum && $yt_has_creds ) : ?>
+								<p class="pva-ga-card__desc"><?php esc_html_e( 'Credentials saved. Click Connect to authorize.', 'pv-youtube-importer' ); ?></p>
+							<?php elseif ( $is_platinum ) : ?>
+								<p class="pva-ga-card__desc"><?php esc_html_e( 'Pull YouTube views, watch time, and subscriber growth into this dashboard.', 'pv-youtube-importer' ); ?></p>
+							<?php else : ?>
+								<p class="pva-ga-card__desc"><?php esc_html_e( 'Platinum: compare YouTube stats against site plays to find growth opportunities.', 'pv-youtube-importer' ); ?></p>
+							<?php endif; ?>
+						</div>
+						<div class="pva-ga-card__action">
+							<?php if ( $yt_connected ) : ?>
+								<button class="pva-ga-btn pva-ga-btn--danger" id="pva-yta-disconnect" type="button" data-nonce="<?php echo esc_attr( $yt_disconnect_nonce ); ?>"><?php esc_html_e( 'Disconnect', 'pv-youtube-importer' ); ?></button>
+							<?php elseif ( $is_platinum && $yt_has_creds ) : ?>
+								<a href="<?php echo esc_url( $yt_auth_url ); ?>" class="pva-ga-btn pva-ga-btn--yt">
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
+									<?php esc_html_e( 'Connect YouTube', 'pv-youtube-importer' ); ?>
+								</a>
+							<?php elseif ( $is_platinum ) : ?>
+								<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ); ?>" class="pva-ga-btn pva-ga-btn--secondary">
+									<?php esc_html_e( 'Add Credentials', 'pv-youtube-importer' ); ?>
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+								</a>
+							<?php else : ?>
+								<a href="https://pressvideo.com" target="_blank" rel="noopener" class="pva-ga-btn pva-ga-btn--secondary">
+									<?php esc_html_e( 'Upgrade to Platinum', 'pv-youtube-importer' ); ?>
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+								</a>
+							<?php endif; ?>
+						</div>
+					</div><!-- .pva-yta-card -->
+
+				</div><!-- .pva-ai-row__integrations -->
 			</div>
 
 			<!-- ── Row 2: Charts — Play Trend + Top Videos + Watch Depth ── -->

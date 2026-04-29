@@ -184,19 +184,12 @@
 
 /* ── New layout rows ──────────────────────────────────────── */
 
-/* Row 1: AI blocks — Coach + Performance Insights */
-.pva-integrations-row {
+/* YouTube stat cards row — shown instead of site stat row on YouTube tab */
+.pva-yt-stats-outer {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 20px;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 16px;
 	margin-bottom: 20px;
-}
-.pva-integrations-row .pva-ga-card,
-.pva-integrations-row .pva-yta-card {
-	margin-top: 0;
-}
-@media (max-width: 900px) {
-	.pva-integrations-row { grid-template-columns: 1fr; }
 }
 
 .pva-ai-row {
@@ -209,6 +202,23 @@
 	height: 460px;
 	display: flex;
 	flex-direction: column;
+}
+
+/* Three-column variant: coach | insights | integrations */
+.pva-ai-row--three-col {
+	grid-template-columns: 1fr 1fr 300px;
+}
+.pva-ai-row__integrations {
+	height: auto !important;
+	min-height: 0;
+	overflow-y: auto;
+	gap: 12px;
+}
+.pva-ai-row__integrations .pva-ga-card,
+.pva-ai-row__integrations .pva-yta-card {
+	margin-top: 0;
+	padding: 16px 18px;
+	flex-shrink: 0;
 }
 
 /* Row 2: Charts — 3 equal columns */
@@ -2097,10 +2107,15 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-yt-grid > .pv-card .pva-chart-wrap { position: relative; inset: auto; height: auto; }
 	.pva-yt-grid .pva-table-wrap { max-height: 320px; }
 	.pva-yt-stats-row  { grid-template-columns: repeat(2, 1fr); }
+	.pva-yt-stats-outer { grid-template-columns: repeat(2, 1fr); }
+	.pva-ai-row--three-col { grid-template-columns: 1fr 1fr; }
+	.pva-ai-row--three-col .pva-ai-row__integrations { display: none; }
 }
 
 @media (max-width: 900px) {
 	.pva-ai-row     { grid-template-columns: 1fr; }
+	.pva-ai-row--three-col { grid-template-columns: 1fr; }
+	.pva-ai-row--three-col .pva-ai-row__integrations { display: flex; }
 	.pva-charts-row { grid-template-columns: 1fr; }
 	.pva-table-row  { grid-template-columns: 1fr; }
 
@@ -2157,6 +2172,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-source-toggle { width: 100%; }
 	.pva-source-btn { flex: 1; justify-content: center; }
 	.pva-yt-stats-row { grid-template-columns: 1fr; }
+	.pva-yt-stats-outer { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 900px) {
