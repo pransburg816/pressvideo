@@ -1166,7 +1166,8 @@ body.pva-page .pva-empty__graphic circle:first-child {
 .pva-export-btn svg { flex-shrink: 0; }
 
 /* ── Analytics Summary card ───────────────────────────────── */
-#pva-summary-section {
+#pva-summary-section,
+#pva-yt-summary-section {
 	margin-bottom: 20px;
 }
 
@@ -1733,6 +1734,11 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	display: flex;
 	flex-direction: column;
 	gap: 9px;
+}
+
+.pva-coach__subbars--full {
+	padding: 4px 18px 16px;
+	border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .pva-coach-subbar__row {
