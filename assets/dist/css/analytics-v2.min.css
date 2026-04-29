@@ -313,12 +313,15 @@
 .pva-int-notice--success { background: rgba(16,185,129,0.12); color: #10b981; }
 .pva-int-notice--error   { background: rgba(239,68,68,0.12); color: #ef4444; }
 
-/* Row 2: Charts — 3 equal columns */
+/* Row 2: Charts — 3 equal columns (2-col on YouTube tab) */
 .pva-charts-row {
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr;
 	gap: 20px;
 	margin-bottom: 20px;
+}
+.pva-charts-row.pva-yt-mode {
+	grid-template-columns: 1fr 1fr;
 }
 .pva-charts-row > .pv-card {
 	height: 320px;
