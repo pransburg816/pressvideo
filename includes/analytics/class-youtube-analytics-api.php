@@ -19,9 +19,14 @@ class PV_YouTube_Analytics_API {
 	const CACHE_TTL    = 6 * HOUR_IN_SECONDS;
 
 	private string $access_token;
+	private string $last_error = '';
 
 	public function __construct( string $access_token ) {
 		$this->access_token = $access_token;
+	}
+
+	public function get_last_error(): string {
+		return $this->last_error;
 	}
 
 	// ── Channel-level stats ──────────────────────────────────────────────
@@ -194,10 +199,14 @@ class PV_YouTube_Analytics_API {
 	// ── Build the full dashboard payload ─────────────────────────────────
 
 	public function get_dashboard_data( int $days = 30 ): array {
+		$channel    = $this->get_channel_stats( $days );
+		$trend      = $this->get_view_trend( $days );
+		$top_videos = $this->get_top_videos( $days );
 		return [
-			'channel'    => $this->get_channel_stats( $days ),
-			'trend'      => $this->get_view_trend( $days ),
-			'top_videos' => $this->get_top_videos( $days ),
+			'channel'    => $channel,
+			'trend'      => $trend,
+			'top_videos' => $top_videos,
+			'api_error'  => $this->last_error,
 		];
 	}
 
@@ -222,10 +231,23 @@ class PV_YouTube_Analytics_API {
 			],
 		] );
 
-		if ( is_wp_error( $response ) ) return [];
+		if ( is_wp_error( $response ) ) {
+			$this->last_error = $response->get_error_message();
+			return [];
+		}
 
+		$code = wp_remote_retrieve_response_code( $response );
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-		if ( ! is_array( $body ) || isset( $body['error'] ) ) return [];
+
+		if ( ! is_array( $body ) ) {
+			$this->last_error = "HTTP {$code}: invalid JSON response";
+			return [];
+		}
+
+		if ( isset( $body['error'] ) ) {
+			$this->last_error = $body['error']['message'] ?? "HTTP {$code} error";
+			return [];
+		}
 
 		return $body;
 	}

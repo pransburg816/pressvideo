@@ -316,7 +316,15 @@ class PV_Analytics_Tracker {
 
 		$days = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
 		$api  = new PV_YouTube_Analytics_API( $access_token );
-		wp_send_json_success( $api->get_dashboard_data( $days ) );
+		$data = $api->get_dashboard_data( $days );
+
+		// If every dataset is empty and we have an error, surface it.
+		if ( empty( $data['channel'] ) && empty( $data['top_videos'] ) && ! empty( $data['api_error'] ) ) {
+			wp_send_json_error( 'api_error: ' . $data['api_error'] );
+			return;
+		}
+
+		wp_send_json_success( $data );
 	}
 
 	// ── AJAX: disconnect YouTube Analytics OAuth ─────────────────────────
