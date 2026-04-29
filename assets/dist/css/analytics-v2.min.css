@@ -126,6 +126,7 @@
 }
 
 /* ── Stat cards row ───────────────────────────────────────── */
+.pva-stats-row[hidden] { display: none; }
 .pva-stats-row {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
