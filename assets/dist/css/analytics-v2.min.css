@@ -67,6 +67,7 @@
 }
 
 /* ── Date range pills ─────────────────────────────────────── */
+.pva-range-pills[hidden] { display: none; }
 .pva-range-pills {
 	display: flex;
 	gap: 6px;
@@ -847,6 +848,86 @@ body.pva-page .pva-pill--active:hover {
 	border-color: rgba(255,255,255,0.42);
 	color: #fff;
 	box-shadow: none;
+}
+
+/* ── YouTube date range dropdown ─────────────────────────── */
+.pva-yt-range { position: relative; }
+.pva-yt-range[hidden] { display: none; }
+
+.pva-yt-range-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 13px;
+	border-radius: 999px;
+	border: 1.5px solid rgba(255,255,255,0.18);
+	background: rgba(255,255,255,0.07);
+	color: rgba(255,255,255,0.82);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s;
+	white-space: nowrap;
+}
+.pva-yt-range-btn:hover {
+	background: rgba(255,255,255,0.13);
+	border-color: rgba(255,255,255,0.32);
+	color: #fff;
+}
+.pva-yt-range-btn[aria-expanded="true"] {
+	background: rgba(255,255,255,0.13);
+	border-color: rgba(255,255,255,0.32);
+}
+.pva-yt-range-chevron {
+	transition: transform 0.18s;
+	flex-shrink: 0;
+}
+.pva-yt-range-btn[aria-expanded="true"] .pva-yt-range-chevron {
+	transform: rotate(180deg);
+}
+
+.pva-yt-range-menu {
+	position: absolute;
+	right: 0;
+	top: calc(100% + 6px);
+	min-width: 160px;
+	margin: 0;
+	padding: 6px 0;
+	list-style: none;
+	background: #1e1b4b;
+	border: 1px solid rgba(255,255,255,0.12);
+	border-radius: 10px;
+	box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+	z-index: 200;
+}
+.pva-yt-range-menu[hidden] { display: none; }
+
+.pva-yt-range-opt {
+	padding: 9px 16px;
+	font-size: 0.8125rem;
+	color: rgba(255,255,255,0.75);
+	cursor: pointer;
+	transition: background 0.12s, color 0.12s;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.pva-yt-range-opt:hover {
+	background: rgba(255,255,255,0.07);
+	color: #fff;
+}
+.pva-yt-range-opt--active {
+	color: #fff;
+	font-weight: 600;
+}
+.pva-yt-range-opt--active::after {
+	content: '';
+	display: inline-block;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #4f46e5;
+	flex-shrink: 0;
 }
 
 /* ── Chart / content cards ────────────────────────────────── */
