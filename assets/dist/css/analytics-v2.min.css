@@ -189,7 +189,7 @@
 /* YouTube stat cards row — shown instead of site stat row on YouTube tab */
 .pva-yt-stats-outer {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(3, 1fr);
 	gap: 16px;
 	margin-bottom: 20px;
 }
@@ -1164,6 +1164,94 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	color: #c7d2fe;
 }
 .pva-export-btn svg { flex-shrink: 0; }
+
+/* ── YouTube stat card delta indicators ───────────────────── */
+.pva-stat-delta {
+	font-size: 0.7rem;
+	font-weight: 700;
+	margin-top: 4px;
+	padding: 2px 6px;
+	border-radius: 20px;
+	display: inline-block;
+	letter-spacing: 0.02em;
+}
+.pva-stat-delta--up {
+	background: rgba(16,185,129,0.15);
+	color: #34d399;
+}
+.pva-stat-delta--down {
+	background: rgba(239,68,68,0.12);
+	color: #f87171;
+}
+.pva-stat-delta--flat {
+	background: rgba(255,255,255,0.07);
+	color: rgba(255,255,255,0.45);
+}
+
+/* ── Traffic sources list (replaces engagement donut on YT tab) */
+.pva-sources-list {
+	padding: 8px 4px 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.pva-source-row__top {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 4px;
+}
+.pva-source-row__label {
+	font-size: 0.78rem;
+	font-weight: 500;
+	color: rgba(255,255,255,0.80);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 68%;
+}
+.pva-source-row__val {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: rgba(255,255,255,0.70);
+	white-space: nowrap;
+}
+.pva-source-row__pct {
+	color: rgba(255,255,255,0.40);
+	font-weight: 400;
+}
+.pva-source-row__track {
+	height: 5px;
+	background: rgba(255,255,255,0.07);
+	border-radius: 3px;
+	overflow: hidden;
+}
+.pva-source-row__fill {
+	height: 100%;
+	border-radius: 3px;
+	transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Copy Report button ───────────────────────────────────── */
+#pva-copy-report {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 14px;
+	background: rgba(99,102,241,0.15);
+	border: 1px solid rgba(99,102,241,0.35);
+	border-radius: 8px;
+	color: #a5b4fc;
+	font-size: 0.78rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.18s, border-color 0.18s;
+	margin-left: auto;
+}
+#pva-copy-report:hover {
+	background: rgba(99,102,241,0.28);
+	border-color: rgba(99,102,241,0.6);
+}
 
 /* ── Analytics Summary card ───────────────────────────────── */
 #pva-summary-section,
@@ -2288,8 +2376,8 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-yt-grid > .pv-card > .pv-card__body { position: relative; overflow: visible; }
 	.pva-yt-grid > .pv-card .pva-chart-wrap { position: relative; inset: auto; height: auto; }
 	.pva-yt-grid .pva-table-wrap { max-height: 320px; }
-	.pva-yt-stats-row  { grid-template-columns: repeat(2, 1fr); }
-	.pva-yt-stats-outer { grid-template-columns: repeat(2, 1fr); }
+	.pva-yt-stats-row  { grid-template-columns: repeat(3, 1fr); }
+	.pva-yt-stats-outer { grid-template-columns: repeat(3, 1fr); }
 	.pva-ai-row--three-col { grid-template-columns: 1fr 1fr; }
 	.pva-ai-row--three-col .pva-ai-row__integrations { display: none; }
 }
