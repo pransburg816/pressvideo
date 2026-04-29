@@ -37,7 +37,7 @@ class PV_YouTube_Analytics_API {
 		if ( is_array( $cached ) ) return $cached;
 
 		$end_date   = gmdate( 'Y-m-d' );
-		$start_date = gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+		$start_date = $days >= 9999 ? '2005-04-23' : gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
 
 		$response = $this->api_get( [
 			'ids'        => 'channel==MINE',
@@ -72,7 +72,7 @@ class PV_YouTube_Analytics_API {
 		if ( is_array( $cached ) ) return $cached;
 
 		$end_date   = gmdate( 'Y-m-d' );
-		$start_date = gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+		$start_date = $days >= 9999 ? '2005-04-23' : gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
 
 		$response = $this->api_get( [
 			'ids'        => 'channel==MINE',
@@ -83,9 +83,10 @@ class PV_YouTube_Analytics_API {
 			'sort'       => 'day',
 		] );
 
-		// Build a full date map so missing days are zero.
+		// Build a full date map so missing days are zero. Cap at 365 for chart performance.
+		$chart_days = min( 365, $days );
 		$trend = [];
-		for ( $i = $days - 1; $i >= 0; $i-- ) {
+		for ( $i = $chart_days - 1; $i >= 0; $i-- ) {
 			$trend[ gmdate( 'Y-m-d', strtotime( "-{$i} days" ) ) ] = 0;
 		}
 		foreach ( $response['rows'] ?? [] as $row ) {
@@ -111,7 +112,7 @@ class PV_YouTube_Analytics_API {
 		if ( is_array( $cached ) ) return $cached;
 
 		$end_date   = gmdate( 'Y-m-d' );
-		$start_date = gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+		$start_date = $days >= 9999 ? '2005-04-23' : gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
 
 		$response = $this->api_get( [
 			'ids'        => 'channel==MINE',

@@ -245,14 +245,15 @@ class PV_Analytics_Page {
 				<!-- YouTube-tab date range picker (hidden until YouTube tab is active) -->
 				<div class="pva-yt-range" id="pva-yt-range" hidden>
 					<button class="pva-yt-range-btn" id="pva-yt-range-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-						<span id="pva-yt-range-label"><?php esc_html_e( 'Last 365 Days', 'pv-youtube-importer' ); ?></span>
+						<span id="pva-yt-range-label"><?php esc_html_e( 'All Time', 'pv-youtube-importer' ); ?></span>
 						<svg class="pva-yt-range-chevron" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
 					</button>
 					<ul class="pva-yt-range-menu" id="pva-yt-range-menu" role="listbox" aria-label="<?php esc_attr_e( 'YouTube date range', 'pv-youtube-importer' ); ?>" hidden>
-						<li class="pva-yt-range-opt" role="option" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></li>
-						<li class="pva-yt-range-opt" role="option" data-days="28"><?php esc_html_e( 'Last 28 Days', 'pv-youtube-importer' ); ?></li>
+						<li class="pva-yt-range-opt pva-yt-range-opt--active" role="option" data-days="9999" aria-selected="true"><?php esc_html_e( 'All Time', 'pv-youtube-importer' ); ?></li>
+						<li class="pva-yt-range-opt" role="option" data-days="365"><?php esc_html_e( 'Last 365 Days', 'pv-youtube-importer' ); ?></li>
 						<li class="pva-yt-range-opt" role="option" data-days="90"><?php esc_html_e( 'Last 90 Days', 'pv-youtube-importer' ); ?></li>
-						<li class="pva-yt-range-opt pva-yt-range-opt--active" role="option" data-days="365" aria-selected="true"><?php esc_html_e( 'Last 365 Days', 'pv-youtube-importer' ); ?></li>
+						<li class="pva-yt-range-opt" role="option" data-days="28"><?php esc_html_e( 'Last 28 Days', 'pv-youtube-importer' ); ?></li>
+						<li class="pva-yt-range-opt" role="option" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></li>
 					</ul>
 				</div>
 			</div><!-- .pva-export-bar -->
