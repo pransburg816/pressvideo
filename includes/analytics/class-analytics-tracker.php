@@ -43,6 +43,7 @@ class PV_Analytics_Tracker {
 		add_action( 'wp_ajax_pv_refresh_ai_insights',   [ $this, 'ajax_refresh_ai'      ] );
 		add_action( 'wp_ajax_pv_yt_analytics_data',     [ $this, 'ajax_yt_data'         ] );
 		add_action( 'wp_ajax_pv_yt_disconnect',         [ $this, 'ajax_yt_disconnect'   ] );
+		add_action( 'wp_ajax_pv_refresh_yt_ai_insights', [ $this, 'ajax_refresh_yt_ai' ] );
 	}
 
 	public function ajax_track(): void {
@@ -97,7 +98,7 @@ class PV_Analytics_Tracker {
 			return;
 		}
 
-		$days = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
+		$days = min( 9999, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
 		wp_send_json_success( self::get_dashboard_data( $days ) );
 	}
 
@@ -314,7 +315,7 @@ class PV_Analytics_Tracker {
 			return;
 		}
 
-		$days = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
+		$days = min( 9999, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
 		$api  = new PV_YouTube_Analytics_API( $access_token );
 		$data = $api->get_dashboard_data( $days );
 
@@ -339,6 +340,152 @@ class PV_Analytics_Tracker {
 
 		PV_YouTube_OAuth::disconnect();
 		wp_send_json_success();
+	}
+
+	// ── AJAX: force-refresh YouTube-specific AI insights ─────────────────
+
+	public function ajax_refresh_yt_ai(): void {
+		check_ajax_referer( 'pv_analytics_admin', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'forbidden' );
+			return;
+		}
+
+		$api_key = self::resolve_ai_key();
+		if ( empty( $api_key ) ) {
+			wp_send_json_error( 'no_api_key' );
+			return;
+		}
+
+		if ( ! PV_Tier::meets( 'platinum' ) || ! PV_YouTube_OAuth::is_connected() ) {
+			wp_send_json_error( 'not_connected' );
+			return;
+		}
+
+		$access_token = PV_YouTube_OAuth::get_access_token();
+		if ( ! $access_token ) {
+			wp_send_json_error( 'token_failed' );
+			return;
+		}
+
+		$days    = min( 9999, max( 7, (int) ( $_POST['days'] ?? 9999 ) ) ); // phpcs:ignore
+		$yt_api  = new PV_YouTube_Analytics_API( $access_token );
+		$yt_data = $yt_api->get_dashboard_data( $days );
+
+		if ( empty( $yt_data['channel'] ) ) {
+			wp_send_json_error( 'no_data' );
+			return;
+		}
+
+		$result    = $this->get_yt_ai_insights( $yt_data, $api_key, $days );
+		$transient = 'pv_yt_ai_insights_' . get_current_user_id() . '_' . $days;
+
+		if ( ! empty( $result['moves'] ) ) {
+			$result['cached_at'] = time();
+			set_transient( $transient, $result, DAY_IN_SECONDS );
+		}
+
+		wp_send_json_success( $result );
+	}
+
+	// ── Build YouTube-specific AI coaching prompt ────────────────────────
+
+	public function get_yt_ai_insights( array $yt_data, string $api_key, int $days = 9999 ): array {
+		$ch  = $yt_data['channel']    ?? [];
+		$top = $yt_data['top_videos'] ?? [];
+
+		$views    = (int)   ( $ch['views']         ?? 0 );
+		$watchMin = (int)   ( $ch['watch_minutes'] ?? 0 );
+		$avgPct   = (float) ( $ch['avg_view_pct']  ?? 0 );
+		$likes    = (int)   ( $ch['likes']         ?? 0 );
+		$comments = (int)   ( $ch['comments']      ?? 0 );
+		$shares   = (int)   ( $ch['shares']        ?? 0 );
+		$subs     = (int)   ( $ch['subs_gained']   ?? 0 );
+		$engRate  = $views > 0 ? round( ( $likes + $comments + $shares ) / $views * 100, 2 ) : 0;
+
+		$top5_lines = [];
+		foreach ( array_slice( $top, 0, 5 ) as $v ) {
+			$top5_lines[] = '"' . sanitize_text_field( $v['title'] ?? '' ) . '" — '
+				. (int) ( $v['views'] ?? 0 ) . ' views, '
+				. (float) ( $v['avg_pct'] ?? 0 ) . '% avg viewed';
+		}
+		$top5_str = implode( "\n", $top5_lines );
+		$period   = $days >= 9999 ? 'all time' : "last {$days} days";
+
+		$prompt = "You are a YouTube channel growth coach. Analyze this creator's YouTube Analytics and generate 3 specific, data-driven growth moves.\n\n"
+			. "Respond ONLY with valid JSON — no markdown, no backticks, no extra text.\n\n"
+			. "YouTube Analytics ({$period}):\n"
+			. "- Views: {$views} | Watch time: {$watchMin} min\n"
+			. "- Avg view %: {$avgPct}% | Likes: {$likes} | Comments: {$comments} | Shares: {$shares}\n"
+			. "- Subscribers gained: {$subs} | Engagement rate: {$engRate}%\n"
+			. ( $top5_str ? "- Top videos:\n{$top5_str}\n\n" : "\n" )
+			. 'Return this exact JSON structure:' . "\n"
+			. '{"summary":{"grade":"...","title":"...","body":"...","tips":[{"title":"...","desc":"..."},{"title":"...","desc":"..."},{"title":"...","desc":"..."}]},"moves":[{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
+			. "summary.grade: exactly one of: Getting Started, Growing, Holding Steady, Needs Attention, Strong Momentum\n"
+			. "summary.title: 8 words max — direct headline about their current YouTube channel\n"
+			. "summary.body: 2 sentences using their real YouTube numbers\n"
+			. "summary.tips[].title: 4 words max action label\n"
+			. "summary.tips[].desc: 1-2 sentences using their specific YouTube data\n\n"
+			. "moves[].title: 5 words max, action-oriented verb phrase\n"
+			. "moves[].edge: one sentence — the specific insight from their YouTube data\n"
+			. "moves[].script: 2-3 sentences — exactly what to do on YouTube\n"
+			. "moves[].impact: one sentence — expected measurable YouTube outcome\n\n"
+			. "Focus entirely on YouTube performance — views, retention, engagement, subscriber growth. Do not mention WordPress or website plays.";
+
+		$response = wp_remote_post( 'https://api.anthropic.com/v1/messages', [
+			'timeout' => 15,
+			'headers' => [
+				'x-api-key'         => $api_key,
+				'anthropic-version' => '2023-06-01',
+				'content-type'      => 'application/json',
+			],
+			'body' => wp_json_encode( [
+				'model'      => 'claude-haiku-4-5-20251001',
+				'max_tokens' => 900,
+				'messages'   => [
+					[ 'role' => 'user', 'content' => $prompt ],
+				],
+			] ),
+		] );
+
+		if ( is_wp_error( $response ) ) return [];
+
+		$body = wp_remote_retrieve_body( $response );
+		$json = json_decode( $body, true );
+
+		if ( ! $json || ! isset( $json['content'][0]['text'] ) ) return [];
+
+		$text = trim( $json['content'][0]['text'] );
+		$text = preg_replace( '/^```(?:json)?\s*/i', '', $text );
+		$text = preg_replace( '/\s*```$/', '', $text );
+
+		$parsed = json_decode( trim( $text ), true );
+		if ( ! $parsed || ! isset( $parsed['moves'] ) || ! is_array( $parsed['moves'] ) ) return [];
+
+		$moves = array_map( function ( $move ) {
+			return [
+				'title'  => sanitize_text_field( $move['title']  ?? '' ),
+				'edge'   => sanitize_textarea_field( $move['edge']   ?? '' ),
+				'script' => sanitize_textarea_field( $move['script'] ?? '' ),
+				'impact' => sanitize_textarea_field( $move['impact'] ?? '' ),
+			];
+		}, array_slice( $parsed['moves'], 0, 3 ) );
+
+		$raw_summary = $parsed['summary'] ?? [];
+		$summary     = [
+			'grade' => sanitize_text_field( $raw_summary['grade'] ?? '' ),
+			'title' => sanitize_text_field( $raw_summary['title'] ?? '' ),
+			'body'  => sanitize_textarea_field( $raw_summary['body']  ?? '' ),
+			'tips'  => array_map( function ( $tip ) {
+				return [
+					'title' => sanitize_text_field( $tip['title'] ?? '' ),
+					'desc'  => sanitize_textarea_field( $tip['desc']  ?? '' ),
+				];
+			}, array_slice( (array) ( $raw_summary['tips'] ?? [] ), 0, 3 ) ),
+		];
+
+		return [ 'moves' => $moves, 'summary' => $summary ];
 	}
 
 	// ── Build AI insights prompt (site stats + optional YouTube stats) ───

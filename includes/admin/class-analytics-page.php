@@ -127,6 +127,22 @@ class PV_Analytics_Page {
 			: '';
 		$yt_disconnect_nonce = $yt_connected ? wp_create_nonce( 'pv_yt_disconnect' ) : '';
 
+		// ── YouTube AI insights (load from cache on page load) ────────────
+		$yt_ai_moves    = [];
+		$yt_ai_summary  = null;
+		$yt_ai_cached_at = null;
+		if ( $has_ai_key && $yt_connected ) {
+			foreach ( [ 9999, 365, 90 ] as $yt_ai_days ) {
+				$yt_ai_cached = get_transient( 'pv_yt_ai_insights_' . get_current_user_id() . '_' . $yt_ai_days );
+				if ( is_array( $yt_ai_cached ) && ! empty( $yt_ai_cached['moves'] ) ) {
+					$yt_ai_moves    = $yt_ai_cached['moves'];
+					$yt_ai_summary  = $yt_ai_cached['summary'] ?? null;
+					$yt_ai_cached_at = $yt_ai_cached['cached_at'] ?? null;
+					break;
+				}
+			}
+		}
+
 		wp_localize_script( 'pv-analytics-admin', 'pvAnalytics', [
 			'ajaxUrl'            => admin_url( 'admin-ajax.php' ),
 			'nonce'              => wp_create_nonce( 'pv_analytics_admin' ),
@@ -143,6 +159,9 @@ class PV_Analytics_Page {
 			'ytHasCreds'         => $yt_has_creds,
 			'ytAuthUrl'          => $yt_auth_url,
 			'ytDisconnectNonce'  => $yt_disconnect_nonce,
+			'ytAiMoves'          => $yt_ai_moves,
+			'ytAiSummary'        => $yt_ai_summary,
+			'ytAiCachedAt'       => $yt_ai_cached_at,
 			'aiDebug'            => [
 				'source'          => $ai_source,
 				'constantDefined' => defined( 'PV_ANTHROPIC_KEY' ),
@@ -298,6 +317,9 @@ class PV_Analytics_Page {
 
 			<!-- ── Dynamic Analytics Summary (JS-rendered) ──────── -->
 			<div id="pva-summary-section" hidden></div>
+
+			<!-- ── YouTube Analytics Summary (JS-rendered, visible on YouTube tab) ── -->
+			<div id="pva-yt-summary-section" hidden></div>
 
 			<!-- ── Row 1: AI Blocks — Coach + Insights + Integrations ── -->
 			<?php
