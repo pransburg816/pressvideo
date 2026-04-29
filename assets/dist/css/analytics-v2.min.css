@@ -1190,10 +1190,15 @@ body.pva-page .pva-empty__graphic circle:first-child {
 
 /* ── Traffic sources list (replaces engagement donut on YT tab) */
 .pva-sources-list {
-	padding: 8px 4px 4px;
+	position: absolute;
+	inset: 0;
+	overflow-y: auto;
+	padding: 14px 16px 10px;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255,255,255,0.15) transparent;
 }
 .pva-source-row__top {
 	display: flex;
