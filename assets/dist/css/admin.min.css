@@ -1352,6 +1352,29 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 }
 .pv-aside__nav-section:first-child { padding-top: 8px; }
 
+/* ── Analytics quick-focus nav ─────────────────────────────────── */
+.pv-aside__focus-divider {
+	margin: 10px 14px 0;
+	height: 1px;
+	background: rgba(255,255,255,0.07);
+	flex-shrink: 0;
+}
+.pv-aside__focus-btn {
+	position: relative;
+	padding-right: 32px;
+}
+.pv-aside__focus-icon {
+	position: absolute;
+	right: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+	opacity: 0;
+	color: rgba(165,180,252,0.45);
+	transition: opacity .14s;
+	flex-shrink: 0;
+}
+.pv-aside__focus-btn:hover .pv-aside__focus-icon { opacity: 1; }
+
 /* ── App Loader ─────────────────────────────────────────────────── */
 #pv-app-loader {
 	position: fixed;

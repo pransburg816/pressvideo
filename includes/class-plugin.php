@@ -322,6 +322,28 @@ class PV_Plugin {
 						<span><?php echo esc_html( $item['label'] ); ?></span>
 					</a>
 					<?php endforeach; ?>
+
+					<?php if ( 'pv_youtube_page_pv-analytics' === $screen->id ) :
+					$focus_nav = [
+						[ 'id' => 'coach',       'label' => 'Creator Growth Coach', 'icon' => 'dashicons-admin-users' ],
+						[ 'id' => 'insights',    'label' => 'Performance Insights', 'icon' => 'dashicons-chart-bar'   ],
+						[ 'id' => 'trend',       'label' => 'Play Trend',           'icon' => 'dashicons-chart-line'  ],
+						[ 'id' => 'top-videos',  'label' => 'Top Videos',           'icon' => 'dashicons-star-filled' ],
+						[ 'id' => 'watch-depth', 'label' => 'Watch Depth',          'icon' => 'dashicons-clock'       ],
+					];
+					?>
+					<div class="pv-aside__focus-divider"></div>
+					<div class="pv-aside__nav-section"><?php esc_html_e( 'Quick Focus', 'pv-youtube-importer' ); ?></div>
+					<?php foreach ( $focus_nav as $fi ) : ?>
+					<button class="pv-aside__nav-item pv-aside__focus-btn"
+					        type="button"
+					        data-pv-focus="<?php echo esc_attr( $fi['id'] ); ?>">
+						<span class="dashicons <?php echo esc_attr( $fi['icon'] ); ?>"></span>
+						<span><?php echo esc_html( $fi['label'] ); ?></span>
+						<svg class="pv-aside__focus-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+					</button>
+					<?php endforeach; ?>
+					<?php endif; ?>
 				</nav>
 
 			<?php endif; ?>
@@ -374,6 +396,36 @@ class PV_Plugin {
 						});
 					});
 				});
+
+				// ── Analytics quick-focus shortcuts ──────────────────────────
+				(function() {
+					function triggerFocus(card) {
+						card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+						setTimeout(function() {
+							var btn = card.querySelector('.pva-expand-btn');
+							if (btn) btn.click();
+						}, 320);
+					}
+					function focusCard(cardId) {
+						var card = document.querySelector('[data-card-id="' + cardId + '"]');
+						if (card) { triggerFocus(card); return; }
+						// Card not yet in DOM (async-loaded) — wait for it
+						var obs = new MutationObserver(function(_, o) {
+							var c = document.querySelector('[data-card-id="' + cardId + '"]');
+							if (!c) return;
+							o.disconnect();
+							triggerFocus(c);
+						});
+						obs.observe(document.body, { childList: true, subtree: true });
+						setTimeout(function() { obs.disconnect(); }, 5000);
+						// Scroll toward the likely area immediately
+						var hint = document.getElementById('pva-ai-row') || document.getElementById('pva-charts-section');
+						if (hint) hint.scrollIntoView({ behavior: 'smooth', block: 'start' });
+					}
+					document.querySelectorAll('#pv-aside .pv-aside__focus-btn[data-pv-focus]').forEach(function(btn) {
+						btn.addEventListener('click', function() { focusCard(btn.getAttribute('data-pv-focus')); });
+					});
+				}());
 
 				// ── Customizer panel bridge ───────────────────────────────────
 				// Wire aside panel buttons to the existing pvc-nav-btn click logic
