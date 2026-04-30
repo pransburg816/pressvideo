@@ -421,10 +421,11 @@ class PV_Analytics_Tracker {
 			. "- Subscribers gained: {$subs} | Engagement rate: {$engRate}%\n"
 			. ( $top5_str ? "- Top videos:\n{$top5_str}\n\n" : "\n" )
 			. 'Return this exact JSON structure:' . "\n"
-			. '{"summary":{"grade":"...","title":"...","body":"...","tips":[{"title":"...","desc":"..."},{"title":"...","desc":"..."},{"title":"...","desc":"..."}]},"moves":[{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
+			. '{"summary":{"grade":"...","title":"...","body":"...","coach_narrative":"...","tips":[{"title":"...","desc":"..."},{"title":"...","desc":"..."},{"title":"...","desc":"..."}]},"moves":[{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
 			. "summary.grade: exactly one of: Getting Started, Growing, Holding Steady, Needs Attention, Strong Momentum\n"
 			. "summary.title: 8 words max — direct headline about their current YouTube channel\n"
 			. "summary.body: 2 sentences — open with the time period (e.g. \"Over all time, ...\" or \"In the last 7 days, ...\") then use their real YouTube numbers\n"
+			. "summary.coach_narrative: 2-3 sentences interpreting the score breakdown — name the strongest metric with its number, name the weakest metric with its number, close with one specific actionable insight from the data\n"
 			. "summary.tips[].title: 4 words max action label\n"
 			. "summary.tips[].desc: 1-2 sentences using their specific YouTube data\n\n"
 			. "moves[].title: 5 words max, action-oriented verb phrase\n"
@@ -442,7 +443,7 @@ class PV_Analytics_Tracker {
 			],
 			'body' => wp_json_encode( [
 				'model'      => 'claude-haiku-4-5-20251001',
-				'max_tokens' => 900,
+				'max_tokens' => 1100,
 				'messages'   => [
 					[ 'role' => 'user', 'content' => $prompt ],
 				],
@@ -554,10 +555,11 @@ class PV_Analytics_Tracker {
 			. '- Daily site trend (' . $days . ' days): [' . $trend_vals . ']'
 			. $yt_section
 			. "\n\nReturn this exact JSON structure:\n"
-			. '{"summary":{"grade":"...","title":"...","body":"...","tips":[{"title":"...","desc":"..."},{"title":"...","desc":"..."},{"title":"...","desc":"..."}]},"moves":[{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
+			. '{"summary":{"grade":"...","title":"...","body":"...","coach_narrative":"...","tips":[{"title":"...","desc":"..."},{"title":"...","desc":"..."},{"title":"...","desc":"..."}]},"moves":[{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
 			. "summary.grade: exactly one of: Getting Started, Growing, Holding Steady, Needs Attention, Strong Momentum\n"
 			. "summary.title: 8 words max — direct headline about their current situation\n"
 			. "summary.body: 2 sentences — what is happening and what to prioritize, using their real numbers\n"
+			. "summary.coach_narrative: 2-3 sentences interpreting the score breakdown — name the strongest metric with its number, name the weakest metric with its number, close with one specific actionable insight from the data\n"
 			. "summary.tips[].title: 4 words max action label\n"
 			. "summary.tips[].desc: 1-2 sentences using their specific data — no generic advice\n\n"
 			. "moves[].title: 5 words max, action-oriented verb phrase\n"
@@ -576,7 +578,7 @@ class PV_Analytics_Tracker {
 			],
 			'body' => wp_json_encode( [
 				'model'      => 'claude-haiku-4-5-20251001',
-				'max_tokens' => 900,
+				'max_tokens' => 1100,
 				'messages'   => [
 					[ 'role' => 'user', 'content' => $prompt ],
 				],

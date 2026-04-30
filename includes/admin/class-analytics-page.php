@@ -128,10 +128,11 @@ class PV_Analytics_Page {
 		$yt_disconnect_nonce = $yt_connected ? wp_create_nonce( 'pv_yt_disconnect' ) : '';
 
 		// ── YouTube AI insights (load from cache on page load) ────────────
-		$yt_ai_moves       = [];
-		$yt_ai_summary     = null;
-		$yt_ai_cached_at   = null;
+		$yt_ai_moves         = [];
+		$yt_ai_summary       = null;
+		$yt_ai_cached_at     = null;
 		$yt_period_summaries = [];
+		$yt_period_cached_at = [];
 		if ( $has_ai_key && $yt_connected ) {
 			foreach ( [ 9999, 365, 90, 28, 7 ] as $yt_ai_days ) {
 				$yt_ai_cached = get_transient( 'pv_yt_ai_insights_' . get_current_user_id() . '_' . $yt_ai_days );
@@ -142,9 +143,12 @@ class PV_Analytics_Page {
 						$yt_ai_summary   = $yt_ai_cached['summary'] ?? null;
 						$yt_ai_cached_at = $yt_ai_cached['cached_at'] ?? null;
 					}
-					// Collect per-period summary for range-aware display.
+					// Collect per-period summary + timestamps for range-aware display.
 					if ( ! empty( $yt_ai_cached['summary'] ) ) {
 						$yt_period_summaries[ $yt_ai_days ] = $yt_ai_cached['summary'];
+					}
+					if ( ! empty( $yt_ai_cached['cached_at'] ) ) {
+						$yt_period_cached_at[ $yt_ai_days ] = $yt_ai_cached['cached_at'];
 					}
 				}
 			}
@@ -170,6 +174,7 @@ class PV_Analytics_Page {
 			'ytAiSummary'        => $yt_ai_summary,
 			'ytAiCachedAt'       => $yt_ai_cached_at,
 			'ytPeriodSummaries'  => $yt_period_summaries,
+			'ytPeriodCachedAt'   => $yt_period_cached_at,
 			'aiDebug'            => [
 				'source'          => $ai_source,
 				'constantDefined' => defined( 'PV_ANTHROPIC_KEY' ),
