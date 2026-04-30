@@ -1951,11 +1951,42 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	display: block;
 }
 
+/* Explicit named areas — DOM order is irrelevant, placement is pinned */
 .pva-focus-card .pva-coach__focus-grid {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
+	grid-template-rows: auto auto;
+	grid-template-areas:
+		"ai    bars"
+		"gauge moves";
 	gap: 14px 18px;
 	align-items: start;
+}
+
+.pva-focus-card .pva-coach__focus-grid .pva-ai-status,
+.pva-focus-card .pva-coach__focus-grid .pva-ai-status--demo,
+.pva-focus-card .pva-coach__focus-grid .pva-ai-status--off {
+	grid-area: ai;
+	align-self: start;
+}
+
+.pva-focus-card .pva-coach__focus-grid .pva-coach__subbars,
+.pva-focus-card .pva-coach__focus-grid .pva-coach__subbars--full {
+	grid-area: bars;
+	align-self: start;
+	border: 1px solid rgba(255,255,255,0.07);
+	border-radius: 8px;
+	padding: 16px 18px;
+}
+
+.pva-focus-card .pva-coach__focus-grid .pva-coach__gauge-row {
+	grid-area: gauge;
+	align-self: start;
+}
+
+.pva-focus-card .pva-coach__focus-grid .pva-coach__moves {
+	grid-area: moves;
+	align-self: start;
 }
 
 .pva-focus-card .pva-coach__focus-grid .pva-coach-move {
@@ -1968,23 +1999,6 @@ body.pva-page .pva-empty__graphic circle:first-child {
 .pva-focus-card .pva-coach__focus-grid .pva-coach-move:last-child {
 	border-bottom: 1px solid rgba(255,255,255,0.07);
 	padding-bottom: 18px;
-}
-
-.pva-focus-card .pva-coach__focus-grid .pva-ai-status {
-	border-radius: 8px;
-	align-self: start;
-}
-
-.pva-focus-card .pva-coach__focus-grid .pva-coach__gauge-row {
-	align-self: start;
-}
-
-.pva-focus-card .pva-coach__focus-grid .pva-coach__subbars,
-.pva-focus-card .pva-coach__focus-grid .pva-coach__subbars--full {
-	align-self: start;
-	border: 1px solid rgba(255,255,255,0.07);
-	border-radius: 8px;
-	padding: 16px 18px;
 }
 
 /* ── Move cards ───────────────────────────────────────────── */
