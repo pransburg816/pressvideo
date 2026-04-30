@@ -233,7 +233,7 @@ class PV_Analytics_Page {
 			<!-- ── Brand header ─────────────────────────────────── -->
 			<div class="pva-brand-header">
 				<h1 class="pva-brand-title">PressAnalytics</h1>
-				<span class="pva-brand-tag">by PressLabs</span>
+				<span class="pva-brand-tag">by LCM Digital Solutions</span>
 			</div>
 
 			<!-- ── Export bar ────────────────────────────────────── -->
