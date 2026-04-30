@@ -355,7 +355,7 @@ class PV_Plugin {
 					</button>
 					<?php endforeach; ?>
 					</div>
-					<div class="pv-aside__focus-group" id="pv-focus-group-yt" hidden>
+					<div class="pv-aside__focus-group" id="pv-focus-group-yt" style="display:none">
 					<?php foreach ( $focus_yt as $fi ) : ?>
 					<button class="pv-aside__nav-item pv-aside__focus-btn"
 					        type="button"
@@ -450,12 +450,12 @@ class PV_Plugin {
 					});
 					// Swap Quick Focus links when analytics source tab changes
 					document.addEventListener('pva:sourcechange', function(e) {
-						var isYt     = e.detail && e.detail.source === 'youtube';
-						var siteGrp  = document.getElementById('pv-focus-group-site');
-						var ytGrp    = document.getElementById('pv-focus-group-yt');
-						var pill     = document.getElementById('pv-focus-source-pill');
-						if (siteGrp) siteGrp.hidden = isYt;
-						if (ytGrp)   ytGrp.hidden   = !isYt;
+						var isYt    = e.detail && e.detail.source === 'youtube';
+						var siteGrp = document.getElementById('pv-focus-group-site');
+						var ytGrp   = document.getElementById('pv-focus-group-yt');
+						var pill    = document.getElementById('pv-focus-source-pill');
+						if (siteGrp) siteGrp.style.display = isYt ? 'none' : 'flex';
+						if (ytGrp)   ytGrp.style.display   = isYt ? 'flex' : 'none';
 						if (pill)    pill.textContent = isYt ? 'YouTube' : 'Site';
 					});
 				}());
