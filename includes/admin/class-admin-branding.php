@@ -117,8 +117,15 @@ class PV_Admin_Branding {
 	private function active_screen(): string {
 		$screen = get_current_screen();
 		if ( ! $screen ) return '';
-		// Post edit / add-new for pv_youtube maps to "All Videos" nav item.
+		// Taxonomy pages must be checked first — they also carry post_type=pv_youtube.
+		if ( ! empty( $screen->taxonomy ) ) {
+			return $screen->id; // e.g. 'edit-pv_category'
+		}
 		if ( ( $screen->post_type ?? '' ) === 'pv_youtube' ) {
+			// Distinguish add-new from list/edit so "Add New Video" gets its own active state.
+			if ( $screen->base === 'post' && $screen->action === 'add' ) {
+				return 'add-pv_youtube';
+			}
 			return 'edit-pv_youtube';
 		}
 		return $screen->id;
@@ -139,6 +146,12 @@ class PV_Admin_Branding {
 				'icon'   => 'dashicons-video-alt3',
 			],
 			[
+				'label'  => 'Add New Video',
+				'url'    => admin_url( 'post-new.php?post_type=pv_youtube' ),
+				'screen' => 'add-pv_youtube',
+				'icon'   => 'dashicons-plus-alt',
+			],
+			[
 				'label'  => 'Categories',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_category',
@@ -155,6 +168,12 @@ class PV_Admin_Branding {
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_series&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_series',
 				'icon'   => 'dashicons-playlist-video',
+			],
+			[
+				'label'  => 'Video Types',
+				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_type&post_type=pv_youtube' ),
+				'screen' => 'edit-pv_type',
+				'icon'   => 'dashicons-admin-generic',
 			],
 		];
 

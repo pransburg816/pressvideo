@@ -208,6 +208,12 @@ class PV_Plugin {
 				'icon'   => 'dashicons-video-alt3',
 			],
 			[
+				'label'  => 'Add New Video',
+				'url'    => admin_url( 'post-new.php?post_type=pv_youtube' ),
+				'screen' => 'add-pv_youtube',
+				'icon'   => 'dashicons-plus-alt',
+			],
+			[
 				'label'  => 'Categories',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_category',
@@ -224,6 +230,12 @@ class PV_Plugin {
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_series&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_series',
 				'icon'   => 'dashicons-playlist-video',
+			],
+			[
+				'label'  => 'Video Types',
+				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_type&post_type=pv_youtube' ),
+				'screen' => 'edit-pv_type',
+				'icon'   => 'dashicons-admin-generic',
 			],
 		];
 
