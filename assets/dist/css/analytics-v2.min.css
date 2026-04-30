@@ -366,6 +366,13 @@
 .pva-table-row__least {
 	height: 460px;
 }
+/* YouTube tab: only Lowest Retention remains — span full row width */
+.pva-table-row--yt {
+	grid-template-columns: 1fr;
+}
+.pva-table-row--yt .pva-table-row__least {
+	height: 420px;
+}
 
 /* ── Least Watched card ───────────────────────────────────── */
 .pva-least-card {
