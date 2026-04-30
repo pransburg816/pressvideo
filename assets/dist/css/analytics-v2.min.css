@@ -1344,6 +1344,22 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	margin-bottom: 10px;
 }
 
+.pva-summary__period-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.67rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: #a5b4fc;
+	background: rgba(99,102,241,0.12);
+	border: 1px solid rgba(99,102,241,0.25);
+	border-radius: 20px;
+	padding: 2px 9px;
+	margin-bottom: 10px;
+}
+
 .pva-summary__grade-row {
 	margin-bottom: 10px;
 }

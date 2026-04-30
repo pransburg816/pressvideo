@@ -424,7 +424,7 @@ class PV_Analytics_Tracker {
 			. '{"summary":{"grade":"...","title":"...","body":"...","tips":[{"title":"...","desc":"..."},{"title":"...","desc":"..."},{"title":"...","desc":"..."}]},"moves":[{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."},{"title":"...","edge":"...","script":"...","impact":"..."}]}' . "\n\n"
 			. "summary.grade: exactly one of: Getting Started, Growing, Holding Steady, Needs Attention, Strong Momentum\n"
 			. "summary.title: 8 words max — direct headline about their current YouTube channel\n"
-			. "summary.body: 2 sentences using their real YouTube numbers\n"
+			. "summary.body: 2 sentences — open with the time period (e.g. \"Over all time, ...\" or \"In the last 7 days, ...\") then use their real YouTube numbers\n"
 			. "summary.tips[].title: 4 words max action label\n"
 			. "summary.tips[].desc: 1-2 sentences using their specific YouTube data\n\n"
 			. "moves[].title: 5 words max, action-oriented verb phrase\n"

@@ -128,17 +128,24 @@ class PV_Analytics_Page {
 		$yt_disconnect_nonce = $yt_connected ? wp_create_nonce( 'pv_yt_disconnect' ) : '';
 
 		// ── YouTube AI insights (load from cache on page load) ────────────
-		$yt_ai_moves    = [];
-		$yt_ai_summary  = null;
-		$yt_ai_cached_at = null;
+		$yt_ai_moves       = [];
+		$yt_ai_summary     = null;
+		$yt_ai_cached_at   = null;
+		$yt_period_summaries = [];
 		if ( $has_ai_key && $yt_connected ) {
-			foreach ( [ 9999, 365, 90 ] as $yt_ai_days ) {
+			foreach ( [ 9999, 365, 90, 28, 7 ] as $yt_ai_days ) {
 				$yt_ai_cached = get_transient( 'pv_yt_ai_insights_' . get_current_user_id() . '_' . $yt_ai_days );
 				if ( is_array( $yt_ai_cached ) && ! empty( $yt_ai_cached['moves'] ) ) {
-					$yt_ai_moves    = $yt_ai_cached['moves'];
-					$yt_ai_summary  = $yt_ai_cached['summary'] ?? null;
-					$yt_ai_cached_at = $yt_ai_cached['cached_at'] ?? null;
-					break;
+					// First hit becomes the default (most inclusive period first).
+					if ( empty( $yt_ai_moves ) ) {
+						$yt_ai_moves     = $yt_ai_cached['moves'];
+						$yt_ai_summary   = $yt_ai_cached['summary'] ?? null;
+						$yt_ai_cached_at = $yt_ai_cached['cached_at'] ?? null;
+					}
+					// Collect per-period summary for range-aware display.
+					if ( ! empty( $yt_ai_cached['summary'] ) ) {
+						$yt_period_summaries[ $yt_ai_days ] = $yt_ai_cached['summary'];
+					}
 				}
 			}
 		}
@@ -162,6 +169,7 @@ class PV_Analytics_Page {
 			'ytAiMoves'          => $yt_ai_moves,
 			'ytAiSummary'        => $yt_ai_summary,
 			'ytAiCachedAt'       => $yt_ai_cached_at,
+			'ytPeriodSummaries'  => $yt_period_summaries,
 			'aiDebug'            => [
 				'source'          => $ai_source,
 				'constantDefined' => defined( 'PV_ANTHROPIC_KEY' ),
