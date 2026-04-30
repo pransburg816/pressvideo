@@ -342,6 +342,51 @@ body.pv-cpt-page .wp-list-table .manage-column {
 	color: rgba(165,180,252,0.75) !important;
 }
 
+/* ── Taxonomy pages: 2-column card grid (Tags, Series, Types) ─── */
+body.pv-cpt-page #col-container {
+	display: grid !important;
+	grid-template-columns: 1fr 1fr !important;
+	gap: 24px !important;
+	float: none !important;
+	max-width: 1100px;
+	margin: 0 auto !important;
+}
+
+/* Swap DOM order: form (col-left) on left, list (col-right) on right */
+body.pv-cpt-page #col-left  { order: 1; float: none !important; width: auto !important; margin: 0 !important; }
+body.pv-cpt-page #col-right { order: 2; float: none !important; width: auto !important; margin: 0 !important; }
+
+/* Card wrapper */
+body.pv-cpt-page .col-wrap {
+	background: rgba(255,255,255,0.04) !important;
+	border: 1px solid rgba(255,255,255,0.08) !important;
+	border-radius: 12px !important;
+	padding: 24px !important;
+	height: 100%;
+	box-sizing: border-box;
+}
+
+/* "Add New" form heading */
+body.pv-cpt-page .form-wrap > h2 {
+	color: #fff !important;
+	font-size: 1rem !important;
+	font-weight: 700 !important;
+	margin: 0 0 18px !important;
+	padding-bottom: 14px !important;
+	border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* List table heading ("Video Tags") */
+body.pv-cpt-page #col-right h1 {
+	margin-bottom: 14px !important;
+}
+
+/* Remove default WP col padding that fights the card layout */
+body.pv-cpt-page #col-container .col-wrap > form,
+body.pv-cpt-page #col-container .col-wrap > .form-wrap {
+	margin: 0 !important;
+}
+
 /* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 900px) {
 	body.pv-cpt-page #pv-aside { display: none !important; }
