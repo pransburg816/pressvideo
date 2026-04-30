@@ -133,44 +133,61 @@ class PV_Plugin {
 	public function render_pv_head_loader(): void {
 		$screen = get_current_screen();
 		if ( ! $screen || ! in_array( $screen->id, $this->pv_fullscreen_screen_ids(), true ) ) return;
+
+		$inner = wp_json_encode(
+			'<div class="pvl-inner">'
+			. '<div class="pvl-icon"><svg viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">'
+			. '<circle cx="44" cy="44" r="40" stroke="rgba(99,102,241,0.12)" stroke-width="3"/>'
+			. '<circle cx="44" cy="44" r="40" stroke="#4f46e5" stroke-width="3" stroke-linecap="round"'
+			.   ' stroke-dasharray="251" stroke-dashoffset="190" class="pvl-arc"/>'
+			. '<circle cx="44" cy="44" r="30" stroke="rgba(99,102,241,0.07)" stroke-width="18" class="pvl-glow"/>'
+			. '<path d="M37 28 L59 44 L37 60 Z" fill="white" class="pvl-play"/>'
+			. '</svg></div>'
+			. '<div class="pvl-wordmark"><span class="pvl-w1">Press</span><span class="pvl-w2">Video</span></div>'
+			. '<div class="pvl-dots"><span></span><span></span><span></span></div>'
+			. '</div>'
+		);
 		?>
 		<style>
 		/* Applied in <head> — dark bg on <html> prevents the white flash that occurs
 		   between pages during navigation, before any body content paints. */
 		html{background:#1a1740!important;margin-top:0!important;padding-top:0!important;}
 		body{margin-top:0!important;padding-top:0!important;}
-		/* Critical loader styles inlined so they work before admin.min.css loads */
-		#pv-app-loader{position:fixed;inset:0;z-index:999999;background:#1a1740;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease;}
-		#pv-app-loader.pv-loader--done{opacity:0;pointer-events:none;}
-		.pv-app-loader__inner{display:flex;flex-direction:column;align-items:center;gap:26px;}
-		.pv-app-loader__wordmark{display:flex;align-items:center;gap:11px;color:#fff;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
-		.pv-app-loader__wordmark svg{color:#818cf8;}
-		.pv-app-loader__bar{width:180px;height:3px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;}
-		.pv-app-loader__bar-fill{height:100%;width:0;background:linear-gradient(90deg,#4f46e5,#818cf8);border-radius:99px;animation:pv-load-bar .65s cubic-bezier(.4,0,.2,1) .08s forwards;}
-		@keyframes pv-load-bar{to{width:100%;}}
+		#pv-brand-loader{position:fixed;inset:0;z-index:999999;background:#1a1740;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease,visibility .45s ease;}
+		#pv-brand-loader.pvl-out{opacity:0;visibility:hidden;pointer-events:none;}
+		.pvl-inner{display:flex;flex-direction:column;align-items:center;gap:0;}
+		.pvl-icon{width:88px;height:88px;}
+		.pvl-icon svg{width:88px;height:88px;overflow:visible;}
+		.pvl-arc{transform-origin:44px 44px;animation:pvl-spin 1.1s linear infinite;}
+		.pvl-glow{animation:pvl-glow 2s ease-in-out infinite;}
+		.pvl-play{transform-origin:48px 44px;animation:pvl-play 2s ease-in-out infinite;}
+		@keyframes pvl-spin{to{transform:rotate(360deg);}}
+		@keyframes pvl-glow{0%,100%{stroke-width:14;opacity:.5;}50%{stroke-width:22;opacity:.9;}}
+		@keyframes pvl-play{0%,100%{opacity:.75;transform:scale(1);}50%{opacity:1;transform:scale(1.07);}}
+		.pvl-wordmark{margin-top:22px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:1.45rem;font-weight:800;letter-spacing:-.03em;line-height:1;animation:pvl-up .5s ease .1s both;}
+		.pvl-w1{color:#fff;}.pvl-w2{color:#818cf8;}
+		.pvl-dots{margin-top:14px;display:flex;gap:6px;animation:pvl-up .4s ease .25s both;}
+		.pvl-dots span{width:5px;height:5px;border-radius:50%;background:rgba(99,102,241,.45);animation:pvl-dot 1.2s ease-in-out infinite;}
+		.pvl-dots span:nth-child(2){animation-delay:.2s;}.pvl-dots span:nth-child(3){animation-delay:.4s;}
+		@keyframes pvl-dot{0%,80%,100%{transform:scale(.75);opacity:.35;}40%{transform:scale(1.3);opacity:1;}}
+		@keyframes pvl-up{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
 		</style>
 		<script>
-		(function() {
+		(function(){
 			document.documentElement.style.marginTop = '0';
 			document.documentElement.style.paddingTop = '0';
-			var l = document.createElement('div');
-			l.id = 'pv-app-loader';
-			l.setAttribute('aria-hidden', 'true');
-			l.innerHTML =
-				'<div class="pv-app-loader__inner">' +
-				'<div class="pv-app-loader__wordmark">' +
-				'<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"><\/path><\/svg>' +
-				'<span>PressVideo<\/span><\/div>' +
-				'<div class="pv-app-loader__bar"><div class="pv-app-loader__bar-fill"><\/div><\/div>' +
-				'<\/div>';
+			var l=document.createElement('div');
+			l.id='pv-brand-loader';
+			l.setAttribute('aria-hidden','true');
+			l.innerHTML=<?php echo $inner; // phpcs:ignore WordPress.Security.EscapeOutput -- JSON-encoded by wp_json_encode ?>;
 			document.documentElement.appendChild(l);
-			document.addEventListener('DOMContentLoaded', function() {
+			document.addEventListener('DOMContentLoaded',function(){
 				document.body.style.marginTop = '0';
 				document.body.style.paddingTop = '0';
-				setTimeout(function() {
-					l.classList.add('pv-loader--done');
-					setTimeout(function() { if (l.parentNode) l.parentNode.removeChild(l); }, 300);
-				}, 300);
+				setTimeout(function(){
+					l.classList.add('pvl-out');
+					setTimeout(function(){if(l.parentNode)l.parentNode.removeChild(l);},480);
+				},520);
 			});
 		}());
 		</script>
@@ -282,19 +299,23 @@ class PV_Plugin {
 						if (link.classList.contains('is-active')) return;
 						e.preventDefault();
 						var dest = link.href;
-						// Always create a fresh loader — avoids conflicts with the
-						// head-loader's pending dismiss timeout
-						var old = document.getElementById('pv-app-loader');
+						// Reuse the same brand-loader structure as the head-injected loader
+						// so the outgoing transition is visually identical to the incoming one.
+						var old = document.getElementById('pv-brand-loader');
 						if (old) old.parentNode.removeChild(old);
 						var mask = document.createElement('div');
-						mask.id = 'pv-app-loader';
+						mask.id = 'pv-brand-loader';
 						mask.setAttribute('aria-hidden', 'true');
 						mask.innerHTML =
-							'<div class="pv-app-loader__inner">' +
-							'<div class="pv-app-loader__wordmark">' +
-							'<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/><\/svg>' +
-							'<span>PressVideo<\/span><\/div>' +
-							'<div class="pv-app-loader__bar"><div class="pv-app-loader__bar-fill"><\/div><\/div>' +
+							'<div class="pvl-inner">' +
+							'<div class="pvl-icon"><svg viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+							'<circle cx="44" cy="44" r="40" stroke="rgba(99,102,241,0.12)" stroke-width="3"\/>' +
+							'<circle cx="44" cy="44" r="40" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="190" class="pvl-arc"\/>' +
+							'<circle cx="44" cy="44" r="30" stroke="rgba(99,102,241,0.07)" stroke-width="18" class="pvl-glow"\/>' +
+							'<path d="M37 28 L59 44 L37 60 Z" fill="white" class="pvl-play"\/>' +
+							'<\/svg><\/div>' +
+							'<div class="pvl-wordmark"><span class="pvl-w1">Press<\/span><span class="pvl-w2">Video<\/span><\/div>' +
+							'<div class="pvl-dots"><span><\/span><span><\/span><span><\/span><\/div>' +
 							'<\/div>';
 						document.body.appendChild(mask);
 						requestAnimationFrame(function() {
