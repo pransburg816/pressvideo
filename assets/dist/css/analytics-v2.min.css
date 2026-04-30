@@ -2352,6 +2352,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 .pva-source-btn:hover { color: rgba(255,255,255,0.82); background: transparent; border-bottom-color: rgba(99,102,241,0.4); }
 .pva-source-btn--active { background: transparent; color: #fff; box-shadow: none; border-bottom-color: #6366f1; }
 .pva-source-btn--active:hover { background: transparent; color: #fff; border-bottom-color: #6366f1; }
+.pva-source-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 
 .pva-conn-dot {
 	width: 6px;
