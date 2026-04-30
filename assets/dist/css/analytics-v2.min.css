@@ -77,7 +77,7 @@
 .pva-pill {
 	padding: 7px 16px;
 	border: 1.5px solid;
-	border-radius: 999px;
+	border-radius: 4px;
 	font-size: 0.8125rem;
 	font-weight: 500;
 	cursor: pointer;
@@ -860,7 +860,7 @@ body.pva-page .pva-pill--active:hover {
 	align-items: center;
 	gap: 6px;
 	padding: 7px 13px;
-	border-radius: 999px;
+	border-radius: 4px;
 	border: 1.5px solid rgba(255,255,255,0.18);
 	background: rgba(255,255,255,0.07);
 	color: rgba(255,255,255,0.82);
@@ -944,7 +944,7 @@ body.pva-page .pva-pill--active:hover {
 	list-style: none;
 	background: #1e1b4b;
 	border: 1px solid rgba(255,255,255,0.12);
-	border-radius: 10px;
+	border-radius: 4px;
 	box-shadow: 0 8px 28px rgba(0,0,0,0.45);
 	z-index: 200;
 }
@@ -1080,21 +1080,23 @@ body.pva-page .pva-ga-event svg { color: #a5b4fc; }
 
 /* ── Dark-theme: source toggle ────────────────────────────── */
 body.pva-page .pva-source-toggle {
-	background: rgba(255,255,255,0.05);
-	border-color: rgba(255,255,255,0.1);
+	background: transparent;
+	border-color: transparent;
 }
 body.pva-page .pva-source-btn {
-	color: rgba(255,255,255,0.52);
+	color: rgba(255,255,255,0.45);
 }
 body.pva-page .pva-source-btn:hover {
 	color: rgba(255,255,255,0.82);
-	background: rgba(255,255,255,0.08);
+	background: transparent;
+	border-bottom-color: rgba(99,102,241,0.4);
 }
 body.pva-page .pva-source-btn--active,
 body.pva-page .pva-source-btn--active:hover {
-	background: rgba(255,255,255,0.13);
+	background: transparent;
 	color: #fff;
-	box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+	box-shadow: none;
+	border-bottom-color: #6366f1;
 }
 
 /* ── Dark-theme: YouTube Analytics connect card ───────────── */
@@ -1182,7 +1184,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	padding: 6px 13px;
 	background: rgba(255,255,255,0.06);
 	border: 1px solid rgba(255,255,255,0.14);
-	border-radius: 6px;
+	border-radius: 3px;
 	color: rgba(255,255,255,0.7);
 	font-size: 0.77rem;
 	font-weight: 500;
@@ -1282,7 +1284,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	padding: 6px 14px;
 	background: rgba(99,102,241,0.15);
 	border: 1px solid rgba(99,102,241,0.35);
-	border-radius: 8px;
+	border-radius: 3px;
 	color: #a5b4fc;
 	font-size: 0.78rem;
 	font-weight: 600;
@@ -2277,11 +2279,11 @@ body.pva-page .pva-empty__graphic circle:first-child {
 /* ── Data source toggle (Site / YouTube) ─────────────────── */
 .pva-source-toggle {
 	display: flex;
-	gap: 4px;
-	background: #f3f4f6;
-	border: 1px solid #e4e4e7;
-	border-radius: 10px;
-	padding: 4px;
+	gap: 22px;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
 	margin-bottom: 16px;
 	width: fit-content;
 }
@@ -2292,25 +2294,36 @@ body.pva-page .pva-empty__graphic circle:first-child {
 .pva-source-btn {
 	display: inline-flex;
 	align-items: center;
-	gap: 7px;
-	padding: 8px 18px;
-	border-radius: 7px;
-	font-size: 0.875rem;
+	gap: 6px;
+	padding: 4px 0;
+	border-radius: 0;
+	font-size: 0.83rem;
 	font-weight: 600;
 	cursor: pointer;
 	border: none;
+	border-bottom: 2px solid transparent;
 	background: transparent;
-	color: #6b7280;
-	transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+	color: rgba(255,255,255,0.45);
+	transition: color 0.15s, border-color 0.15s;
 	line-height: 1;
 }
 .pva-export-bar .pva-source-btn {
-	padding: 6px 14px;
+	padding: 4px 0;
 	font-size: 0.8rem;
 }
-.pva-source-btn:hover { color: #374151; background: rgba(0, 0, 0, 0.04); }
-.pva-source-btn--active { background: #fff; color: #1e1b4b; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12); }
-.pva-source-btn--active:hover { background: #fff; color: #1e1b4b; }
+.pva-source-btn:hover { color: rgba(255,255,255,0.82); background: transparent; border-bottom-color: rgba(99,102,241,0.4); }
+.pva-source-btn--active { background: transparent; color: #fff; box-shadow: none; border-bottom-color: #6366f1; }
+.pva-source-btn--active:hover { background: transparent; color: #fff; border-bottom-color: #6366f1; }
+
+.pva-conn-dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #10b981;
+	box-shadow: 0 0 0 2px rgba(16,185,129,0.25);
+	flex-shrink: 0;
+	display: inline-block;
+}
 
 /* ── YouTube stat cards ───────────────────────────────────── */
 .pva-yt-stats-row {

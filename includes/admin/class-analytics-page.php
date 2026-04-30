@@ -221,10 +221,12 @@ class PV_Analytics_Page {
 					<button class="pva-source-btn pva-source-btn--active" data-source="site" type="button">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
 						<?php esc_html_e( 'Site Stats', 'pv-youtube-importer' ); ?>
+						<?php if ( $ga_id ) : ?><span class="pva-conn-dot" title="<?php esc_attr_e( 'GA4 connected', 'pv-youtube-importer' ); ?>"></span><?php endif; ?>
 					</button>
 					<button class="pva-source-btn" data-source="youtube" type="button">
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
 						<?php esc_html_e( 'YouTube Stats', 'pv-youtube-importer' ); ?>
+						<?php if ( $yt_connected ) : ?><span class="pva-conn-dot" title="<?php esc_attr_e( 'YouTube Analytics connected', 'pv-youtube-importer' ); ?>"></span><?php endif; ?>
 					</button>
 				</div>
 				<div class="pva-export-sep" aria-hidden="true"></div>
