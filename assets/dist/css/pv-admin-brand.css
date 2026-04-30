@@ -1,0 +1,184 @@
+/* ============================================================
+   PressVideo — Admin Brand Bar + WP element overrides
+   Applied on CPT list/edit and taxonomy pages via body.pv-admin-page
+   ============================================================ */
+
+/* ── Brand bar ────────────────────────────────────────────── */
+.pv-admin-bar.notice {
+	background: linear-gradient(135deg, #1e1b4b 0%, #2d2a6e 100%);
+	border: 1px solid rgba(99, 102, 241, 0.25);
+	border-left: 3px solid #4f46e5;
+	border-radius: 8px;
+	padding: 0;
+	margin: 5px 0 18px;
+	box-shadow: 0 2px 12px rgba(79, 70, 229, 0.15);
+}
+
+.pv-admin-bar__inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 16px;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+/* ── Brand identity ───────────────────────────────────────── */
+.pv-admin-bar__brand {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.pv-admin-bar__logo {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	background: rgba(99, 102, 241, 0.2);
+	border: 1px solid rgba(99, 102, 241, 0.35);
+	border-radius: 7px;
+	color: #a5b4fc;
+	flex-shrink: 0;
+}
+
+.pv-admin-bar__name {
+	font-size: 0.875rem;
+	font-weight: 800;
+	color: #fff;
+	letter-spacing: -0.01em;
+	line-height: 1;
+}
+
+.pv-admin-bar__sep {
+	color: rgba(255, 255, 255, 0.2);
+	font-size: 1rem;
+	font-weight: 300;
+	line-height: 1;
+}
+
+.pv-admin-bar__page {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: rgba(199, 210, 254, 0.75);
+	line-height: 1;
+}
+
+/* ── Navigation links ─────────────────────────────────────── */
+.pv-admin-bar__nav {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	flex-wrap: wrap;
+}
+
+.pv-admin-bar__link {
+	display: inline-block;
+	padding: 5px 11px;
+	border-radius: 5px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	font-size: 0.775rem;
+	font-weight: 500;
+	color: rgba(199, 210, 254, 0.6);
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s;
+	line-height: 1.4;
+	white-space: nowrap;
+}
+
+.pv-admin-bar__link:hover {
+	background: rgba(255, 255, 255, 0.1);
+	color: #c7d2fe;
+	text-decoration: none;
+}
+
+.pv-admin-bar__link--active {
+	background: rgba(99, 102, 241, 0.25);
+	color: #a5b4fc;
+	font-weight: 600;
+}
+
+.pv-admin-bar__link--active:hover {
+	background: rgba(99, 102, 241, 0.35);
+	color: #c7d2fe;
+}
+
+/* ── WP button overrides on PV admin pages ────────────────── */
+body.pv-admin-page .page-title-action,
+body.pv-admin-page input[type="submit"].button-primary,
+body.pv-admin-page a.button-primary,
+body.pv-admin-page button.button-primary {
+	background: #4f46e5 !important;
+	border-color: #4338ca !important;
+	color: #fff !important;
+	border-radius: 6px !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	font-weight: 600 !important;
+	transition: background 0.15s !important;
+}
+
+body.pv-admin-page .page-title-action:hover,
+body.pv-admin-page input[type="submit"].button-primary:hover,
+body.pv-admin-page a.button-primary:hover,
+body.pv-admin-page button.button-primary:hover {
+	background: #4338ca !important;
+	border-color: #3730a3 !important;
+	color: #fff !important;
+}
+
+body.pv-admin-page .page-title-action:focus,
+body.pv-admin-page input[type="submit"].button-primary:focus,
+body.pv-admin-page a.button-primary:focus,
+body.pv-admin-page button.button-primary:focus {
+	box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4) !important;
+	outline: none !important;
+}
+
+/* ── WP form + table accents ──────────────────────────────── */
+body.pv-admin-page #wpbody-content input[type="text"]:focus,
+body.pv-admin-page #wpbody-content input[type="search"]:focus,
+body.pv-admin-page #wpbody-content textarea:focus,
+body.pv-admin-page #wpbody-content select:focus {
+	border-color: #4f46e5;
+	box-shadow: 0 0 0 1px #4f46e5;
+	outline: none;
+}
+
+body.pv-admin-page #wpbody-content input[type="checkbox"]:checked,
+body.pv-admin-page #wpbody-content input[type="radio"]:checked {
+	background-color: #4f46e5;
+	border-color: #4f46e5;
+}
+
+body.pv-admin-page .wp-list-table .check-column input[type="checkbox"]:checked {
+	background-color: #4f46e5;
+	border-color: #4f46e5;
+}
+
+/* Subtle indigo tint on alternate table rows */
+body.pv-admin-page table.wp-list-table tbody tr:hover td {
+	background: rgba(79, 70, 229, 0.04);
+}
+
+/* ── Page heading accent ──────────────────────────────────── */
+body.pv-admin-page #wpcontent h1.wp-heading-inline {
+	color: #1e1b4b;
+	font-weight: 700;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 900px) {
+	.pv-admin-bar__nav { display: none; }
+	.pv-admin-bar__inner { flex-wrap: nowrap; }
+}
+
+@media (max-width: 600px) {
+	.pv-admin-bar__sep,
+	.pv-admin-bar__page { display: none; }
+}

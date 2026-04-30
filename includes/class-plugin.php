@@ -55,6 +55,7 @@ class PV_Plugin {
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-dashboard-page.php';
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-customizer-page.php';
 			require_once PV_PLUGIN_DIR . 'includes/admin/class-analytics-page.php';
+			require_once PV_PLUGIN_DIR . 'includes/admin/class-admin-branding.php';
 		}
 	}
 
@@ -88,6 +89,7 @@ class PV_Plugin {
 			( new PV_Dashboard_Page() )->register();
 			( new PV_Customizer_Page() )->register();
 			( new PV_Analytics_Page() )->register();
+			( new PV_Admin_Branding() )->register();
 		}
 
 		// Archive page AJAX (pagination + per-page)

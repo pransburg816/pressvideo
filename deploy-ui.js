@@ -66,6 +66,7 @@ const FILES = [
 	'includes/admin/class-settings-page.php',
 	'includes/admin/class-customizer-page.php',
 	'includes/admin/class-analytics-page.php',
+	'includes/admin/class-admin-branding.php',
 	// PHP — analytics
 	'includes/analytics/class-analytics-tracker.php',
 	'includes/analytics/class-youtube-oauth.php',
@@ -80,6 +81,7 @@ const FILES = [
 	// CSS
 	'assets/dist/css/pv-notifications.css',
 	'assets/dist/css/admin.min.css',
+	'assets/dist/css/pv-admin-brand.css',
 	'assets/dist/css/offcanvas.min.css',
 	'assets/dist/css/grid.min.css',
 	'assets/dist/css/watch-page.min.css',
