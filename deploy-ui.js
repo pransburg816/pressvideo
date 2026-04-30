@@ -60,6 +60,8 @@ const FILES = [
 	'templates/single/layouts/hero-top.php',
 	'templates/single/layouts/hero-split.php',
 	'templates/single/layouts/theater.php',
+	// Core
+	'includes/class-plugin.php',
 	// PHP — admin
 	'includes/admin/class-dashboard-page.php',
 	'includes/admin/class-import-ui.php',

@@ -1,14 +1,13 @@
 <?php
 /**
- * PressVideo admin branding — loader, brand bar, and WP element overrides
- * for CPT list/edit and taxonomy pages.
+ * PressVideo admin branding — full-shell takeover for CPT list and taxonomy pages.
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 class PV_Admin_Branding {
 
-	/** Screen IDs that already have their own full PV shell — skip ours. */
+	/** Screen IDs that render their own PV shell — skip ours. */
 	private function fullscreen_ids(): array {
 		return [
 			'pv_youtube_page_pv-youtube-importer-dashboard',
@@ -18,7 +17,7 @@ class PV_Admin_Branding {
 		];
 	}
 
-	/** True when we're on a PV page that needs our branding layer. */
+	/** True when we're on a CPT/taxonomy page that needs our shell. */
 	private function is_pv_page(): bool {
 		$screen = get_current_screen();
 		if ( ! $screen ) return false;
@@ -29,15 +28,15 @@ class PV_Admin_Branding {
 	}
 
 	public function register(): void {
-		add_filter( 'admin_body_class',      [ $this, 'body_class'     ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'admin_head',            [ $this, 'render_loader'  ] );
-		add_action( 'admin_notices',         [ $this, 'render_brand_bar' ] );
+		add_filter( 'admin_body_class',      [ $this, 'body_class'    ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets'] );
+		add_action( 'admin_head',            [ $this, 'render_loader' ] );
+		add_action( 'admin_footer',          [ $this, 'render_shell'  ] );
 	}
 
 	public function body_class( string $classes ): string {
 		if ( ! $this->is_pv_page() ) return $classes;
-		return $classes . ' pv-admin-page';
+		return $classes . ' pv-admin-page pv-fullscreen-ui pv-cpt-page';
 	}
 
 	public function enqueue_assets(): void {
@@ -50,104 +49,7 @@ class PV_Admin_Branding {
 		);
 	}
 
-	// ── Contextual label + icon for the current page ─────────────────
-
-	private function page_context(): array {
-		$screen = get_current_screen();
-
-		$tax_map = [
-			'pv_tag'      => [ 'Video Tags',       'M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z' ],
-			'pv_category' => [ 'Video Categories', 'M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z' ],
-			'pv_series'   => [ 'Video Series',     'M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z' ],
-			'pv_type'     => [ 'Video Types',      'M12 2l-5.5 9h11L12 2zm0 3.84L14.6 10h-5.2L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5S15.01 22 17.5 22 22 19.99 22 17.5 19.99 13 17.5 13zm0 7c-1.38 0-2.5-1.12-2.5-2.5S16.12 15 17.5 15s2.5 1.12 2.5 2.5S18.88 20 17.5 20zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z' ],
-		];
-
-		if ( $screen ) {
-			if ( ! empty( $screen->taxonomy ) && isset( $tax_map[ $screen->taxonomy ] ) ) {
-				return $tax_map[ $screen->taxonomy ];
-			}
-			if ( ( $screen->post_type ?? '' ) === 'pv_youtube' ) {
-				if ( $screen->base === 'post' ) {
-					return [ 'Edit Video', 'M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z' ];
-				}
-				return [ 'All Videos', 'M8 5v14l11-7z' ];
-			}
-		}
-
-		return [ 'PressVideo', 'M8 5v14l11-7z' ];
-	}
-
-	// ── Brand bar (injected via admin_notices, JS moves it to top) ────
-
-	public function render_brand_bar(): void {
-		if ( ! $this->is_pv_page() ) return;
-		$screen = get_current_screen();
-
-		[ $page_label, $page_icon ] = $this->page_context();
-
-		$nav = [
-			[
-				'label'  => 'All Videos',
-				'url'    => admin_url( 'edit.php?post_type=pv_youtube' ),
-				'active' => $screen && $screen->base === 'edit' && ( $screen->post_type ?? '' ) === 'pv_youtube',
-			],
-			[
-				'label'  => 'Tags',
-				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_tag&post_type=pv_youtube' ),
-				'active' => $screen && ( $screen->taxonomy ?? '' ) === 'pv_tag',
-			],
-			[
-				'label'  => 'Categories',
-				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ),
-				'active' => $screen && ( $screen->taxonomy ?? '' ) === 'pv_category',
-			],
-			[
-				'label'  => 'Series',
-				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_series&post_type=pv_youtube' ),
-				'active' => $screen && ( $screen->taxonomy ?? '' ) === 'pv_series',
-			],
-			[
-				'label'  => 'Dashboard',
-				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ),
-				'active' => false,
-			],
-			[
-				'label'  => 'Analytics',
-				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ),
-				'active' => false,
-			],
-		];
-		?>
-		<div class="pv-admin-bar notice" id="pv-admin-bar">
-			<div class="pv-admin-bar__inner">
-
-				<div class="pv-admin-bar__brand">
-					<span class="pv-admin-bar__logo" aria-hidden="true">
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-					</span>
-					<span class="pv-admin-bar__name">PressVideo</span>
-					<span class="pv-admin-bar__sep" aria-hidden="true">/</span>
-					<span class="pv-admin-bar__page">
-						<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="<?php echo esc_attr( $page_icon ); ?>"/></svg>
-						<?php echo esc_html( $page_label ); ?>
-					</span>
-				</div>
-
-				<nav class="pv-admin-bar__nav" aria-label="<?php esc_attr_e( 'PressVideo navigation', 'pv-youtube-importer' ); ?>">
-					<?php foreach ( $nav as $item ) : ?>
-						<a href="<?php echo esc_url( $item['url'] ); ?>"
-						   class="pv-admin-bar__link<?php echo $item['active'] ? ' pv-admin-bar__link--active' : ''; ?>">
-							<?php echo esc_html( $item['label'] ); ?>
-						</a>
-					<?php endforeach; ?>
-				</nav>
-
-			</div>
-		</div>
-		<?php
-	}
-
-	// ── Animated loader (critical CSS + JS inline in <head>) ──────────
+	// ── Animated loader ──────────────────────────────────────────────
 
 	public function render_loader(): void {
 		if ( ! $this->is_pv_page() ) return;
@@ -167,7 +69,9 @@ class PV_Admin_Branding {
 		);
 		?>
 		<style id="pv-brand-loader-css">
-		#pv-brand-loader{position:fixed;inset:0;z-index:999998;background:#1a1740;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease,visibility .45s ease;}
+		html{background:#1a1740!important;margin-top:0!important;padding-top:0!important;}
+		body{margin-top:0!important;padding-top:0!important;}
+		#pv-brand-loader{position:fixed;inset:0;z-index:999999;background:#1a1740;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease,visibility .45s ease;}
 		#pv-brand-loader.pvl-out{opacity:0;visibility:hidden;pointer-events:none;}
 		.pvl-inner{display:flex;flex-direction:column;align-items:center;gap:0;}
 		.pvl-icon{width:88px;height:88px;}
@@ -188,12 +92,16 @@ class PV_Admin_Branding {
 		</style>
 		<script>
 		(function(){
+			document.documentElement.style.marginTop='0';
+			document.documentElement.style.paddingTop='0';
 			var l=document.createElement('div');
 			l.id='pv-brand-loader';
 			l.setAttribute('aria-hidden','true');
 			l.innerHTML=<?php echo $inner; // phpcs:ignore WordPress.Security.EscapeOutput -- JSON-encoded by wp_json_encode ?>;
 			document.documentElement.appendChild(l);
 			document.addEventListener('DOMContentLoaded',function(){
+				document.body.style.marginTop='0';
+				document.body.style.paddingTop='0';
 				setTimeout(function(){
 					l.classList.add('pvl-out');
 					setTimeout(function(){if(l.parentNode)l.parentNode.removeChild(l);},480);
@@ -201,15 +109,151 @@ class PV_Admin_Branding {
 			});
 		}());
 		</script>
+		<?php
+	}
+
+	// ── Contextual active-state helper ───────────────────────────────
+
+	private function active_screen(): string {
+		$screen = get_current_screen();
+		if ( ! $screen ) return '';
+		// Post edit / add-new for pv_youtube maps to "All Videos" nav item.
+		if ( ( $screen->post_type ?? '' ) === 'pv_youtube' ) {
+			return 'edit-pv_youtube';
+		}
+		return $screen->id;
+	}
+
+	// ── Full PV shell (aside + nav) ───────────────────────────────────
+
+	public function render_shell(): void {
+		if ( ! $this->is_pv_page() ) return;
+
+		$active = $this->active_screen();
+
+		$library_nav = [
+			[
+				'label'  => 'All Videos',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube' ),
+				'screen' => 'edit-pv_youtube',
+				'icon'   => 'dashicons-video-alt3',
+			],
+			[
+				'label'  => 'Categories',
+				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ),
+				'screen' => 'edit-pv_category',
+				'icon'   => 'dashicons-category',
+			],
+			[
+				'label'  => 'Tags',
+				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_tag&post_type=pv_youtube' ),
+				'screen' => 'edit-pv_tag',
+				'icon'   => 'dashicons-tag',
+			],
+			[
+				'label'  => 'Series',
+				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_series&post_type=pv_youtube' ),
+				'screen' => 'edit-pv_series',
+				'icon'   => 'dashicons-playlist-video',
+			],
+		];
+
+		$manage_nav = [
+			[
+				'label'  => 'Dashboard',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ),
+				'screen' => 'pv_youtube_page_pv-youtube-importer-dashboard',
+				'icon'   => 'dashicons-dashboard',
+			],
+			[
+				'label'  => 'Settings',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
+				'screen' => 'pv_youtube_page_pv-youtube-importer-settings',
+				'icon'   => 'dashicons-admin-settings',
+			],
+			[
+				'label'  => 'Live Preview',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-customizer' ),
+				'screen' => 'pv_youtube_page_pv-customizer',
+				'icon'   => 'dashicons-visibility',
+			],
+			[
+				'label'  => 'Analytics',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ),
+				'screen' => 'pv_youtube_page_pv-analytics',
+				'icon'   => 'dashicons-chart-bar',
+			],
+		];
+		?>
+		<aside id="pv-aside">
+
+			<div class="pv-aside__brand">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>
+				<span>PressVideo</span>
+			</div>
+
+			<nav class="pv-aside__nav" aria-label="<?php esc_attr_e( 'PressVideo', 'pv-youtube-importer' ); ?>">
+				<div class="pv-aside__nav-section"><?php esc_html_e( 'Library', 'pv-youtube-importer' ); ?></div>
+				<?php foreach ( $library_nav as $item ) : ?>
+				<a href="<?php echo esc_url( $item['url'] ); ?>"
+				   class="pv-aside__nav-item<?php echo $active === $item['screen'] ? ' is-active' : ''; ?>">
+					<span class="dashicons <?php echo esc_attr( $item['icon'] ); ?>"></span>
+					<span><?php echo esc_html( $item['label'] ); ?></span>
+				</a>
+				<?php endforeach; ?>
+
+				<div class="pv-aside__nav-section"><?php esc_html_e( 'Manage', 'pv-youtube-importer' ); ?></div>
+				<?php foreach ( $manage_nav as $item ) : ?>
+				<a href="<?php echo esc_url( $item['url'] ); ?>"
+				   class="pv-aside__nav-item<?php echo $active === $item['screen'] ? ' is-active' : ''; ?>">
+					<span class="dashicons <?php echo esc_attr( $item['icon'] ); ?>"></span>
+					<span><?php echo esc_html( $item['label'] ); ?></span>
+				</a>
+				<?php endforeach; ?>
+			</nav>
+
+			<div class="pv-aside__footer">
+				<a href="<?php echo esc_url( admin_url( 'index.php' ) ); ?>" class="pv-aside__exit">
+					<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+					<?php esc_html_e( 'Exit to WP Admin', 'pv-youtube-importer' ); ?>
+				</a>
+			</div>
+
+		</aside>
 		<script>
-		/* Move brand bar above the WP page title once DOM is ready */
-		document.addEventListener('DOMContentLoaded',function(){
-			var bar=document.getElementById('pv-admin-bar');
-			if(!bar)return;
-			var wrap=document.querySelector('#wpbody-content .wrap');
-			if(wrap){wrap.insertBefore(bar,wrap.firstChild);}
-			else{var wbc=document.getElementById('wpbody-content');if(wbc)wbc.insertBefore(bar,wbc.firstChild);}
-		});
+		(function(){
+			document.addEventListener('DOMContentLoaded',function(){
+				document.querySelectorAll('#pv-aside .pv-aside__nav-item[href]').forEach(function(link){
+					link.addEventListener('click',function(e){
+						if(link.classList.contains('is-active'))return;
+						e.preventDefault();
+						var dest=link.href;
+						var old=document.getElementById('pv-brand-loader');
+						if(old)old.parentNode.removeChild(old);
+						var mask=document.createElement('div');
+						mask.id='pv-brand-loader';
+						mask.setAttribute('aria-hidden','true');
+						mask.innerHTML=
+							'<div class="pvl-inner">'+
+							'<div class="pvl-icon"><svg viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">'+
+							'<circle cx="44" cy="44" r="40" stroke="rgba(99,102,241,0.12)" stroke-width="3"\/>'+
+							'<circle cx="44" cy="44" r="40" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="190" class="pvl-arc"\/>'+
+							'<circle cx="44" cy="44" r="30" stroke="rgba(99,102,241,0.07)" stroke-width="18" class="pvl-glow"\/>'+
+							'<path d="M37 28 L59 44 L37 60 Z" fill="white" class="pvl-play"\/>'+
+							'<\/svg><\/div>'+
+							'<div class="pvl-wordmark"><span class="pvl-w1">Press<\/span><span class="pvl-w2">Video<\/span><\/div>'+
+							'<div class="pvl-dots"><span><\/span><span><\/span><span><\/span><\/div>'+
+							'<\/div>';
+						document.body.appendChild(mask);
+						requestAnimationFrame(function(){
+							requestAnimationFrame(function(){
+								window.location.href=dest;
+							});
+						});
+					});
+				});
+			});
+		}());
 		</script>
 		<?php
 	}

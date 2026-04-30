@@ -200,6 +200,33 @@ class PV_Plugin {
 
 		$is_customizer = 'pv_youtube_page_pv-customizer' === $screen->id;
 
+		$library_nav = [
+			[
+				'label'  => 'All Videos',
+				'url'    => admin_url( 'edit.php?post_type=pv_youtube' ),
+				'screen' => 'edit-pv_youtube',
+				'icon'   => 'dashicons-video-alt3',
+			],
+			[
+				'label'  => 'Categories',
+				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ),
+				'screen' => 'edit-pv_category',
+				'icon'   => 'dashicons-category',
+			],
+			[
+				'label'  => 'Tags',
+				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_tag&post_type=pv_youtube' ),
+				'screen' => 'edit-pv_tag',
+				'icon'   => 'dashicons-tag',
+			],
+			[
+				'label'  => 'Series',
+				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_series&post_type=pv_youtube' ),
+				'screen' => 'edit-pv_series',
+				'icon'   => 'dashicons-playlist-video',
+			],
+		];
+
 		$main_nav = [
 			[
 				'label'  => 'Dashboard',
@@ -266,6 +293,16 @@ class PV_Plugin {
 			<?php else : ?>
 
 				<nav class="pv-aside__nav" aria-label="<?php esc_attr_e( 'PressVideo Admin', 'pv-youtube-importer' ); ?>">
+					<div class="pv-aside__nav-section"><?php esc_html_e( 'Library', 'pv-youtube-importer' ); ?></div>
+					<?php foreach ( $library_nav as $item ) : ?>
+					<a href="<?php echo esc_url( $item['url'] ); ?>"
+					   class="pv-aside__nav-item<?php echo $screen->id === $item['screen'] ? ' is-active' : ''; ?>">
+						<span class="dashicons <?php echo esc_attr( $item['icon'] ); ?>"></span>
+						<span><?php echo esc_html( $item['label'] ); ?></span>
+					</a>
+					<?php endforeach; ?>
+
+					<div class="pv-aside__nav-section"><?php esc_html_e( 'Manage', 'pv-youtube-importer' ); ?></div>
 					<?php foreach ( $main_nav as $item ) : ?>
 					<a href="<?php echo esc_url( $item['url'] ); ?>"
 					   class="pv-aside__nav-item<?php echo $screen->id === $item['screen'] ? ' is-active' : ''; ?>">
