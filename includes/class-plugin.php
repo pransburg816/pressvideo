@@ -200,42 +200,47 @@ class PV_Plugin {
 
 		$is_customizer = 'pv_youtube_page_pv-customizer' === $screen->id;
 
+		// Inline SVG helper — wraps Feather-style path data in a stroke SVG element.
+		$svgi = static function( string $p ): string {
+			return '<svg class="pv-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $p . '</svg>';
+		};
+
 		$library_nav = [
 			[
 				'label'  => 'All Videos',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube' ),
 				'screen' => 'edit-pv_youtube',
-				'icon'   => 'dashicons-video-alt3',
+				'icon'   => $svgi( '<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>' ),
 			],
 			[
 				'label'  => 'Add New Video',
 				'url'    => admin_url( 'post-new.php?post_type=pv_youtube' ),
 				'screen' => 'add-pv_youtube',
-				'icon'   => 'dashicons-plus-alt',
+				'icon'   => $svgi( '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>' ),
 			],
 			[
 				'label'  => 'Categories',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_category',
-				'icon'   => 'dashicons-category',
+				'icon'   => $svgi( '<path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>' ),
 			],
 			[
 				'label'  => 'Tags',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_tag&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_tag',
-				'icon'   => 'dashicons-tag',
+				'icon'   => $svgi( '<path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>' ),
 			],
 			[
 				'label'  => 'Series',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_series&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_series',
-				'icon'   => 'dashicons-playlist-video',
+				'icon'   => $svgi( '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>' ),
 			],
 			[
 				'label'  => 'Video Types',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_type&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_type',
-				'icon'   => 'dashicons-admin-generic',
+				'icon'   => $svgi( '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>' ),
 			],
 		];
 
@@ -244,34 +249,34 @@ class PV_Plugin {
 				'label'  => 'Dashboard',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ),
 				'screen' => 'pv_youtube_page_pv-youtube-importer-dashboard',
-				'icon'   => 'dashicons-dashboard',
+				'icon'   => $svgi( '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>' ),
 			],
 			[
 				'label'  => 'Settings',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
 				'screen' => 'pv_youtube_page_pv-youtube-importer-settings',
-				'icon'   => 'dashicons-admin-settings',
+				'icon'   => $svgi( '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>' ),
 			],
 			[
 				'label'  => 'Live Preview',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-customizer' ),
 				'screen' => 'pv_youtube_page_pv-customizer',
-				'icon'   => 'dashicons-visibility',
+				'icon'   => $svgi( '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>' ),
 			],
 			[
 				'label'  => 'Analytics',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ),
 				'screen' => 'pv_youtube_page_pv-analytics',
-				'icon'   => 'dashicons-chart-bar',
+				'icon'   => $svgi( '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>' ),
 			],
 		];
 
 		$customizer_panels = [
-			[ 'panel' => 'layout',        'label' => 'Layout',   'icon' => 'dashicons-layout' ],
-			[ 'panel' => 'hero',          'label' => 'Hero',     'icon' => 'dashicons-format-image' ],
-			[ 'panel' => 'sidebar',       'label' => 'Sidebar',  'icon' => 'dashicons-align-pull-right' ],
-			[ 'panel' => 'style',         'label' => 'Style',    'icon' => 'dashicons-art' ],
-			[ 'panel' => 'notifications', 'label' => 'Alerts',   'icon' => 'dashicons-bell' ],
+			[ 'panel' => 'layout',        'label' => 'Layout', 'icon' => $svgi( '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>' ) ],
+			[ 'panel' => 'hero',          'label' => 'Hero',   'icon' => $svgi( '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l4-4 4 4 4-5 4 5"/>' ) ],
+			[ 'panel' => 'sidebar',       'label' => 'Sidebar','icon' => $svgi( '<rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 3v18"/>' ) ],
+			[ 'panel' => 'style',         'label' => 'Style',  'icon' => $svgi( '<path d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/>' ) ],
+			[ 'panel' => 'notifications', 'label' => 'Alerts', 'icon' => $svgi( '<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>' ) ],
 		];
 		?>
 		<aside id="pv-aside">
@@ -296,7 +301,7 @@ class PV_Plugin {
 					<?php foreach ( $customizer_panels as $i => $p ) : ?>
 					<button class="pv-aside__nav-item pv-aside__panel-btn<?php echo 0 === $i ? ' is-active' : ''; ?>"
 					        data-pv-panel="<?php echo esc_attr( $p['panel'] ); ?>">
-						<span class="dashicons <?php echo esc_attr( $p['icon'] ); ?>"></span>
+						<?php echo $p['icon']; // phpcs:ignore WordPress.Security.EscapeOutput -- trusted internal SVG ?>
 						<span><?php echo esc_html( $p['label'] ); ?></span>
 					</button>
 					<?php endforeach; ?>
@@ -309,7 +314,7 @@ class PV_Plugin {
 					<?php foreach ( $library_nav as $item ) : ?>
 					<a href="<?php echo esc_url( $item['url'] ); ?>"
 					   class="pv-aside__nav-item<?php echo $screen->id === $item['screen'] ? ' is-active' : ''; ?>">
-						<span class="dashicons <?php echo esc_attr( $item['icon'] ); ?>"></span>
+						<?php echo $item['icon']; // phpcs:ignore WordPress.Security.EscapeOutput -- trusted internal SVG ?>
 						<span><?php echo esc_html( $item['label'] ); ?></span>
 					</a>
 					<?php endforeach; ?>
@@ -318,25 +323,25 @@ class PV_Plugin {
 					<?php foreach ( $main_nav as $item ) : ?>
 					<a href="<?php echo esc_url( $item['url'] ); ?>"
 					   class="pv-aside__nav-item<?php echo $screen->id === $item['screen'] ? ' is-active' : ''; ?>">
-						<span class="dashicons <?php echo esc_attr( $item['icon'] ); ?>"></span>
+						<?php echo $item['icon']; // phpcs:ignore WordPress.Security.EscapeOutput -- trusted internal SVG ?>
 						<span><?php echo esc_html( $item['label'] ); ?></span>
 					</a>
 					<?php endforeach; ?>
 
 					<?php if ( 'pv_youtube_page_pv-analytics' === $screen->id ) :
 					$focus_site = [
-						[ 'id' => 'coach',       'label' => 'Creator Growth Coach', 'icon' => 'dashicons-admin-users' ],
-						[ 'id' => 'insights',    'label' => 'Performance Insights', 'icon' => 'dashicons-chart-bar'   ],
-						[ 'id' => 'trend',       'label' => 'Play Trend',           'icon' => 'dashicons-chart-line'  ],
-						[ 'id' => 'top-videos',  'label' => 'Top Videos',           'icon' => 'dashicons-star-filled' ],
-						[ 'id' => 'watch-depth', 'label' => 'Watch Depth',          'icon' => 'dashicons-clock'       ],
+						[ 'id' => 'coach',       'label' => 'Creator Growth Coach', 'icon' => $svgi( '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' ) ],
+						[ 'id' => 'insights',    'label' => 'Performance Insights', 'icon' => $svgi( '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>' ) ],
+						[ 'id' => 'trend',       'label' => 'Play Trend',           'icon' => $svgi( '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' ) ],
+						[ 'id' => 'top-videos',  'label' => 'Top Videos',           'icon' => $svgi( '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>' ) ],
+						[ 'id' => 'watch-depth', 'label' => 'Watch Depth',          'icon' => $svgi( '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>' ) ],
 					];
 					$focus_yt = [
-						[ 'id' => 'coach',        'label' => 'Creator Growth Coach', 'icon' => 'dashicons-admin-users' ],
-						[ 'id' => 'trend',        'label' => 'View Trend',           'icon' => 'dashicons-chart-line'  ],
-						[ 'id' => 'top-videos',   'label' => 'Top YouTube Videos',   'icon' => 'dashicons-star-filled' ],
-						[ 'id' => 'watch-depth',  'label' => 'Engagement',           'icon' => 'dashicons-heart'       ],
-						[ 'id' => 'yt-retention', 'label' => 'Lowest Retention',     'icon' => 'dashicons-clock'       ],
+						[ 'id' => 'coach',        'label' => 'Creator Growth Coach', 'icon' => $svgi( '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' ) ],
+						[ 'id' => 'trend',        'label' => 'View Trend',           'icon' => $svgi( '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' ) ],
+						[ 'id' => 'top-videos',   'label' => 'Top YouTube Videos',   'icon' => $svgi( '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>' ) ],
+						[ 'id' => 'watch-depth',  'label' => 'Engagement',           'icon' => $svgi( '<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>' ) ],
+						[ 'id' => 'yt-retention', 'label' => 'Lowest Retention',     'icon' => $svgi( '<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>' ) ],
 					];
 					?>
 					<div class="pv-aside__focus-divider"></div>
@@ -349,7 +354,7 @@ class PV_Plugin {
 					<button class="pv-aside__nav-item pv-aside__focus-btn"
 					        type="button"
 					        data-pv-focus="<?php echo esc_attr( $fi['id'] ); ?>">
-						<span class="dashicons <?php echo esc_attr( $fi['icon'] ); ?>"></span>
+						<?php echo $fi['icon']; // phpcs:ignore WordPress.Security.EscapeOutput -- trusted internal SVG ?>
 						<span><?php echo esc_html( $fi['label'] ); ?></span>
 						<svg class="pv-aside__focus-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
 					</button>
@@ -360,7 +365,7 @@ class PV_Plugin {
 					<button class="pv-aside__nav-item pv-aside__focus-btn"
 					        type="button"
 					        data-pv-focus="<?php echo esc_attr( $fi['id'] ); ?>">
-						<span class="dashicons <?php echo esc_attr( $fi['icon'] ); ?>"></span>
+						<?php echo $fi['icon']; // phpcs:ignore WordPress.Security.EscapeOutput -- trusted internal SVG ?>
 						<span><?php echo esc_html( $fi['label'] ); ?></span>
 						<svg class="pv-aside__focus-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
 					</button>

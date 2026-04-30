@@ -147,42 +147,46 @@ class PV_Admin_Branding {
 
 		$active = $this->active_screen();
 
+		$svgi = static function( string $p ): string {
+			return '<svg class="pv-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $p . '</svg>';
+		};
+
 		$library_nav = [
 			[
 				'label'  => 'All Videos',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube' ),
 				'screen' => 'edit-pv_youtube',
-				'icon'   => 'dashicons-video-alt3',
+				'icon'   => $svgi( '<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>' ),
 			],
 			[
 				'label'  => 'Add New Video',
 				'url'    => admin_url( 'post-new.php?post_type=pv_youtube' ),
 				'screen' => 'add-pv_youtube',
-				'icon'   => 'dashicons-plus-alt',
+				'icon'   => $svgi( '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>' ),
 			],
 			[
 				'label'  => 'Categories',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_category',
-				'icon'   => 'dashicons-category',
+				'icon'   => $svgi( '<path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>' ),
 			],
 			[
 				'label'  => 'Tags',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_tag&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_tag',
-				'icon'   => 'dashicons-tag',
+				'icon'   => $svgi( '<path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>' ),
 			],
 			[
 				'label'  => 'Series',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_series&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_series',
-				'icon'   => 'dashicons-playlist-video',
+				'icon'   => $svgi( '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>' ),
 			],
 			[
 				'label'  => 'Video Types',
 				'url'    => admin_url( 'edit-tags.php?taxonomy=pv_type&post_type=pv_youtube' ),
 				'screen' => 'edit-pv_type',
-				'icon'   => 'dashicons-admin-generic',
+				'icon'   => $svgi( '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>' ),
 			],
 		];
 
@@ -191,25 +195,25 @@ class PV_Admin_Branding {
 				'label'  => 'Dashboard',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ),
 				'screen' => 'pv_youtube_page_pv-youtube-importer-dashboard',
-				'icon'   => 'dashicons-dashboard',
+				'icon'   => $svgi( '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>' ),
 			],
 			[
 				'label'  => 'Settings',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
 				'screen' => 'pv_youtube_page_pv-youtube-importer-settings',
-				'icon'   => 'dashicons-admin-settings',
+				'icon'   => $svgi( '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>' ),
 			],
 			[
 				'label'  => 'Live Preview',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-customizer' ),
 				'screen' => 'pv_youtube_page_pv-customizer',
-				'icon'   => 'dashicons-visibility',
+				'icon'   => $svgi( '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>' ),
 			],
 			[
 				'label'  => 'Analytics',
 				'url'    => admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ),
 				'screen' => 'pv_youtube_page_pv-analytics',
-				'icon'   => 'dashicons-chart-bar',
+				'icon'   => $svgi( '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>' ),
 			],
 		];
 		?>
@@ -225,7 +229,7 @@ class PV_Admin_Branding {
 				<?php foreach ( $library_nav as $item ) : ?>
 				<a href="<?php echo esc_url( $item['url'] ); ?>"
 				   class="pv-aside__nav-item<?php echo $active === $item['screen'] ? ' is-active' : ''; ?>">
-					<span class="dashicons <?php echo esc_attr( $item['icon'] ); ?>"></span>
+					<?php echo $item['icon']; // phpcs:ignore WordPress.Security.EscapeOutput -- trusted internal SVG ?>
 					<span><?php echo esc_html( $item['label'] ); ?></span>
 				</a>
 				<?php endforeach; ?>
@@ -234,7 +238,7 @@ class PV_Admin_Branding {
 				<?php foreach ( $manage_nav as $item ) : ?>
 				<a href="<?php echo esc_url( $item['url'] ); ?>"
 				   class="pv-aside__nav-item<?php echo $active === $item['screen'] ? ' is-active' : ''; ?>">
-					<span class="dashicons <?php echo esc_attr( $item['icon'] ); ?>"></span>
+					<?php echo $item['icon']; // phpcs:ignore WordPress.Security.EscapeOutput -- trusted internal SVG ?>
 					<span><?php echo esc_html( $item['label'] ); ?></span>
 				</a>
 				<?php endforeach; ?>
