@@ -6,10 +6,10 @@
 
 /* ── Narrow sidebar for CPT pages (220px vs 500px on fullscreen) ── */
 body.pv-cpt-page #pv-aside {
-	width: 220px;
+	width: 500px;
 }
 body.pv-cpt-page.pv-fullscreen-ui #wpcontent {
-	margin-left: 220px !important;
+	margin-left: 500px !important;
 }
 
 /* ── Dark gradient background ─────────────────────────────────── */
