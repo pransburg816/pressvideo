@@ -454,8 +454,8 @@ class PV_Plugin {
 						var siteGrp = document.getElementById('pv-focus-group-site');
 						var ytGrp   = document.getElementById('pv-focus-group-yt');
 						var pill    = document.getElementById('pv-focus-source-pill');
-						if (siteGrp) siteGrp.style.display = isYt ? 'none' : 'flex';
-						if (ytGrp)   ytGrp.style.display   = isYt ? 'flex' : 'none';
+						if (siteGrp) siteGrp.style.display = isYt ? 'none' : '';
+						if (ytGrp)   ytGrp.style.display   = isYt ? '' : 'none';
 						if (pill)    pill.textContent = isYt ? 'YouTube' : 'Site';
 					});
 				}());
