@@ -1255,18 +1255,18 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	align-items: center;
 	gap: 6px;
 	font-size: .75rem;
-	color: rgba(255,255,255,.4);
+	color: rgba(255,255,255,.54);
 	text-decoration: none;
 	transition: color .14s;
 	margin-bottom: 10px;
 }
-.pv-aside__back:hover { color: rgba(255,255,255,.8); }
+.pv-aside__back:hover { color: rgba(255,255,255,.85); }
 .pv-aside__section-label {
 	font-size: .7rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: .09em;
-	color: rgba(255,255,255,.28);
+	color: rgba(255,255,255,.40);
 }
 
 /* Nav list */
@@ -1286,7 +1286,7 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	border-radius: 6px;
 	font-size: .79rem;
 	font-weight: 400;
-	color: rgba(255,255,255,.38);
+	color: rgba(255,255,255,.52);
 	text-decoration: none;
 	background: none;
 	border: none;
@@ -1300,7 +1300,7 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 }
 .pv-aside__nav-item:hover {
 	background: rgba(255,255,255,.055);
-	color: rgba(255,255,255,.8);
+	color: rgba(255,255,255,.85);
 }
 .pv-aside__nav-item.is-active {
 	background: rgba(79,70,229,.16);
@@ -1312,10 +1312,10 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	width: 14px;
 	height: 14px;
 	flex-shrink: 0;
-	color: rgba(255,255,255,.22);
+	color: rgba(255,255,255,.32);
 	transition: color .15s;
 }
-.pv-aside__nav-item:hover .pv-nav-icon { color: rgba(255,255,255,.5); }
+.pv-aside__nav-item:hover .pv-nav-icon { color: rgba(255,255,255,.60); }
 .pv-aside__nav-item.is-active .pv-nav-icon { color: #818cf8; }
 
 /* Footer / Exit */
@@ -1331,13 +1331,13 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	padding: 9px 12px;
 	border-radius: 7px;
 	font-size: .78rem;
-	color: rgba(255,255,255,.28);
+	color: rgba(255,255,255,.42);
 	text-decoration: none;
 	transition: background .14s, color .14s;
 }
 .pv-aside__exit:hover {
 	background: rgba(255,255,255,.06);
-	color: rgba(255,255,255,.6);
+	color: rgba(255,255,255,.72);
 }
 
 /* ── Aside nav section labels ───────────────────────────────────── */
@@ -1347,7 +1347,7 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.14em;
-	color: rgba(255,255,255,0.15);
+	color: rgba(255,255,255,0.24);
 	flex-shrink: 0;
 }
 .pv-aside__nav-section:first-child { padding-top: 8px; }
@@ -1371,7 +1371,7 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.12em;
-	color: rgba(255,255,255,0.2);
+	color: rgba(255,255,255,0.30);
 	flex: 1;
 }
 .pv-aside__focus-source-pill {

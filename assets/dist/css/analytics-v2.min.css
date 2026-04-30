@@ -850,7 +850,7 @@ body.pva-page .pva-stat-value {
 	letter-spacing: -0.02em;
 }
 body.pva-page .pva-stat-label {
-	color: rgba(255,255,255,0.45);
+	color: rgba(255,255,255,0.58);
 	letter-spacing: 0;
 }
 
@@ -1019,7 +1019,7 @@ body.pva-page .pv-card__head h2 {
 	margin: 0;
 }
 body.pva-page .pva-chart-sub {
-	color: rgba(255,255,255,0.35);
+	color: rgba(255,255,255,0.48);
 }
 
 /* ── Skeleton loaders ─────────────────────────────────────── */
@@ -1037,7 +1037,7 @@ body.pva-page .pva-skeleton {
 /* ── All Videos table ─────────────────────────────────────── */
 body.pva-page .pva-table thead th {
 	background: rgba(255,255,255,0.04);
-	color: rgba(255,255,255,0.38);
+	color: rgba(255,255,255,0.52);
 	border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 body.pva-page .pva-table tbody tr {
@@ -1061,10 +1061,10 @@ body.pva-page .pva-col-plays {
 	color: #818cf8;
 }
 body.pva-page .pva-col-last {
-	color: rgba(255,255,255,0.33);
+	color: rgba(255,255,255,0.45);
 }
 body.pva-page .pva-stat-sublabel {
-	color: rgba(255,255,255,0.3);
+	color: rgba(255,255,255,0.42);
 }
 body.pva-page .pva-trend-badge--new {
 	background: rgba(99,102,241,0.2);
@@ -1114,7 +1114,7 @@ body.pva-page .pva-source-toggle {
 	border-color: transparent;
 }
 body.pva-page .pva-source-btn {
-	color: rgba(255,255,255,0.45);
+	color: rgba(255,255,255,0.58);
 }
 body.pva-page .pva-source-btn:hover {
 	color: rgba(255,255,255,0.82);
@@ -1164,10 +1164,10 @@ body.pva-page .pva-yt-connect-desc {
 
 /* ── No-data / empty states ───────────────────────────────── */
 body.pva-page .pva-no-data {
-	color: rgba(255,255,255,0.38);
+	color: rgba(255,255,255,0.52);
 }
 body.pva-page .pva-empty__title { color: rgba(255,255,255,0.9); }
-body.pva-page .pva-empty__desc  { color: rgba(255,255,255,0.48); }
+body.pva-page .pva-empty__desc  { color: rgba(255,255,255,0.60); }
 body.pva-page .pva-empty__graphic circle:first-child {
 	fill: rgba(255,255,255,0.07);
 }
@@ -1190,7 +1190,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	gap: 5px;
 	font-size: 0.72rem;
 	font-weight: 700;
-	color: rgba(255,255,255,0.42);
+	color: rgba(255,255,255,0.55);
 	text-transform: uppercase;
 	letter-spacing: 0.09em;
 	flex-shrink: 0;

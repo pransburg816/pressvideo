@@ -139,10 +139,10 @@ body.pv-cpt-page ul.striped > :nth-child(odd) {
 body.pv-cpt-page td .row-actions,
 body.pv-cpt-page td .row-actions span,
 body.pv-cpt-page td .row-actions .sep {
-	color: rgba(165,180,252,0.3) !important;
+	color: rgba(165,180,252,0.42) !important;
 }
 body.pv-cpt-page td .row-actions a {
-	color: rgba(165,180,252,0.65) !important;
+	color: rgba(165,180,252,0.75) !important;
 }
 body.pv-cpt-page td .row-actions a:hover {
 	color: #a5b4fc !important;
@@ -168,10 +168,10 @@ body.pv-cpt-page .wp-list-table input[type="checkbox"]:checked {
 
 /* ── Tablenav (filter bar, pagination) ────────────────────────── */
 body.pv-cpt-page .tablenav {
-	color: rgba(165,180,252,0.55) !important;
+	color: rgba(165,180,252,0.68) !important;
 }
 body.pv-cpt-page .tablenav .displaying-num {
-	color: rgba(165,180,252,0.45) !important;
+	color: rgba(165,180,252,0.58) !important;
 }
 body.pv-cpt-page .tablenav-pages a,
 body.pv-cpt-page .tablenav-pages span.paging-input,
@@ -318,7 +318,7 @@ body.pv-cpt-page .notice-info {
 /* "All (451)" subsubsub filter links */
 body.pv-cpt-page .subsubsub a,
 body.pv-cpt-page .subsubsub li {
-	color: rgba(165,180,252,0.65) !important;
+	color: rgba(165,180,252,0.78) !important;
 }
 body.pv-cpt-page .subsubsub a:hover,
 body.pv-cpt-page .subsubsub a.current {
