@@ -17,6 +17,13 @@ class PV_Admin_Branding {
 		];
 	}
 
+	/** True when we're on the Gutenberg post-edit / add-new screen for pv_youtube. */
+	private function is_pv_post_edit(): bool {
+		$screen = get_current_screen();
+		if ( ! $screen ) return false;
+		return ( $screen->post_type ?? '' ) === 'pv_youtube' && $screen->base === 'post';
+	}
+
 	/** True when we're on a CPT/taxonomy page that needs our shell. */
 	private function is_pv_page(): bool {
 		$screen = get_current_screen();
@@ -29,10 +36,11 @@ class PV_Admin_Branding {
 	}
 
 	public function register(): void {
-		add_filter( 'admin_body_class',      [ $this, 'body_class'    ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets'] );
-		add_action( 'admin_head',            [ $this, 'render_loader' ] );
-		add_action( 'admin_footer',          [ $this, 'render_shell'  ] );
+		add_filter( 'admin_body_class',      [ $this, 'body_class'         ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets'     ] );
+		add_action( 'admin_head',            [ $this, 'render_loader'      ] );
+		add_action( 'admin_footer',          [ $this, 'render_shell'       ] );
+		add_action( 'admin_head',            [ $this, 'render_editor_bar'  ] );
 	}
 
 	public function body_class( string $classes ): string {
@@ -274,6 +282,58 @@ class PV_Admin_Branding {
 				});
 			});
 		}());
+		</script>
+		<?php
+	}
+
+	// ── Gutenberg editor bar (bottom fixed, non-intrusive) ────────────
+
+	public function render_editor_bar(): void {
+		if ( ! $this->is_pv_post_edit() ) return;
+
+		$nav = [
+			[ 'label' => 'All Videos',   'url' => admin_url( 'edit.php?post_type=pv_youtube' ) ],
+			[ 'label' => 'Categories',   'url' => admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ) ],
+			[ 'label' => 'Tags',         'url' => admin_url( 'edit-tags.php?taxonomy=pv_tag&post_type=pv_youtube' ) ],
+			[ 'label' => 'Series',       'url' => admin_url( 'edit-tags.php?taxonomy=pv_series&post_type=pv_youtube' ) ],
+			[ 'label' => 'Dashboard',    'url' => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-dashboard' ) ],
+			[ 'label' => 'Settings',     'url' => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ) ],
+			[ 'label' => 'Live Preview', 'url' => admin_url( 'edit.php?post_type=pv_youtube&page=pv-customizer' ) ],
+			[ 'label' => 'Analytics',    'url' => admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ) ],
+		];
+		?>
+		<style>
+		#pv-editor-bar{position:fixed;bottom:0;left:0;right:0;height:38px;z-index:999999;background:linear-gradient(90deg,#1e1b4b 0%,#2d2a6e 100%);border-top:1px solid rgba(99,102,241,0.35);display:flex;align-items:center;padding:0 16px;gap:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+		#pv-editor-bar__brand{display:flex;align-items:center;gap:7px;color:#fff;font-size:.8rem;font-weight:800;letter-spacing:-.02em;flex-shrink:0;margin-right:18px;}
+		#pv-editor-bar__brand svg{color:#818cf8;}
+		#pv-editor-bar__sep{width:1px;height:16px;background:rgba(255,255,255,.15);flex-shrink:0;margin-right:6px;}
+		#pv-editor-bar__nav{display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;}
+		#pv-editor-bar__nav::-webkit-scrollbar{display:none;}
+		.pv-eb-link{display:inline-block;padding:4px 10px;border-radius:4px;font-size:.72rem;font-weight:500;color:rgba(199,210,254,.65);text-decoration:none;white-space:nowrap;transition:background .15s,color .15s;}
+		.pv-eb-link:hover{background:rgba(255,255,255,.1);color:#c7d2fe;text-decoration:none;}
+		/* Push Gutenberg's own bottom bar up so our bar doesn't cover it */
+		.block-editor-editor-skeleton__footer,.edit-post-layout__footer{margin-bottom:38px !important;}
+		</style>
+		<script>
+		document.addEventListener('DOMContentLoaded',function(){
+			var bar=document.createElement('div');
+			bar.id='pv-editor-bar';
+			bar.innerHTML=
+				'<div id="pv-editor-bar__brand">'+
+				'<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"\/><\/svg>'+
+				'PressVideo<\/div>'+
+				'<div id="pv-editor-bar__sep"><\/div>'+
+				'<nav id="pv-editor-bar__nav"><?php
+					foreach ( $nav as $item ) {
+						printf(
+							'<a class="pv-eb-link" href="%s">%s<\/a>',
+							esc_url( $item['url'] ),
+							esc_html( $item['label'] )
+						);
+					}
+				?><\/nav>';
+			document.body.appendChild(bar);
+		});
 		</script>
 		<?php
 	}
