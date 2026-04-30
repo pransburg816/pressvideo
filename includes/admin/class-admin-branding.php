@@ -22,7 +22,8 @@ class PV_Admin_Branding {
 		$screen = get_current_screen();
 		if ( ! $screen ) return false;
 		if ( in_array( $screen->id, $this->fullscreen_ids(), true ) ) return false;
-		if ( ( $screen->post_type ?? '' ) === 'pv_youtube' ) return true;
+		// List screen only — exclude the Gutenberg editor (base=post) which manages its own fullscreen UI.
+		if ( ( $screen->post_type ?? '' ) === 'pv_youtube' && $screen->base === 'edit' ) return true;
 		if ( in_array( $screen->taxonomy ?? '', [ 'pv_tag', 'pv_category', 'pv_series', 'pv_type' ], true ) ) return true;
 		return false;
 	}
