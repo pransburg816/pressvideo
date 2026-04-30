@@ -116,8 +116,15 @@ body.pv-cpt-page .wp-list-table tbody th {
 	border-bottom: 1px solid rgba(255,255,255,0.04) !important;
 	background: transparent !important;
 }
+/* WP taxonomy rows use .level-0, .level-1 etc. — reset their backgrounds */
+body.pv-cpt-page .wp-list-table tbody tr[class*="level-"] td,
+body.pv-cpt-page .wp-list-table tbody tr[class*="level-"] th {
+	background: transparent !important;
+}
 body.pv-cpt-page .wp-list-table tbody tr:hover td,
-body.pv-cpt-page .wp-list-table tbody tr:hover th {
+body.pv-cpt-page .wp-list-table tbody tr:hover th,
+body.pv-cpt-page .wp-list-table tbody tr[class*="level-"]:hover td,
+body.pv-cpt-page .wp-list-table tbody tr[class*="level-"]:hover th {
 	background: rgba(99,102,241,0.08) !important;
 }
 body.pv-cpt-page .wp-list-table tbody tr.alternate td,
