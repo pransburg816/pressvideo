@@ -2567,12 +2567,21 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	display: block;
 }
 
-/* Focused card: override fixed heights, animate into place */
+/* Focused card: fill viewport height so content has room to breathe */
 .pva-focus-card.pv-card {
-	height: auto !important;
+	height: calc(100vh - 60px) !important;
 	min-height: 480px;
 	width: 100%;
+	display: flex;
+	flex-direction: column;
 	animation: pvaFocusIn 0.32s ease forwards;
+}
+.pva-focus-card .pv-card__body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255,255,255,0.12) transparent;
 }
 @keyframes pvaFocusIn {
 	from { opacity: 0; transform: scale(0.97); }
