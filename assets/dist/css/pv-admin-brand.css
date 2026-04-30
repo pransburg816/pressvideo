@@ -355,16 +355,24 @@ body.pv-cpt-page #col-container {
 	overflow: visible !important;
 }
 
-/* Swap DOM order: form (col-left) on left, list (col-right) on right */
+/* wp-clearfix ::after becomes a grid item and breaks the layout — kill it */
+body.pv-cpt-page #col-container::after {
+	display: none !important;
+	content: none !important;
+}
+
+/* Explicitly place each column so order/DOM position doesn't matter */
 body.pv-cpt-page #col-left  {
-	order: 1 !important;
+	grid-column: 1 !important;
+	grid-row: 1 !important;
 	float: none !important;
 	width: auto !important;
 	min-width: 0 !important;
 	margin: 0 !important;
 }
 body.pv-cpt-page #col-right {
-	order: 2 !important;
+	grid-column: 2 !important;
+	grid-row: 1 !important;
 	float: none !important;
 	width: auto !important;
 	min-width: 0 !important;
