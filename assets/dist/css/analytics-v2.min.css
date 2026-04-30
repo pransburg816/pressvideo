@@ -1946,6 +1946,35 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	line-height: 1.5;
 }
 
+/* ── Focus-mode 2-column grid ─────────────────────────────── */
+.pva-coach__focus-grid {
+	display: block;
+}
+
+.pva-focus-card .pva-coach__focus-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px 18px;
+	align-items: start;
+}
+
+.pva-focus-card .pva-coach__focus-grid .pva-coach-move {
+	border: 1px solid rgba(255,255,255,0.07);
+	border-bottom: 1px solid rgba(255,255,255,0.07);
+	border-radius: 8px;
+	padding: 18px;
+}
+
+.pva-focus-card .pva-coach__focus-grid .pva-coach-move:last-child {
+	border-bottom: 1px solid rgba(255,255,255,0.07);
+	padding-bottom: 18px;
+}
+
+.pva-focus-card .pva-coach__focus-grid .pva-ai-status {
+	border-radius: 8px;
+	align-self: start;
+}
+
 /* ── Move cards ───────────────────────────────────────────── */
 .pva-coach-move {
 	padding: 18px 0 18px;
@@ -2323,6 +2352,31 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	box-shadow: 0 0 0 2px rgba(16,185,129,0.25);
 	flex-shrink: 0;
 	display: inline-block;
+}
+
+/* ── Brand header ─────────────────────────────────────────── */
+.pva-brand-header {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	margin-bottom: 20px;
+}
+
+.pva-brand-title {
+	margin: 0;
+	font-size: 1.55rem;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	color: #fff;
+	line-height: 1;
+}
+
+.pva-brand-tag {
+	font-size: 0.7rem;
+	font-weight: 500;
+	color: rgba(255,255,255,0.3);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 }
 
 /* ── YouTube stat cards ───────────────────────────────────── */

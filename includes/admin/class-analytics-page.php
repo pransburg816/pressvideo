@@ -214,6 +214,12 @@ class PV_Analytics_Page {
 		<div class="wrap pva-wrap">
 		<div class="pva-inner">
 
+			<!-- ── Brand header ─────────────────────────────────── -->
+			<div class="pva-brand-header">
+				<h1 class="pva-brand-title">PressAnalytics</h1>
+				<span class="pva-brand-tag">by PressVideo</span>
+			</div>
+
 			<!-- ── Export bar ────────────────────────────────────── -->
 			<div class="pva-export-bar">
 				<?php if ( $is_platinum ) : ?>
