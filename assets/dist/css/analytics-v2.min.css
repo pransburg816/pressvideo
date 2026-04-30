@@ -892,6 +892,39 @@ body.pva-page .pva-pill--active:hover {
 	pointer-events: none;
 	transition: opacity 0.2s ease;
 }
+
+/* Spinner overlay — centered in viewport above dimmed content */
+.pva-yt-load-spinner {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 99999;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	background: rgba(15, 17, 26, 0.82);
+	border: 1px solid rgba(255,255,255,0.08);
+	border-radius: 14px;
+	padding: 20px 28px;
+	pointer-events: none;
+}
+.pva-yt-load-spinner__ring {
+	width: 36px;
+	height: 36px;
+	border: 3px solid rgba(255,255,255,0.12);
+	border-top-color: #4f46e5;
+	border-radius: 50%;
+	animation: pva-refresh-spin 0.7s linear infinite;
+}
+.pva-yt-load-spinner__label {
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: rgba(255,255,255,0.7);
+	letter-spacing: 0.02em;
+	white-space: nowrap;
+}
 .pva-yt-range-chevron {
 	transition: transform 0.18s;
 	flex-shrink: 0;
