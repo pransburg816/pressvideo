@@ -106,7 +106,8 @@ class PV_Analytics_Tracker {
 		global $wpdb;
 		$table    = self::table();
 		$all_time = $days >= 9999;
-		$from     = $all_time ? '2000-01-01 00:00:00' : gmdate( 'Y-m-d H:i:s', strtotime( "-{$days} days" ) );
+		$now      = current_time( 'timestamp' );
+		$from     = $all_time ? '2000-01-01 00:00:00' : date( 'Y-m-d H:i:s', $now - ( $days * DAY_IN_SECONDS ) );
 
 		// ── Stat: Total plays ─────────────────────────────────────────
 		$total_plays = (int) $wpdb->get_var( $wpdb->prepare(
@@ -171,7 +172,7 @@ class PV_Analytics_Tracker {
 
 			$trend = [];
 			for ( $i = $days - 1; $i >= 0; $i-- ) {
-				$trend[ gmdate( 'Y-m-d', strtotime( "-{$i} days" ) ) ] = 0;
+				$trend[ date( 'Y-m-d', $now - ( $i * DAY_IN_SECONDS ) ) ] = 0;
 			}
 			foreach ( $trend_rows as $row ) {
 				if ( isset( $trend[ $row['day'] ] ) ) {
@@ -207,7 +208,7 @@ class PV_Analytics_Tracker {
 		// ── Per-video prev-period plays (skip for All Time) ───────────
 		$vid_prev_plays = [];
 		if ( ! $all_time ) {
-			$prev_from = gmdate( 'Y-m-d H:i:s', strtotime( "-" . ( $days * 2 ) . " days" ) );
+			$prev_from = date( 'Y-m-d H:i:s', $now - ( $days * 2 * DAY_IN_SECONDS ) );
 			$prev_rows = $wpdb->get_results( $wpdb->prepare(
 				"SELECT video_id, COUNT(*) AS plays
 				 FROM {$table}
@@ -297,9 +298,14 @@ class PV_Analytics_Tracker {
 				'engaged_plays'  => $engaged_plays,
 			],
 			'trend'      => [
-				'labels'    => array_keys( $trend ),
-				'values'    => array_values( $trend ),
+				'labels'     => array_keys( $trend ),
+				'values'     => array_values( $trend ),
 				'is_monthly' => $all_time,
+			],
+			'period'     => [
+				'from' => $all_time ? null : date( 'Y-m-d', $now - ( $days * DAY_IN_SECONDS ) ),
+				'to'   => date( 'Y-m-d', $now ),
+				'days' => $days,
 			],
 			'top_videos' => $top_videos,
 			'depth'      => $depth,

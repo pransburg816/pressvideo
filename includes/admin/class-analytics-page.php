@@ -204,7 +204,7 @@ class PV_Analytics_Page {
 	private function has_any_data(): bool {
 		global $wpdb;
 		$table = $wpdb->prefix . 'pv_analytics';
-		$from  = gmdate( 'Y-m-d H:i:s', strtotime( '-30 days' ) );
+		$from  = date( 'Y-m-d H:i:s', current_time( 'timestamp' ) - ( 30 * DAY_IN_SECONDS ) );
 		$count = (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM {$table} WHERE event = 'play' AND created_at >= %s",
 			$from
@@ -353,6 +353,8 @@ class PV_Analytics_Page {
 				</div>
 
 			</div><!-- .pva-stats-row -->
+
+			<p class="pva-stats-period" id="pva-stats-period" aria-live="polite"></p>
 
 			<!-- ── YouTube stat cards (JS-rendered, visible on YouTube tab) ── -->
 			<div id="pva-yt-stats-row" class="pva-yt-stats-outer" hidden></div>
