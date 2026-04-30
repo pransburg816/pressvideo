@@ -2553,7 +2553,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 /* Focused card: override fixed heights, animate into place */
 .pva-focus-card.pv-card {
 	height: auto !important;
-	min-height: 624px;
+	min-height: 812px;
 	width: 100%;
 	animation: pvaFocusIn 0.32s ease forwards;
 }
