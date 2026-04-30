@@ -272,12 +272,18 @@ class PV_Analytics_Page {
 						<?php esc_html_e( 'Download Report', 'pv-youtube-importer' ); ?>
 					</button>
 				</div>
-				<div class="pva-range-pills" role="group" aria-label="<?php esc_attr_e( 'Date range', 'pv-youtube-importer' ); ?>">
-					<button class="pva-pill" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></button>
-					<button class="pva-pill pva-pill--active" data-days="30"><?php esc_html_e( 'Last 30 Days', 'pv-youtube-importer' ); ?></button>
-					<button class="pva-pill" data-days="90"><?php esc_html_e( 'Last 90 Days', 'pv-youtube-importer' ); ?></button>
-					<button class="pva-pill" data-days="365"><?php esc_html_e( 'Last 365 Days', 'pv-youtube-importer' ); ?></button>
-					<button class="pva-pill" data-days="9999"><?php esc_html_e( 'All Time', 'pv-youtube-importer' ); ?></button>
+				<div class="pva-yt-range" id="pva-site-range">
+					<button class="pva-yt-range-btn" id="pva-site-range-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+						<span id="pva-site-range-label"><?php esc_html_e( 'Last 30 Days', 'pv-youtube-importer' ); ?></span>
+						<svg class="pva-yt-range-chevron" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+					</button>
+					<ul class="pva-yt-range-menu" id="pva-site-range-menu" role="listbox" aria-label="<?php esc_attr_e( 'Site stats date range', 'pv-youtube-importer' ); ?>" hidden>
+						<li class="pva-yt-range-opt" role="option" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></li>
+						<li class="pva-yt-range-opt pva-yt-range-opt--active" role="option" data-days="30" aria-selected="true"><?php esc_html_e( 'Last 30 Days', 'pv-youtube-importer' ); ?></li>
+						<li class="pva-yt-range-opt" role="option" data-days="90"><?php esc_html_e( 'Last 90 Days', 'pv-youtube-importer' ); ?></li>
+						<li class="pva-yt-range-opt" role="option" data-days="365"><?php esc_html_e( 'Last 365 Days', 'pv-youtube-importer' ); ?></li>
+						<li class="pva-yt-range-opt" role="option" data-days="9999"><?php esc_html_e( 'All Time', 'pv-youtube-importer' ); ?></li>
+					</ul>
 				</div>
 
 				<!-- YouTube-tab date range picker (hidden until YouTube tab is active) -->
