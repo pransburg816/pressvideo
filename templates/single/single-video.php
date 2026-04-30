@@ -23,7 +23,7 @@ $_pv_w_attr     = $_pv_max_w ? ' style="max-width:' . esc_attr( $_pv_max_w ) . '
 $pv_youtube_id  = get_post_meta( $post->ID, '_pv_youtube_id', true );
 $pv_accent      = pv_resolve_accent_color( $post->ID );
 $pv_embed_url   = $pv_youtube_id
-	? 'https://www.youtube.com/embed/' . $pv_youtube_id . '?rel=0&modestbranding=1'
+	? 'https://www.youtube.com/embed/' . $pv_youtube_id . '?rel=0&modestbranding=1&enablejsapi=1'
 	: '';
 $pv_watch_url   = $pv_youtube_id
 	? 'https://www.youtube.com/watch?v=' . $pv_youtube_id
