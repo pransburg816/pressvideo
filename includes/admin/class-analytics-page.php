@@ -83,39 +83,53 @@ class PV_Analytics_Page {
 		$api_key     = PV_Analytics_Tracker::resolve_ai_key();
 		$has_ai_key  = ! empty( $api_key );
 		$is_platinum = PV_Tier::meets( 'platinum' );
-		$ai_moves    = [];
 
-		$ai_source = 'none';
-
-		$ai_summary = null;
+		$ai_source           = 'none';
+		$ai_moves            = [];
+		$ai_summary          = null;
+		$ai_cached_at        = null;
+		$site_period_summaries = [];
+		$site_period_cached_at = [];
 
 		if ( $has_ai_key ) {
-			$transient      = 'pv_ai_insights_' . get_current_user_id() . '_30';
-			$cached         = get_transient( $transient );
-			$cache_empty    = is_array( $cached ) && empty( $cached );
-			$cache_old_fmt  = is_array( $cached ) && ! empty( $cached ) && ! isset( $cached['moves'] );
+			// Load AI insights for each site-stats period; default display uses 30-day.
+			foreach ( [ 9999, 365, 90, 30, 7 ] as $site_ai_days ) {
+				$transient     = 'pv_ai_insights_' . get_current_user_id() . '_' . $site_ai_days;
+				$cached        = get_transient( $transient );
+				$cache_empty   = is_array( $cached ) && empty( $cached );
+				$cache_old_fmt = is_array( $cached ) && ! empty( $cached ) && ! isset( $cached['moves'] );
 
-			$ai_cached_at = null;
-			if ( false === $cached || $cache_empty || $cache_old_fmt ) {
-				delete_transient( $transient );
-				$tracker  = new PV_Analytics_Tracker();
-				$data     = PV_Analytics_Tracker::get_dashboard_data( 30 );
-				$result   = $tracker->get_ai_insights( $data, $api_key, 30 );
-				$ai_moves = $result['moves']   ?? [];
-				$ai_summary = $result['summary'] ?? null;
-				if ( ! empty( $ai_moves ) ) {
-					$result['cached_at'] = time();
-					set_transient( $transient, $result, DAY_IN_SECONDS );
-					$ai_cached_at = $result['cached_at'];
-					$ai_source = 'fresh';
-				} else {
-					$ai_source = 'api_failed';
+				// Auto-generate the 30-day summary on page load if not cached.
+				if ( $site_ai_days === 30 && ( false === $cached || $cache_empty || $cache_old_fmt ) ) {
+					delete_transient( $transient );
+					$tracker  = new PV_Analytics_Tracker();
+					$data     = PV_Analytics_Tracker::get_dashboard_data( 30 );
+					$result   = $tracker->get_ai_insights( $data, $api_key, 30 );
+					if ( ! empty( $result['moves'] ) ) {
+						$result['cached_at'] = time();
+						set_transient( $transient, $result, DAY_IN_SECONDS );
+						$cached = $result;
+						$ai_source = 'fresh';
+					} else {
+						$ai_source = 'api_failed';
+					}
 				}
-			} else {
-				$ai_moves   = $cached['moves']   ?? [];
-				$ai_summary = $cached['summary'] ?? null;
-				$ai_cached_at = $cached['cached_at'] ?? null;
-				$ai_source  = 'cached';
+
+				if ( is_array( $cached ) && ! empty( $cached['moves'] ) ) {
+					// First valid hit becomes the default (30-day first in loop, but 30 is default).
+					if ( $site_ai_days === 30 && empty( $ai_moves ) ) {
+						$ai_moves   = $cached['moves']   ?? [];
+						$ai_summary = $cached['summary'] ?? null;
+						$ai_cached_at = $cached['cached_at'] ?? null;
+						if ( $ai_source === 'none' ) $ai_source = 'cached';
+					}
+					if ( ! empty( $cached['summary'] ) ) {
+						$site_period_summaries[ $site_ai_days ] = $cached['summary'];
+					}
+					if ( ! empty( $cached['cached_at'] ) ) {
+						$site_period_cached_at[ $site_ai_days ] = $cached['cached_at'];
+					}
+				}
 			}
 		}
 
@@ -155,27 +169,29 @@ class PV_Analytics_Page {
 		}
 
 		wp_localize_script( 'pv-analytics-admin', 'pvAnalytics', [
-			'ajaxUrl'            => admin_url( 'admin-ajax.php' ),
-			'nonce'              => wp_create_nonce( 'pv_analytics_admin' ),
-			'hasData'            => $this->has_any_data(),
-			'siteName'           => get_bloginfo( 'name' ),
-			'siteUrl'            => home_url(),
-			'aiMoves'            => $ai_moves,
-			'aiSummary'          => $ai_summary,
-			'aiCachedAt'         => $ai_cached_at,
-			'hasAiKey'           => $has_ai_key,
-			'isPlatinum'         => $is_platinum,
-			'settingsUrl'        => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
-			'ytConnected'        => $yt_connected,
-			'ytHasCreds'         => $yt_has_creds,
-			'ytAuthUrl'          => $yt_auth_url,
-			'ytDisconnectNonce'  => $yt_disconnect_nonce,
-			'ytAiMoves'          => $yt_ai_moves,
-			'ytAiSummary'        => $yt_ai_summary,
-			'ytAiCachedAt'       => $yt_ai_cached_at,
-			'ytPeriodSummaries'  => $yt_period_summaries,
-			'ytPeriodCachedAt'   => $yt_period_cached_at,
-			'aiDebug'            => [
+			'ajaxUrl'              => admin_url( 'admin-ajax.php' ),
+			'nonce'                => wp_create_nonce( 'pv_analytics_admin' ),
+			'hasData'              => $this->has_any_data(),
+			'siteName'             => get_bloginfo( 'name' ),
+			'siteUrl'              => home_url(),
+			'aiMoves'              => $ai_moves,
+			'aiSummary'            => $ai_summary,
+			'aiCachedAt'           => $ai_cached_at,
+			'hasAiKey'             => $has_ai_key,
+			'isPlatinum'           => $is_platinum,
+			'settingsUrl'          => admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-importer-settings' ),
+			'ytConnected'          => $yt_connected,
+			'ytHasCreds'           => $yt_has_creds,
+			'ytAuthUrl'            => $yt_auth_url,
+			'ytDisconnectNonce'    => $yt_disconnect_nonce,
+			'ytAiMoves'            => $yt_ai_moves,
+			'ytAiSummary'          => $yt_ai_summary,
+			'ytAiCachedAt'         => $yt_ai_cached_at,
+			'ytPeriodSummaries'    => $yt_period_summaries,
+			'ytPeriodCachedAt'     => $yt_period_cached_at,
+			'sitePeriodSummaries'  => $site_period_summaries,
+			'sitePeriodCachedAt'   => $site_period_cached_at,
+			'aiDebug'              => [
 				'source'          => $ai_source,
 				'constantDefined' => defined( 'PV_ANTHROPIC_KEY' ),
 				'keyResolved'     => $has_ai_key,
@@ -260,6 +276,8 @@ class PV_Analytics_Page {
 					<button class="pva-pill" data-days="7"><?php esc_html_e( 'Last 7 Days', 'pv-youtube-importer' ); ?></button>
 					<button class="pva-pill pva-pill--active" data-days="30"><?php esc_html_e( 'Last 30 Days', 'pv-youtube-importer' ); ?></button>
 					<button class="pva-pill" data-days="90"><?php esc_html_e( 'Last 90 Days', 'pv-youtube-importer' ); ?></button>
+					<button class="pva-pill" data-days="365"><?php esc_html_e( 'Last 365 Days', 'pv-youtube-importer' ); ?></button>
+					<button class="pva-pill" data-days="9999"><?php esc_html_e( 'All Time', 'pv-youtube-importer' ); ?></button>
 				</div>
 
 				<!-- YouTube-tab date range picker (hidden until YouTube tab is active) -->
@@ -314,6 +332,17 @@ class PV_Analytics_Page {
 					<div class="pva-stat-body">
 						<div class="pva-stat-value" id="pva-avg-completion">—</div>
 						<div class="pva-stat-label"><?php esc_html_e( 'Avg Completion', 'pv-youtube-importer' ); ?></div>
+					</div>
+				</div>
+
+				<div class="pva-stat-card">
+					<div class="pva-stat-icon pva-icon--engaged" aria-hidden="true">
+						<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+					</div>
+					<div class="pva-stat-body">
+						<div class="pva-stat-value" id="pva-engaged-plays">—</div>
+						<div class="pva-stat-label"><?php esc_html_e( 'Engaged Plays', 'pv-youtube-importer' ); ?></div>
+						<div class="pva-stat-sublabel"><?php esc_html_e( 'Watched ≥ 50%', 'pv-youtube-importer' ); ?></div>
 					</div>
 				</div>
 

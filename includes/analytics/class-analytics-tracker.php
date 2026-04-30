@@ -104,8 +104,9 @@ class PV_Analytics_Tracker {
 
 	public static function get_dashboard_data( int $days = 30 ): array {
 		global $wpdb;
-		$table = self::table();
-		$from  = gmdate( 'Y-m-d H:i:s', strtotime( "-{$days} days" ) );
+		$table    = self::table();
+		$all_time = $days >= 9999;
+		$from     = $all_time ? '2000-01-01 00:00:00' : gmdate( 'Y-m-d H:i:s', strtotime( "-{$days} days" ) );
 
 		// ── Stat: Total plays ─────────────────────────────────────────
 		$total_plays = (int) $wpdb->get_var( $wpdb->prepare(
@@ -137,22 +138,86 @@ class PV_Analytics_Tracker {
 			$avg_completion = (int) round( array_sum( array_column( $depth_rows, 'max_depth' ) ) / count( $depth_rows ) );
 		}
 
-		// ── Daily trend ───────────────────────────────────────────────
-		$trend_rows = $wpdb->get_results( $wpdb->prepare(
-			"SELECT DATE(created_at) AS day, COUNT(*) AS plays
+		// ── Stat: Engaged plays (sessions that hit ≥ 50%) ────────────
+		$engaged_plays = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(DISTINCT CONCAT(video_id,'_',session_id))
 			 FROM {$table}
-			 WHERE event = 'play' AND created_at >= %s
-			 GROUP BY day ORDER BY day ASC",
+			 WHERE event IN ('d50','d75','d100') AND created_at >= %s",
+			$from
+		) );
+
+		// ── Trend: monthly for All Time, daily otherwise ──────────────
+		if ( $all_time ) {
+			$trend_rows = $wpdb->get_results( $wpdb->prepare(
+				"SELECT DATE_FORMAT(created_at, '%%Y-%%m-01') AS day, COUNT(*) AS plays
+				 FROM {$table}
+				 WHERE event = 'play' AND created_at >= %s
+				 GROUP BY day ORDER BY day ASC",
+				$from
+			), ARRAY_A );
+
+			$trend = [];
+			foreach ( $trend_rows as $row ) {
+				$trend[ $row['day'] ] = (int) $row['plays'];
+			}
+		} else {
+			$trend_rows = $wpdb->get_results( $wpdb->prepare(
+				"SELECT DATE(created_at) AS day, COUNT(*) AS plays
+				 FROM {$table}
+				 WHERE event = 'play' AND created_at >= %s
+				 GROUP BY day ORDER BY day ASC",
+				$from
+			), ARRAY_A );
+
+			$trend = [];
+			for ( $i = $days - 1; $i >= 0; $i-- ) {
+				$trend[ gmdate( 'Y-m-d', strtotime( "-{$i} days" ) ) ] = 0;
+			}
+			foreach ( $trend_rows as $row ) {
+				if ( isset( $trend[ $row['day'] ] ) ) {
+					$trend[ $row['day'] ] = (int) $row['plays'];
+				}
+			}
+		}
+
+		// ── Per-video avg completion (subquery: max depth per session, then avg per video) ──
+		$vid_completion_rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT video_id,
+			        ROUND(AVG(max_depth)) AS avg_completion
+			 FROM (
+			   SELECT video_id,
+			          MAX(CASE WHEN event='d100' THEN 100
+			                   WHEN event='d75'  THEN 75
+			                   WHEN event='d50'  THEN 50
+			                   WHEN event='d25'  THEN 25
+			                   ELSE 0 END) AS max_depth
+			   FROM {$table}
+			   WHERE created_at >= %s
+			   GROUP BY video_id, session_id
+			 ) AS sessions
+			 GROUP BY video_id",
 			$from
 		), ARRAY_A );
 
-		$trend = [];
-		for ( $i = $days - 1; $i >= 0; $i-- ) {
-			$trend[ gmdate( 'Y-m-d', strtotime( "-{$i} days" ) ) ] = 0;
+		$vid_completion = [];
+		foreach ( $vid_completion_rows as $row ) {
+			$vid_completion[ (int) $row['video_id'] ] = (int) $row['avg_completion'];
 		}
-		foreach ( $trend_rows as $row ) {
-			if ( isset( $trend[ $row['day'] ] ) ) {
-				$trend[ $row['day'] ] = (int) $row['plays'];
+
+		// ── Per-video prev-period plays (skip for All Time) ───────────
+		$vid_prev_plays = [];
+		if ( ! $all_time ) {
+			$prev_from = gmdate( 'Y-m-d H:i:s', strtotime( "-" . ( $days * 2 ) . " days" ) );
+			$prev_rows = $wpdb->get_results( $wpdb->prepare(
+				"SELECT video_id, COUNT(*) AS plays
+				 FROM {$table}
+				 WHERE event = 'play' AND created_at >= %s AND created_at < %s
+				 GROUP BY video_id",
+				$prev_from,
+				$from
+			), ARRAY_A );
+			foreach ( $prev_rows as $row ) {
+				$vid_prev_plays[ (int) $row['video_id'] ] = (int) $row['plays'];
 			}
 		}
 
@@ -169,14 +234,17 @@ class PV_Analytics_Tracker {
 			$post = get_post( (int) $row['video_id'] );
 			if ( ! $post ) continue;
 			$yt_id = get_post_meta( $post->ID, '_pv_youtube_id', true );
+			$vid_id = (int) $row['video_id'];
 			$top_videos[] = [
-				'id'        => (int) $row['video_id'],
-				'title'     => $post->post_title,
-				'plays'     => (int) $row['plays'],
-				'thumb'     => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ) ?: '',
-				'edit'      => get_edit_post_link( $post->ID, 'raw' ) ?: '',
-				'permalink' => get_permalink( $post->ID ) ?: '',
-				'yt_id'     => $yt_id ?: '',
+				'id'             => $vid_id,
+				'title'          => $post->post_title,
+				'plays'          => (int) $row['plays'],
+				'avg_completion' => $vid_completion[ $vid_id ] ?? 0,
+				'prev_plays'     => $all_time ? null : ( $vid_prev_plays[ $vid_id ] ?? 0 ),
+				'thumb'          => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ) ?: '',
+				'edit'           => get_edit_post_link( $post->ID, 'raw' ) ?: '',
+				'permalink'      => get_permalink( $post->ID ) ?: '',
+				'yt_id'          => $yt_id ?: '',
 			];
 		}
 
@@ -205,16 +273,19 @@ class PV_Analytics_Tracker {
 		foreach ( $all_rows as $row ) {
 			$post = get_post( (int) $row['video_id'] );
 			if ( ! $post ) continue;
-			$yt_id = get_post_meta( $post->ID, '_pv_youtube_id', true );
+			$yt_id  = get_post_meta( $post->ID, '_pv_youtube_id', true );
+			$vid_id = (int) $row['video_id'];
 			$all_videos[] = [
-				'id'          => (int) $row['video_id'],
-				'title'       => $post->post_title,
-				'plays'       => (int) $row['plays'],
-				'last_played' => human_time_diff( strtotime( $row['last_played'] ), time() ) . ' ago',
-				'thumb'       => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ) ?: '',
-				'edit'        => get_edit_post_link( $post->ID, 'raw' ) ?: '',
-				'permalink'   => get_permalink( $post->ID ) ?: '',
-				'yt_id'       => $yt_id ?: '',
+				'id'             => $vid_id,
+				'title'          => $post->post_title,
+				'plays'          => (int) $row['plays'],
+				'avg_completion' => $vid_completion[ $vid_id ] ?? 0,
+				'prev_plays'     => $all_time ? null : ( $vid_prev_plays[ $vid_id ] ?? 0 ),
+				'last_played'    => human_time_diff( strtotime( $row['last_played'] ), time() ) . ' ago',
+				'thumb'          => get_the_post_thumbnail_url( $post->ID, 'thumbnail' ) ?: '',
+				'edit'           => get_edit_post_link( $post->ID, 'raw' ) ?: '',
+				'permalink'      => get_permalink( $post->ID ) ?: '',
+				'yt_id'          => $yt_id ?: '',
 			];
 		}
 
@@ -223,10 +294,12 @@ class PV_Analytics_Tracker {
 				'total_plays'    => $total_plays,
 				'unique_videos'  => $unique_videos,
 				'avg_completion' => $avg_completion,
+				'engaged_plays'  => $engaged_plays,
 			],
 			'trend'      => [
-				'labels' => array_keys( $trend ),
-				'values' => array_values( $trend ),
+				'labels'    => array_keys( $trend ),
+				'values'    => array_values( $trend ),
+				'is_monthly' => $all_time,
 			],
 			'top_videos' => $top_videos,
 			'depth'      => $depth,
@@ -266,7 +339,7 @@ class PV_Analytics_Tracker {
 			return;
 		}
 
-		$days = min( 90, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
+		$days = min( 9999, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
 		$data = self::get_dashboard_data( $days );
 
 		$yt_data = [];

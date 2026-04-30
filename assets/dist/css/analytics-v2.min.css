@@ -130,7 +130,7 @@
 .pva-stats-row[hidden] { display: none; }
 .pva-stats-row {
 	display: grid;
-	grid-template-columns: repeat(3, 1fr);
+	grid-template-columns: repeat(4, 1fr);
 	gap: 16px;
 	margin-bottom: 20px;
 }
@@ -152,7 +152,13 @@
 
 .pva-stat-icon { display: none; }
 
-.pva-icon--plays, .pva-icon--videos, .pva-icon--completion { background: none; }
+.pva-icon--plays, .pva-icon--videos, .pva-icon--completion, .pva-icon--engaged { background: none; }
+
+.pva-stat-sublabel {
+	font-size: 0.7rem;
+	color: #9ca3af;
+	margin-top: 2px;
+}
 
 .pva-stat-body {
 	display: flex;
@@ -607,6 +613,23 @@
 
 .pva-col-plays { font-weight: 700; color: #4f46e5; font-size: 0.9375rem; }
 .pva-col-last  { color: #9ca3af; font-size: 0.8125rem; white-space: nowrap; }
+.pva-col-avg   { font-size: 0.875rem; white-space: nowrap; }
+.pva-col-trend { font-size: 0.8125rem; white-space: nowrap; }
+
+.pva-trend        { font-weight: 600; font-size: 0.8125rem; }
+.pva-trend--up    { color: #10b981; }
+.pva-trend--down  { color: #ef4444; }
+.pva-trend--flat  { color: #9ca3af; }
+.pva-trend-badge--new {
+	display: inline-block;
+	padding: 1px 7px;
+	border-radius: 20px;
+	font-size: 0.7rem;
+	font-weight: 700;
+	background: rgba(99,102,241,0.15);
+	color: #818cf8;
+	letter-spacing: 0.03em;
+}
 
 /* ── Empty state ──────────────────────────────────────────── */
 .pva-empty {
@@ -1039,6 +1062,13 @@ body.pva-page .pva-col-plays {
 }
 body.pva-page .pva-col-last {
 	color: rgba(255,255,255,0.33);
+}
+body.pva-page .pva-stat-sublabel {
+	color: rgba(255,255,255,0.3);
+}
+body.pva-page .pva-trend-badge--new {
+	background: rgba(99,102,241,0.2);
+	color: #a5b4fc;
 }
 body.pva-page .pva-thumb-empty {
 	background: rgba(255,255,255,0.10);
