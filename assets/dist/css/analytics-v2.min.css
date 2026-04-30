@@ -138,50 +138,44 @@
 .pva-stat-card {
 	background: #fff;
 	border: 1px solid #e4e4e7;
-	border-radius: 12px;
-	padding: 22px 20px;
+	border-radius: 10px;
+	padding: 18px 20px 20px;
 	display: flex;
-	align-items: center;
-	gap: 16px;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-	transition: box-shadow 0.2s, transform 0.2s;
+	flex-direction: column;
+	box-shadow: none;
+	transition: border-color 0.15s;
 }
 
 .pva-stat-card:hover {
-	box-shadow: 0 6px 20px rgba(79, 70, 229, 0.1);
-	transform: translateY(-1px);
+	border-color: #c7d2fe;
 }
 
-.pva-stat-icon {
-	width: 50px;
-	height: 50px;
-	border-radius: 14px;
+.pva-stat-icon { display: none; }
+
+.pva-icon--plays, .pva-icon--videos, .pva-icon--completion { background: none; }
+
+.pva-stat-body {
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-	color: #fff;
+	flex-direction: column;
 }
-
-.pva-icon--plays      { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-.pva-icon--videos     { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
-.pva-icon--completion { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
 
 .pva-stat-value {
-	font-size: 2rem;
-	font-weight: 800;
-	color: #1e1b4b;
+	font-size: 1.75rem;
+	font-weight: 600;
+	color: #111827;
 	line-height: 1;
-	letter-spacing: -0.03em;
-	margin-bottom: 5px;
+	letter-spacing: -0.02em;
+	margin-bottom: 0;
 }
 
 .pva-stat-label {
-	font-size: 0.6875rem;
-	font-weight: 700;
-	color: #9ca3af;
-	text-transform: uppercase;
-	letter-spacing: 0.07em;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: #6b7280;
+	text-transform: none;
+	letter-spacing: 0;
+	margin-bottom: 8px;
+	order: -1;
 }
 
 /* ── New layout rows ──────────────────────────────────────── */
@@ -822,20 +816,19 @@
 body.pva-page .pva-stat-card {
 	background: rgba(255,255,255,0.05);
 	border: 1px solid rgba(255,255,255,0.09);
-	box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+	box-shadow: none;
 }
 body.pva-page .pva-stat-card:hover {
 	background: rgba(255,255,255,0.08);
-	box-shadow: 0 8px 32px rgba(0,0,0,0.55);
-	transform: translateY(-2px);
+	border-color: rgba(255,255,255,0.2);
 }
 body.pva-page .pva-stat-value {
 	color: #fff;
-	letter-spacing: -0.03em;
+	letter-spacing: -0.02em;
 }
 body.pva-page .pva-stat-label {
-	color: rgba(255,255,255,0.42);
-	letter-spacing: 0.08em;
+	color: rgba(255,255,255,0.45);
+	letter-spacing: 0;
 }
 
 /* ── Range pills (dark page context) ─────────────────────── */
@@ -1222,26 +1215,15 @@ body.pva-page .pva-empty__graphic circle:first-child {
 
 /* ── YouTube stat card delta indicators ───────────────────── */
 .pva-stat-delta {
-	font-size: 0.7rem;
-	font-weight: 700;
-	margin-top: 4px;
-	padding: 2px 6px;
-	border-radius: 20px;
+	font-size: 0.6875rem;
+	font-weight: 500;
+	margin-top: 8px;
 	display: inline-block;
-	letter-spacing: 0.02em;
+	letter-spacing: 0;
 }
-.pva-stat-delta--up {
-	background: rgba(16,185,129,0.15);
-	color: #34d399;
-}
-.pva-stat-delta--down {
-	background: rgba(239,68,68,0.12);
-	color: #f87171;
-}
-.pva-stat-delta--flat {
-	background: rgba(255,255,255,0.07);
-	color: rgba(255,255,255,0.45);
-}
+.pva-stat-delta--up   { color: #10b981; }
+.pva-stat-delta--down { color: #ef4444; }
+.pva-stat-delta--flat { color: #9ca3af; }
 
 /* ── Traffic sources list (replaces engagement donut on YT tab) */
 .pva-sources-list {
@@ -2480,7 +2462,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-hero__title { font-size: 1.875rem; }
 
 	.pva-stats-row { grid-template-columns: 1fr; }
-	.pva-stat-value { font-size: 1.625rem; }
+	.pva-stat-value { font-size: 1.5rem; }
 
 	.pva-chart-wrap--trend { height: 220px; }
 	.pva-chart-wrap--top   { height: 280px; }
