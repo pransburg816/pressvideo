@@ -128,8 +128,11 @@ body.pv-cpt-page .wp-list-table tbody tr[class*="level-"]:hover th {
 	background: rgba(99,102,241,0.08) !important;
 }
 body.pv-cpt-page .wp-list-table tbody tr.alternate td,
-body.pv-cpt-page .wp-list-table tbody tr.alternate th {
-	background: rgba(255,255,255,0.02) !important;
+body.pv-cpt-page .wp-list-table tbody tr.alternate th,
+body.pv-cpt-page .alternate,
+body.pv-cpt-page .striped > tbody > :nth-child(odd),
+body.pv-cpt-page ul.striped > :nth-child(odd) {
+	background-color: transparent !important;
 }
 
 /* Row actions */
