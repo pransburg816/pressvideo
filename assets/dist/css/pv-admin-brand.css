@@ -1,114 +1,41 @@
 /* ============================================================
-   PressVideo — Admin Brand Bar + WP element overrides
-   Applied on CPT list/edit and taxonomy pages via body.pv-admin-page
+   PressVideo — CPT/taxonomy full-shell overrides
+   Applied on pv_youtube CPT list/edit and taxonomy pages via
+   body.pv-cpt-page (combined with pv-fullscreen-ui from admin.min.css)
    ============================================================ */
 
-/* ── Brand bar ────────────────────────────────────────────── */
-.pv-admin-bar.notice {
-	background: linear-gradient(135deg, #1e1b4b 0%, #2d2a6e 100%);
-	border: 1px solid rgba(99, 102, 241, 0.25);
-	border-left: 3px solid #4f46e5;
-	border-radius: 8px;
-	padding: 0;
-	margin: 5px 0 18px;
-	box-shadow: 0 2px 12px rgba(79, 70, 229, 0.15);
+/* ── Narrow sidebar for CPT pages (220px vs 500px on fullscreen) ── */
+body.pv-cpt-page #pv-aside {
+	width: 220px;
+}
+body.pv-cpt-page.pv-fullscreen-ui #wpcontent {
+	margin-left: 220px !important;
 }
 
-.pv-admin-bar__inner {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 10px 16px;
-	gap: 16px;
-	flex-wrap: wrap;
+/* ── Dark gradient background ─────────────────────────────────── */
+body.pv-cpt-page #wpwrap {
+	background: linear-gradient(160deg, #1a1740 0%, #0f0d2a 60%, #12102e 100%);
 }
 
-/* ── Brand identity ───────────────────────────────────────── */
-.pv-admin-bar__brand {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+/* ── Content padding ──────────────────────────────────────────── */
+body.pv-cpt-page.pv-fullscreen-ui .wrap {
+	padding: 24px 28px;
+	max-width: none;
+}
+body.pv-cpt-page.pv-fullscreen-ui #wpbody-content {
+	padding-top: 0;
 }
 
-.pv-admin-bar__logo {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 28px;
-	background: rgba(99, 102, 241, 0.2);
-	border: 1px solid rgba(99, 102, 241, 0.35);
-	border-radius: 7px;
-	color: #a5b4fc;
-	flex-shrink: 0;
+/* ── Page heading ─────────────────────────────────────────────── */
+body.pv-cpt-page #wpcontent h1,
+body.pv-cpt-page #wpcontent h1.wp-heading-inline {
+	color: #fff !important;
+	font-size: 1.35rem !important;
+	font-weight: 700 !important;
+	margin-bottom: 14px !important;
 }
 
-.pv-admin-bar__name {
-	font-size: 0.875rem;
-	font-weight: 800;
-	color: #fff;
-	letter-spacing: -0.01em;
-	line-height: 1;
-}
-
-.pv-admin-bar__sep {
-	color: rgba(255, 255, 255, 0.2);
-	font-size: 1rem;
-	font-weight: 300;
-	line-height: 1;
-}
-
-.pv-admin-bar__page {
-	display: flex;
-	align-items: center;
-	gap: 5px;
-	font-size: 0.8rem;
-	font-weight: 500;
-	color: rgba(199, 210, 254, 0.75);
-	line-height: 1;
-}
-
-/* ── Navigation links ─────────────────────────────────────── */
-.pv-admin-bar__nav {
-	display: flex;
-	align-items: center;
-	gap: 2px;
-	flex-wrap: wrap;
-}
-
-.pv-admin-bar__link {
-	display: inline-block;
-	padding: 5px 11px;
-	border-radius: 5px;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-	font-size: 0.775rem;
-	font-weight: 500;
-	color: rgba(199, 210, 254, 0.6);
-	text-decoration: none;
-	transition: background 0.15s, color 0.15s;
-	line-height: 1.4;
-	white-space: nowrap;
-}
-
-.pv-admin-bar__link:hover {
-	background: rgba(255, 255, 255, 0.1);
-	color: #c7d2fe;
-	text-decoration: none;
-}
-
-.pv-admin-bar__link--active {
-	background: rgba(99, 102, 241, 0.25);
-	color: #a5b4fc;
-	font-weight: 600;
-}
-
-.pv-admin-bar__link--active:hover {
-	background: rgba(99, 102, 241, 0.35);
-	color: #c7d2fe;
-}
-
-/* ── WP button overrides on PV admin pages ────────────────── */
+/* ── WP button overrides ──────────────────────────────────────── */
 body.pv-admin-page .page-title-action,
 body.pv-admin-page input[type="submit"].button-primary,
 body.pv-admin-page a.button-primary,
@@ -122,7 +49,6 @@ body.pv-admin-page button.button-primary {
 	font-weight: 600 !important;
 	transition: background 0.15s !important;
 }
-
 body.pv-admin-page .page-title-action:hover,
 body.pv-admin-page input[type="submit"].button-primary:hover,
 body.pv-admin-page a.button-primary:hover,
@@ -131,7 +57,6 @@ body.pv-admin-page button.button-primary:hover {
 	border-color: #3730a3 !important;
 	color: #fff !important;
 }
-
 body.pv-admin-page .page-title-action:focus,
 body.pv-admin-page input[type="submit"].button-primary:focus,
 body.pv-admin-page a.button-primary:focus,
@@ -140,45 +65,253 @@ body.pv-admin-page button.button-primary:focus {
 	outline: none !important;
 }
 
-/* ── WP form + table accents ──────────────────────────────── */
-body.pv-admin-page #wpbody-content input[type="text"]:focus,
-body.pv-admin-page #wpbody-content input[type="search"]:focus,
-body.pv-admin-page #wpbody-content textarea:focus,
-body.pv-admin-page #wpbody-content select:focus {
-	border-color: #4f46e5;
-	box-shadow: 0 0 0 1px #4f46e5;
-	outline: none;
+/* ── Secondary buttons ────────────────────────────────────────── */
+body.pv-cpt-page .button,
+body.pv-cpt-page input[type="submit"].button,
+body.pv-cpt-page a.button {
+	background: rgba(255,255,255,0.07) !important;
+	border-color: rgba(255,255,255,0.15) !important;
+	color: rgba(199,210,254,0.8) !important;
+	box-shadow: none !important;
+	text-shadow: none !important;
+	border-radius: 5px !important;
+}
+body.pv-cpt-page .button:hover,
+body.pv-cpt-page input[type="submit"].button:hover,
+body.pv-cpt-page a.button:hover {
+	background: rgba(255,255,255,0.12) !important;
+	color: #fff !important;
 }
 
-body.pv-admin-page #wpbody-content input[type="checkbox"]:checked,
-body.pv-admin-page #wpbody-content input[type="radio"]:checked {
-	background-color: #4f46e5;
-	border-color: #4f46e5;
+/* ── List table ───────────────────────────────────────────────── */
+body.pv-cpt-page table.wp-list-table {
+	border: 1px solid rgba(255,255,255,0.06);
+	border-radius: 8px;
+	overflow: hidden;
+	border-collapse: separate;
+	border-spacing: 0;
+	background: rgba(255,255,255,0.03);
 }
-
-body.pv-admin-page .wp-list-table .check-column input[type="checkbox"]:checked {
-	background-color: #4f46e5;
-	border-color: #4f46e5;
-}
-
-/* Subtle indigo tint on alternate table rows */
-body.pv-admin-page table.wp-list-table tbody tr:hover td {
-	background: rgba(79, 70, 229, 0.04);
-}
-
-/* ── Page heading accent ──────────────────────────────────── */
-body.pv-admin-page #wpcontent h1.wp-heading-inline {
-	color: #1e1b4b;
+body.pv-cpt-page .wp-list-table thead th,
+body.pv-cpt-page .wp-list-table thead td {
+	background: rgba(99,102,241,0.12) !important;
+	color: rgba(165,180,252,0.75) !important;
+	border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+	font-size: 0.68rem;
 	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+body.pv-cpt-page .wp-list-table thead th a,
+body.pv-cpt-page .wp-list-table thead td a {
+	color: rgba(165,180,252,0.75) !important;
+}
+body.pv-cpt-page .wp-list-table thead th.sorted,
+body.pv-cpt-page .wp-list-table thead td.sorted {
+	background: rgba(99,102,241,0.2) !important;
+}
+body.pv-cpt-page .wp-list-table tbody td,
+body.pv-cpt-page .wp-list-table tbody th {
+	color: rgba(226,232,255,0.85) !important;
+	border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+	background: transparent !important;
+}
+/* WP taxonomy rows use .level-0, .level-1 etc. — reset their backgrounds */
+body.pv-cpt-page .wp-list-table tbody tr[class*="level-"] td,
+body.pv-cpt-page .wp-list-table tbody tr[class*="level-"] th {
+	background: transparent !important;
+}
+body.pv-cpt-page .wp-list-table tbody tr:hover td,
+body.pv-cpt-page .wp-list-table tbody tr:hover th,
+body.pv-cpt-page .wp-list-table tbody tr[class*="level-"]:hover td,
+body.pv-cpt-page .wp-list-table tbody tr[class*="level-"]:hover th {
+	background: rgba(99,102,241,0.08) !important;
+}
+body.pv-cpt-page .wp-list-table tbody tr.alternate td,
+body.pv-cpt-page .wp-list-table tbody tr.alternate th {
+	background: rgba(255,255,255,0.02) !important;
 }
 
-/* ── Responsive ───────────────────────────────────────────── */
+/* Row actions */
+body.pv-cpt-page td .row-actions,
+body.pv-cpt-page td .row-actions span,
+body.pv-cpt-page td .row-actions .sep {
+	color: rgba(165,180,252,0.3) !important;
+}
+body.pv-cpt-page td .row-actions a {
+	color: rgba(165,180,252,0.65) !important;
+}
+body.pv-cpt-page td .row-actions a:hover {
+	color: #a5b4fc !important;
+}
+body.pv-cpt-page td .row-actions .delete a,
+body.pv-cpt-page td .row-actions .trash a {
+	color: rgba(252,165,165,0.55) !important;
+}
+body.pv-cpt-page td .row-actions .delete a:hover,
+body.pv-cpt-page td .row-actions .trash a:hover {
+	color: #fca5a5 !important;
+}
+
+/* Checkboxes */
+body.pv-cpt-page .wp-list-table input[type="checkbox"] {
+	border-color: rgba(255,255,255,0.2) !important;
+	background: rgba(255,255,255,0.06) !important;
+}
+body.pv-cpt-page .wp-list-table input[type="checkbox"]:checked {
+	background-color: #4f46e5 !important;
+	border-color: #4f46e5 !important;
+}
+
+/* ── Tablenav (filter bar, pagination) ────────────────────────── */
+body.pv-cpt-page .tablenav {
+	color: rgba(165,180,252,0.55) !important;
+}
+body.pv-cpt-page .tablenav .displaying-num {
+	color: rgba(165,180,252,0.45) !important;
+}
+body.pv-cpt-page .tablenav-pages a,
+body.pv-cpt-page .tablenav-pages span.paging-input,
+body.pv-cpt-page .tablenav-pages span.tablenav-pages-navspan {
+	background: rgba(255,255,255,0.06) !important;
+	border-color: rgba(255,255,255,0.1) !important;
+	color: rgba(165,180,252,0.75) !important;
+	box-shadow: none !important;
+}
+body.pv-cpt-page .tablenav-pages a:hover {
+	background: rgba(99,102,241,0.2) !important;
+	color: #a5b4fc !important;
+}
+body.pv-cpt-page .tablenav-pages .current-page {
+	background: rgba(255,255,255,0.06) !important;
+	border-color: rgba(255,255,255,0.1) !important;
+	color: rgba(226,232,255,0.8) !important;
+}
+body.pv-cpt-page .tablenav .actions select,
+body.pv-cpt-page .tablenav .actions input {
+	background: rgba(255,255,255,0.06) !important;
+	border-color: rgba(255,255,255,0.1) !important;
+	color: rgba(199,210,254,0.8) !important;
+}
+
+/* ── Search box ───────────────────────────────────────────────── */
+body.pv-cpt-page .search-box input[type="search"] {
+	background: rgba(255,255,255,0.07) !important;
+	border-color: rgba(255,255,255,0.12) !important;
+	color: #fff !important;
+}
+body.pv-cpt-page .search-box input[type="search"]::placeholder {
+	color: rgba(165,180,252,0.4) !important;
+}
+body.pv-cpt-page .search-box input[type="search"]:focus {
+	border-color: #4f46e5 !important;
+	box-shadow: 0 0 0 1px #4f46e5 !important;
+}
+
+/* ── Form inputs (taxonomy add/edit forms) ────────────────────── */
+body.pv-cpt-page.pv-fullscreen-ui #wpbody-content input[type="text"],
+body.pv-cpt-page.pv-fullscreen-ui #wpbody-content input[type="email"],
+body.pv-cpt-page.pv-fullscreen-ui #wpbody-content textarea,
+body.pv-cpt-page.pv-fullscreen-ui #wpbody-content select {
+	background: rgba(255,255,255,0.07) !important;
+	border-color: rgba(255,255,255,0.15) !important;
+	color: #fff !important;
+	border-radius: 5px !important;
+}
+body.pv-cpt-page.pv-fullscreen-ui #wpbody-content input[type="text"]:focus,
+body.pv-cpt-page.pv-fullscreen-ui #wpbody-content input[type="email"]:focus,
+body.pv-cpt-page.pv-fullscreen-ui #wpbody-content textarea:focus,
+body.pv-cpt-page.pv-fullscreen-ui #wpbody-content select:focus {
+	border-color: #4f46e5 !important;
+	box-shadow: 0 0 0 1px #4f46e5 !important;
+	outline: none !important;
+}
+
+/* ── Taxonomy form table ──────────────────────────────────────── */
+body.pv-cpt-page .form-table th,
+body.pv-cpt-page .form-table td {
+	color: rgba(199,210,254,0.85) !important;
+}
+body.pv-cpt-page .form-table .description,
+body.pv-cpt-page .description {
+	color: rgba(165,180,252,0.5) !important;
+}
+body.pv-cpt-page label {
+	color: rgba(199,210,254,0.85) !important;
+}
+
+/* Term form (add new term panel on taxonomy list pages) */
+body.pv-cpt-page div.form-wrap {
+	background: rgba(255,255,255,0.03) !important;
+	border: 1px solid rgba(255,255,255,0.06) !important;
+	border-radius: 8px !important;
+	padding: 20px !important;
+}
+body.pv-cpt-page div.form-wrap h2 {
+	color: #fff !important;
+	border-bottom-color: rgba(255,255,255,0.08) !important;
+}
+
+/* ── Post metaboxes (video edit screen) ───────────────────────── */
+body.pv-cpt-page #poststuff h1.wp-heading-inline,
+body.pv-cpt-page #poststuff h2 {
+	color: #fff !important;
+}
+body.pv-cpt-page #poststuff .postbox {
+	background: rgba(255,255,255,0.03) !important;
+	border: 1px solid rgba(255,255,255,0.07) !important;
+	border-radius: 8px !important;
+}
+body.pv-cpt-page #poststuff .postbox .postbox-header {
+	border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+}
+body.pv-cpt-page #poststuff .postbox .postbox-header h2 {
+	color: rgba(199,210,254,0.85) !important;
+}
+body.pv-cpt-page #poststuff .postbox .inside {
+	color: rgba(226,232,255,0.85) !important;
+}
+body.pv-cpt-page #post-body-content {
+	background: rgba(255,255,255,0.03) !important;
+	border: 1px solid rgba(255,255,255,0.07) !important;
+	border-radius: 8px !important;
+}
+body.pv-cpt-page #title-wrap #title {
+	background: rgba(255,255,255,0.07) !important;
+	border-color: rgba(255,255,255,0.15) !important;
+	color: #fff !important;
+	border-radius: 5px !important;
+}
+body.pv-cpt-page #title-wrap #title:focus {
+	border-color: #4f46e5 !important;
+	box-shadow: 0 0 0 1px #4f46e5 !important;
+}
+
+/* ── WP notices on CPT pages ──────────────────────────────────── */
+body.pv-cpt-page .notice,
+body.pv-cpt-page .updated,
+body.pv-cpt-page .error {
+	background: rgba(255,255,255,0.05) !important;
+	border-color: rgba(255,255,255,0.1) !important;
+	color: rgba(199,210,254,0.85) !important;
+}
+body.pv-cpt-page .notice-success,
+body.pv-cpt-page .updated {
+	border-left-color: #4ade80 !important;
+}
+body.pv-cpt-page .notice-error,
+body.pv-cpt-page .error {
+	border-left-color: #f87171 !important;
+}
+body.pv-cpt-page .notice-warning {
+	border-left-color: #fbbf24 !important;
+}
+body.pv-cpt-page .notice-info {
+	border-left-color: #818cf8 !important;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 900px) {
-	.pv-admin-bar__nav { display: none; }
-	.pv-admin-bar__inner { flex-wrap: nowrap; }
-}
-
-@media (max-width: 600px) {
-	.pv-admin-bar__sep,
-	.pv-admin-bar__page { display: none; }
+	body.pv-cpt-page #pv-aside { display: none !important; }
+	body.pv-cpt-page.pv-fullscreen-ui #wpcontent { margin-left: 0 !important; }
 }

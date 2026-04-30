@@ -1340,6 +1340,18 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	color: rgba(255,255,255,.6);
 }
 
+/* ── Aside nav section labels ───────────────────────────────────── */
+.pv-aside__nav-section {
+	padding: 16px 16px 4px;
+	font-size: 0.6rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: rgba(255,255,255,0.2);
+	flex-shrink: 0;
+}
+.pv-aside__nav-section:first-child { padding-top: 8px; }
+
 /* ── App Loader ─────────────────────────────────────────────────── */
 #pv-app-loader {
 	position: fixed;
