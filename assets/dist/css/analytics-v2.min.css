@@ -2285,6 +2285,10 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	margin-bottom: 16px;
 	width: fit-content;
 }
+.pva-export-bar .pva-source-toggle {
+	margin-bottom: 0;
+	flex-shrink: 0;
+}
 .pva-source-btn {
 	display: inline-flex;
 	align-items: center;
@@ -2299,6 +2303,10 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	color: #6b7280;
 	transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 	line-height: 1;
+}
+.pva-export-bar .pva-source-btn {
+	padding: 6px 14px;
+	font-size: 0.8rem;
 }
 .pva-source-btn:hover { color: #374151; background: rgba(0, 0, 0, 0.04); }
 .pva-source-btn--active { background: #fff; color: #1e1b4b; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12); }

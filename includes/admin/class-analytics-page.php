@@ -214,41 +214,21 @@ class PV_Analytics_Page {
 		<div class="wrap pva-wrap">
 		<div class="pva-inner">
 
-			<!-- ── Branded Hero ───────────────────────────────── -->
-			<div class="pva-hero">
-				<div class="pva-hero__orb pva-hero__orb--1"></div>
-				<div class="pva-hero__orb pva-hero__orb--2"></div>
-
-				<div class="pva-hero__content">
-					<p class="pva-hero__eyebrow">PressVideo</p>
-					<h1 class="pva-hero__title"><?php esc_html_e( 'Analytics', 'pv-youtube-importer' ); ?></h1>
-					<p class="pva-hero__sub">
-						<?php esc_html_e( 'Track plays, watch depth, and engagement across all your videos.', 'pv-youtube-importer' ); ?>
-					</p>
-					<button class="pva-demo-btn" id="pva-demo-toggle" type="button">
-						<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-						<?php esc_html_e( 'Preview sample data', 'pv-youtube-importer' ); ?>
-					</button>
-				</div>
-
-			</div><!-- .pva-hero -->
-
-			<!-- ── Data source toggle (Site / YouTube) ──────────── -->
-			<?php if ( $is_platinum ) : ?>
-			<div class="pva-source-toggle" id="pva-source-toggle" role="group" aria-label="<?php esc_attr_e( 'Data source', 'pv-youtube-importer' ); ?>">
-				<button class="pva-source-btn pva-source-btn--active" data-source="site" type="button">
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-					<?php esc_html_e( 'Site Stats', 'pv-youtube-importer' ); ?>
-				</button>
-				<button class="pva-source-btn" data-source="youtube" type="button">
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
-					<?php esc_html_e( 'YouTube Stats', 'pv-youtube-importer' ); ?>
-				</button>
-			</div>
-			<?php endif; ?>
-
 			<!-- ── Export bar ────────────────────────────────────── -->
 			<div class="pva-export-bar">
+				<?php if ( $is_platinum ) : ?>
+				<div class="pva-source-toggle" id="pva-source-toggle" role="group" aria-label="<?php esc_attr_e( 'Data source', 'pv-youtube-importer' ); ?>">
+					<button class="pva-source-btn pva-source-btn--active" data-source="site" type="button">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+						<?php esc_html_e( 'Site Stats', 'pv-youtube-importer' ); ?>
+					</button>
+					<button class="pva-source-btn" data-source="youtube" type="button">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
+						<?php esc_html_e( 'YouTube Stats', 'pv-youtube-importer' ); ?>
+					</button>
+				</div>
+				<div class="pva-export-sep" aria-hidden="true"></div>
+				<?php endif; ?>
 				<span class="pva-export-bar__label">
 					<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
 					<?php esc_html_e( 'Export', 'pv-youtube-importer' ); ?>
