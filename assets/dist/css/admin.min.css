@@ -1387,7 +1387,7 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	flex-shrink: 0;
 	transition: background 0.2s, color 0.2s;
 }
-.pv-aside__focus-group { display: contents; }
+.pv-aside__focus-group { display: flex; flex-direction: column; }
 .pv-aside__focus-btn {
 	position: relative;
 	padding-right: 32px;
