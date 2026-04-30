@@ -126,21 +126,23 @@ body.pv-cpt-page .wp-list-table tbody tr.alternate th {
 }
 
 /* Row actions */
-body.pv-cpt-page .row-actions {
-	color: rgba(165,180,252,0.45) !important;
+body.pv-cpt-page td .row-actions,
+body.pv-cpt-page td .row-actions span,
+body.pv-cpt-page td .row-actions .sep {
+	color: rgba(165,180,252,0.3) !important;
 }
-body.pv-cpt-page .row-actions a {
+body.pv-cpt-page td .row-actions a {
 	color: rgba(165,180,252,0.65) !important;
 }
-body.pv-cpt-page .row-actions a:hover {
+body.pv-cpt-page td .row-actions a:hover {
 	color: #a5b4fc !important;
 }
-body.pv-cpt-page .row-actions .delete a,
-body.pv-cpt-page .row-actions .trash a {
+body.pv-cpt-page td .row-actions .delete a,
+body.pv-cpt-page td .row-actions .trash a {
 	color: rgba(252,165,165,0.55) !important;
 }
-body.pv-cpt-page .row-actions .delete a:hover,
-body.pv-cpt-page .row-actions .trash a:hover {
+body.pv-cpt-page td .row-actions .delete a:hover,
+body.pv-cpt-page td .row-actions .trash a:hover {
 	color: #fca5a5 !important;
 }
 
