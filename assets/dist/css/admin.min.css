@@ -1359,6 +1359,35 @@ body.pv-fullscreen-ui.pv-customizer-fullscreen #wpbody {
 	background: rgba(255,255,255,0.07);
 	flex-shrink: 0;
 }
+.pv-aside__focus-header {
+	display: flex;
+	align-items: center;
+	padding: 14px 16px 4px;
+	gap: 8px;
+	flex-shrink: 0;
+}
+.pv-aside__focus-label {
+	font-size: 0.6rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: rgba(255,255,255,0.2);
+	flex: 1;
+}
+.pv-aside__focus-source-pill {
+	font-size: 0.58rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	padding: 2px 7px;
+	border-radius: 10px;
+	background: rgba(79,70,229,0.3);
+	color: rgba(165,180,252,0.85);
+	border: 1px solid rgba(99,102,241,0.3);
+	flex-shrink: 0;
+	transition: background 0.2s, color 0.2s;
+}
+.pv-aside__focus-group { display: contents; }
 .pv-aside__focus-btn {
 	position: relative;
 	padding-right: 32px;

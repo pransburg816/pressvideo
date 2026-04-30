@@ -324,17 +324,28 @@ class PV_Plugin {
 					<?php endforeach; ?>
 
 					<?php if ( 'pv_youtube_page_pv-analytics' === $screen->id ) :
-					$focus_nav = [
+					$focus_site = [
 						[ 'id' => 'coach',       'label' => 'Creator Growth Coach', 'icon' => 'dashicons-admin-users' ],
 						[ 'id' => 'insights',    'label' => 'Performance Insights', 'icon' => 'dashicons-chart-bar'   ],
 						[ 'id' => 'trend',       'label' => 'Play Trend',           'icon' => 'dashicons-chart-line'  ],
 						[ 'id' => 'top-videos',  'label' => 'Top Videos',           'icon' => 'dashicons-star-filled' ],
 						[ 'id' => 'watch-depth', 'label' => 'Watch Depth',          'icon' => 'dashicons-clock'       ],
 					];
+					$focus_yt = [
+						[ 'id' => 'coach',        'label' => 'Creator Growth Coach', 'icon' => 'dashicons-admin-users' ],
+						[ 'id' => 'trend',        'label' => 'View Trend',           'icon' => 'dashicons-chart-line'  ],
+						[ 'id' => 'top-videos',   'label' => 'Top YouTube Videos',   'icon' => 'dashicons-star-filled' ],
+						[ 'id' => 'watch-depth',  'label' => 'Engagement',           'icon' => 'dashicons-heart'       ],
+						[ 'id' => 'yt-retention', 'label' => 'Lowest Retention',     'icon' => 'dashicons-clock'       ],
+					];
 					?>
 					<div class="pv-aside__focus-divider"></div>
-					<div class="pv-aside__nav-section"><?php esc_html_e( 'Quick Focus', 'pv-youtube-importer' ); ?></div>
-					<?php foreach ( $focus_nav as $fi ) : ?>
+					<div class="pv-aside__focus-header">
+						<span class="pv-aside__focus-label"><?php esc_html_e( 'Quick Focus', 'pv-youtube-importer' ); ?></span>
+						<span class="pv-aside__focus-source-pill" id="pv-focus-source-pill">Site</span>
+					</div>
+					<div class="pv-aside__focus-group" id="pv-focus-group-site">
+					<?php foreach ( $focus_site as $fi ) : ?>
 					<button class="pv-aside__nav-item pv-aside__focus-btn"
 					        type="button"
 					        data-pv-focus="<?php echo esc_attr( $fi['id'] ); ?>">
@@ -343,6 +354,18 @@ class PV_Plugin {
 						<svg class="pv-aside__focus-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
 					</button>
 					<?php endforeach; ?>
+					</div>
+					<div class="pv-aside__focus-group" id="pv-focus-group-yt" hidden>
+					<?php foreach ( $focus_yt as $fi ) : ?>
+					<button class="pv-aside__nav-item pv-aside__focus-btn"
+					        type="button"
+					        data-pv-focus="<?php echo esc_attr( $fi['id'] ); ?>">
+						<span class="dashicons <?php echo esc_attr( $fi['icon'] ); ?>"></span>
+						<span><?php echo esc_html( $fi['label'] ); ?></span>
+						<svg class="pv-aside__focus-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+					</button>
+					<?php endforeach; ?>
+					</div>
 					<?php endif; ?>
 				</nav>
 
@@ -424,6 +447,16 @@ class PV_Plugin {
 					}
 					document.querySelectorAll('#pv-aside .pv-aside__focus-btn[data-pv-focus]').forEach(function(btn) {
 						btn.addEventListener('click', function() { focusCard(btn.getAttribute('data-pv-focus')); });
+					});
+					// Swap Quick Focus links when analytics source tab changes
+					document.addEventListener('pva:sourcechange', function(e) {
+						var isYt     = e.detail && e.detail.source === 'youtube';
+						var siteGrp  = document.getElementById('pv-focus-group-site');
+						var ytGrp    = document.getElementById('pv-focus-group-yt');
+						var pill     = document.getElementById('pv-focus-source-pill');
+						if (siteGrp) siteGrp.hidden = isYt;
+						if (ytGrp)   ytGrp.hidden   = !isYt;
+						if (pill)    pill.textContent = isYt ? 'YouTube' : 'Site';
 					});
 				}());
 

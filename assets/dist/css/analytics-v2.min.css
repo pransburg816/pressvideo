@@ -2698,6 +2698,32 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	display: block !important;
 }
 
+/* ── Focus mode close button ────────────────────────────────── */
+#pva-focus-close {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-left: auto;
+	padding: 5px 12px;
+	background: rgba(255,255,255,0.07);
+	border: 1px solid rgba(255,255,255,0.12);
+	border-radius: 6px;
+	color: rgba(255,255,255,0.5);
+	font-size: 0.74rem;
+	font-weight: 500;
+	font-family: inherit;
+	cursor: pointer;
+	white-space: nowrap;
+	flex-shrink: 0;
+	transition: background 0.15s, color 0.15s, border-color 0.15s;
+	line-height: 1;
+}
+#pva-focus-close:hover {
+	background: rgba(255,255,255,0.13);
+	color: rgba(255,255,255,0.9);
+	border-color: rgba(255,255,255,0.22);
+}
+
 /* ── First-visit focus hint ───────────────────────────────── */
 .pva-focus-hint {
 	display: flex;
