@@ -878,6 +878,20 @@ body.pva-page .pva-pill--active:hover {
 	background: rgba(255,255,255,0.13);
 	border-color: rgba(255,255,255,0.32);
 }
+.pva-yt-range-btn--loading {
+	opacity: 0.75;
+	cursor: wait;
+}
+.pva-yt-range-btn--loading .pva-yt-range-chevron {
+	animation: pva-refresh-spin 0.7s linear infinite;
+}
+
+/* Content dim while YouTube data is fetching */
+.pva-yt-fetching {
+	opacity: 0.35;
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+}
 .pva-yt-range-chevron {
 	transition: transform 0.18s;
 	flex-shrink: 0;
