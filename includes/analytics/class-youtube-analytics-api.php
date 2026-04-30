@@ -166,7 +166,10 @@ class PV_YouTube_Analytics_API {
 		if ( is_array( $cached ) ) return $cached;
 
 		$end_date   = gmdate( 'Y-m-d' );
-		$start_date = $days >= 9999 ? '2005-04-23' : gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+		// Cap trend API query to 365 days — chart renders at most 365 points regardless of $days,
+		// and querying from 2005 returns ~7300 rows that can hit API row limits or timeout.
+		$chart_days  = min( 365, $days );
+		$start_date  = gmdate( 'Y-m-d', strtotime( "-{$chart_days} days" ) );
 
 		$response = $this->api_get( [
 			'ids'        => 'channel==MINE',
@@ -176,9 +179,6 @@ class PV_YouTube_Analytics_API {
 			'dimensions' => 'day',
 			'sort'       => 'day',
 		] );
-
-		// Build a full date map so missing days are zero. Cap at 365 for chart performance.
-		$chart_days = min( 365, $days );
 		$trend = [];
 		for ( $i = $chart_days - 1; $i >= 0; $i-- ) {
 			$trend[ gmdate( 'Y-m-d', strtotime( "-{$i} days" ) ) ] = 0;
