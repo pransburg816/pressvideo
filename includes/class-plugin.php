@@ -330,11 +330,14 @@ class PV_Plugin {
 
 					<?php if ( 'pv_youtube_page_pv-analytics' === $screen->id ) :
 					$focus_site = [
-						[ 'id' => 'coach',       'label' => 'Creator Growth Coach', 'icon' => $svgi( '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' ) ],
-						[ 'id' => 'insights',    'label' => 'Performance Insights', 'icon' => $svgi( '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>' ) ],
-						[ 'id' => 'trend',       'label' => 'Play Trend',           'icon' => $svgi( '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' ) ],
-						[ 'id' => 'top-videos',  'label' => 'Top Videos',           'icon' => $svgi( '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>' ) ],
-						[ 'id' => 'watch-depth', 'label' => 'Watch Depth',          'icon' => $svgi( '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>' ) ],
+						[ 'id' => 'coach',        'label' => 'Creator Growth Coach', 'icon' => $svgi( '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' ) ],
+						[ 'id' => 'insights',     'label' => 'Performance Insights', 'icon' => $svgi( '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>' ) ],
+						[ 'id' => 'trend',        'label' => 'Play Trend',           'icon' => $svgi( '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' ) ],
+						[ 'id' => 'top-videos',   'label' => 'Top Videos',           'icon' => $svgi( '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>' ) ],
+						[ 'id' => 'watch-depth',  'label' => 'Watch Depth',          'icon' => $svgi( '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>' ) ],
+						[ 'id' => 'all-videos',   'label' => 'All Videos',           'icon' => $svgi( '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>' ) ],
+						[ 'id' => 'least-watched','label' => 'Least Watched',        'icon' => $svgi( '<line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="16"/>' ) ],
+						[ 'id' => 'feature',      'label' => 'What to Feature',      'icon' => $svgi( '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' ) ],
 					];
 					$focus_yt = [
 						[ 'id' => 'coach',        'label' => 'Creator Growth Coach', 'icon' => $svgi( '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' ) ],
@@ -342,6 +345,8 @@ class PV_Plugin {
 						[ 'id' => 'top-videos',   'label' => 'Top YouTube Videos',   'icon' => $svgi( '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>' ) ],
 						[ 'id' => 'watch-depth',  'label' => 'Engagement',           'icon' => $svgi( '<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>' ) ],
 						[ 'id' => 'yt-retention', 'label' => 'Lowest Retention',     'icon' => $svgi( '<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>' ) ],
+						[ 'id' => 'all-videos',   'label' => 'YouTube Performance',  'icon' => $svgi( '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>' ) ],
+						[ 'id' => 'integrations', 'label' => 'Integrations',         'icon' => $svgi( '<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>' ) ],
 					];
 					?>
 					<div class="pv-aside__focus-divider"></div>
