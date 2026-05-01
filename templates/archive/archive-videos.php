@@ -534,7 +534,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 				<?php endif; /* end non-broadcast control bar */ ?>
 
 				<?php if ( 'broadcast' !== $pv_layout ) : ?>
-				<div class="pv-type-toggle" role="group" aria-label="<?php esc_attr_e( 'Filter by type', 'pv-youtube-importer' ); ?>">
+				<div class="pv-type-toggle" role="group" aria-label="<?php esc_attr_e( 'Filter by type', 'pv-youtube-importer' ); ?>" hidden>
 					<button class="pv-type-btn pv-type-btn--active" data-type="*" type="button"><?php esc_html_e( 'All', 'pv-youtube-importer' ); ?></button>
 					<button class="pv-type-btn" data-type="video" type="button"><?php esc_html_e( 'Videos', 'pv-youtube-importer' ); ?></button>
 					<button class="pv-type-btn" data-type="music" type="button"><?php esc_html_e( 'Music', 'pv-youtube-importer' ); ?></button>
@@ -909,8 +909,8 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							</div>
 							<?php endif; ?>
 
-							<!-- Type toggle: All / Videos / Music -->
-							<div class="pv-type-toggle pv-type-toggle--bc pv-type-toggle--home" role="group" aria-label="<?php esc_attr_e( 'Filter by type', 'pv-youtube-importer' ); ?>">
+							<!-- Type toggle: hidden until grid loads, revealed only when music items exist -->
+							<div class="pv-type-toggle pv-type-toggle--bc pv-type-toggle--home" role="group" aria-label="<?php esc_attr_e( 'Filter by type', 'pv-youtube-importer' ); ?>" hidden>
 								<button class="pv-type-btn pv-type-btn--active" data-type="*" type="button"><?php esc_html_e( 'All', 'pv-youtube-importer' ); ?></button>
 								<button class="pv-type-btn" data-type="video" type="button"><?php esc_html_e( 'Videos', 'pv-youtube-importer' ); ?></button>
 								<button class="pv-type-btn" data-type="music" type="button"><?php esc_html_e( 'Music', 'pv-youtube-importer' ); ?></button>
@@ -961,8 +961,8 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							</div>
 							<?php endif; ?>
 
-							<!-- Type toggle: All / Videos / Music -->
-							<div class="pv-type-toggle pv-type-toggle--bc pv-type-toggle--videos" role="group" aria-label="<?php esc_attr_e( 'Filter by type', 'pv-youtube-importer' ); ?>">
+							<!-- Type toggle: hidden until grid loads, revealed only when music items exist -->
+							<div class="pv-type-toggle pv-type-toggle--bc pv-type-toggle--videos" role="group" aria-label="<?php esc_attr_e( 'Filter by type', 'pv-youtube-importer' ); ?>" hidden>
 								<button class="pv-type-btn pv-type-btn--active" data-type="*" type="button"><?php esc_html_e( 'All', 'pv-youtube-importer' ); ?></button>
 								<button class="pv-type-btn" data-type="video" type="button"><?php esc_html_e( 'Videos', 'pv-youtube-importer' ); ?></button>
 								<button class="pv-type-btn" data-type="music" type="button"><?php esc_html_e( 'Music', 'pv-youtube-importer' ); ?></button>
