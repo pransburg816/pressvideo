@@ -43,10 +43,20 @@
 	// ── Main init ─────────────────────────────────────────────────────
 	function init() {
 		var canvas = document.getElementById('pv-canvas');
-		if (!canvas) return;
+		if (canvas) {
+			canvas.addEventListener('pv:iframe-ready', onIframeReady);
+			canvas.addEventListener('pv:closed',       onClose);
+			// No early return — watch pages also render #pv-canvas via the
+			// offcanvas footer hook, so we must still fall through and hook
+			// the static iframe below when present.
+		}
 
-		canvas.addEventListener('pv:iframe-ready', onIframeReady);
-		canvas.addEventListener('pv:closed',       onClose);
+		// Watch-page mode: hook the static embedded iframe directly.
+		var iframe = document.querySelector('.pv-watch-embed-wrap iframe');
+		if (!iframe) return;
+		var src   = iframe.getAttribute('src') || '';
+		var match = src.match(/\/embed\/([A-Za-z0-9_\-]{5,15})/);
+		if (match) onIframeReady({ detail: { iframe: iframe, youtubeId: match[1] } });
 	}
 
 	function onIframeReady(e) {
