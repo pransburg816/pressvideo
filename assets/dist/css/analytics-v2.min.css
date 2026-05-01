@@ -503,7 +503,7 @@ body.pva-page .pva-stats-period:empty { display: none; }
 
 .pva-chart-wrap { position: relative; width: 100%; }
 .pva-chart-wrap--trend { height: 280px; }
-.pva-chart-wrap--top   { height: 360px; }
+.pva-chart-wrap--top   { height: 500px; }
 .pva-chart-wrap--donut { height: 300px; }
 
 /* ── Unified 460px panel grid system ──────────────────────── */
@@ -2579,7 +2579,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-charts-row > .pv-card { height: auto; }
 	.pva-charts-row > .pv-card > .pv-card__body { position: relative; overflow: visible; }
 	.pva-charts-row > .pv-card .pva-chart-wrap { position: relative; inset: auto; height: auto; }
-	.pva-chart-wrap--top   { height: 300px; }
+	.pva-chart-wrap--top   { height: 420px; }
 	.pva-chart-wrap--donut { height: 260px; }
 	.pva-chart-wrap--trend { height: 220px; }
 
@@ -2606,7 +2606,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-stat-value { font-size: 1.5rem; }
 
 	.pva-chart-wrap--trend { height: 220px; }
-	.pva-chart-wrap--top   { height: 280px; }
+	.pva-chart-wrap--top   { height: 380px; }
 	.pva-chart-wrap--donut { height: 260px; }
 
 	.pva-pill { padding: 6px 12px; font-size: 0.75rem; }
