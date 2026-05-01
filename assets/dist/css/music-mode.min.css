@@ -732,3 +732,117 @@
     opacity: .3;
     cursor: default;
 }
+
+/* ── Volume row ───────────────────────────────────────────────────── */
+.pvm-volume-row {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px auto 0;
+    flex-shrink: 0;
+}
+
+.pvm-mute-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,.45);
+    padding: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: color .15s, background .15s;
+}
+
+.pvm-mute-btn:hover {
+    color: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.07);
+}
+
+/* Volume icons — hidden by default; shown by data-vol-level on .pvm-player */
+.pvm-vol-icon { display: none; }
+
+.pvm-player:not([data-vol-level]) .pvm-vol-icon--full,
+.pvm-player[data-vol-level="full"] .pvm-vol-icon--full { display: block; }
+
+.pvm-player[data-vol-level="low"]  .pvm-vol-icon--low  { display: block; }
+.pvm-player[data-vol-level="mute"] .pvm-vol-icon--mute { display: block; }
+
+/* Volume slider track */
+.pvm-volume-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,.14);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+    transition: height .15s;
+}
+
+.pvm-volume-track:hover {
+    height: 6px;
+}
+
+.pvm-volume-fill {
+    height: 100%;
+    background: var(--pv-accent, #4f46e5);
+    border-radius: 2px;
+    pointer-events: none;
+    transition: width .08s linear;
+}
+
+/* ── Loop button active states ────────────────────────────────────── */
+.pvm-loop-btn {
+    position: relative; /* anchor for badge */
+}
+
+.pvm-loop-btn[data-loop-mode="all"],
+.pvm-loop-btn[data-loop-mode="one"] {
+    color: var(--pv-accent, #4f46e5);
+}
+
+/* "1" badge on repeat-one mode */
+.pvm-loop-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--pv-accent, #4f46e5);
+    color: #fff;
+    font-size: .58rem;
+    font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(.6);
+    transition: opacity .15s, transform .15s;
+}
+
+.pvm-loop-btn[data-loop-mode="one"] .pvm-loop-badge {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ── Queue header with count ──────────────────────────────────────── */
+.pvm-queue-hd {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pvm-queue-count {
+    font-size: .65rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.25);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .02em;
+}
