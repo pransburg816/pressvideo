@@ -45,11 +45,11 @@
 	text-transform: uppercase;
 	white-space: nowrap;
 	line-height: .9;
-	opacity: .2;
-	color: var(--pv-vtext-color, var(--pv-accent, #4f46e5));
+	opacity: .18;
+	color: var(--pv-vtext-color, #ffffff); /* default white — readable on dark bg */
 	max-height: 80vh;
 	overflow: hidden;
-	text-shadow: 0 0 120px currentColor;  /* soft glow for visibility on dark bg */
+	text-shadow: 0 0 100px currentColor;
 }
 
 /* ── Hero header ────────────────────────────────────────────────── */

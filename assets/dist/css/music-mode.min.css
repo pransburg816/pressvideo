@@ -869,9 +869,9 @@
     flex: 1;
     border-radius: 3px 3px 0 0;
     background: var(--pv-accent, #4f46e5);
-    opacity: .09;
+    opacity: .22;
     transform-origin: bottom center;
-    transform: scaleY(0.08);
+    transform: scaleY(0.22); /* visible at rest */
     animation: pvm-eq-bounce var(--pvm-eq-dur, .6s) ease-in-out infinite alternate;
     animation-play-state: paused;
 }
@@ -902,6 +902,6 @@
 .pvm-eq-bar:nth-child(18) { height: 78vh; --pvm-eq-dur: .66s; animation-delay: .14s;  }
 
 @keyframes pvm-eq-bounce {
-    from { transform: scaleY(0.08); }
+    from { transform: scaleY(0.22); }
     to   { transform: scaleY(1);    }
 }

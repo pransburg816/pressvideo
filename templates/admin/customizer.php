@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * PressVideo Live Customizer — admin page template.
+ * PressVideo Live Customizer â€” admin page template.
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -71,7 +71,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 ?>
 <div class="pvc-wrap">
 
-	<!-- ── Settings Sidebar ───────────────────────────────── -->
+	<!-- â”€â”€ Settings Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 	<div class="pvc-sidebar">
 
 		<div class="pvc-header">
@@ -120,7 +120,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 
 		<div class="pvc-settings">
 
-			<!-- ── Layout ── -->
+			<!-- â”€â”€ Layout â”€â”€ -->
 			<div class="pvc-panel pvc-panel--active" id="pvc-panel-layout">
 
 				<div class="pvc-field">
@@ -189,7 +189,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					</div>
 				</div>
 
-				<!-- Playlist selector: always visible — drives the playlist nav in all layouts -->
+				<!-- Playlist selector: always visible â€” drives the playlist nav in all layouts -->
 				<div class="pvc-field pvc-sublayout" id="pvc-broadcast-field">
 					<span class="pvc-label">Featured Playlists</span>
 					<span class="pvc-hint" style="display:block;margin:4px 0 14px;">Choose which playlists and series appear in the playlist navigation bar across all layouts.</span>
@@ -327,7 +327,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 
 			</div><!-- /#pvc-panel-layout -->
 
-			<!-- ── Hero ── -->
+			<!-- â”€â”€ Hero â”€â”€ -->
 			<div class="pvc-panel" id="pvc-panel-hero">
 
 				<div class="pvc-aside-section">
@@ -444,7 +444,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 
 			</div><!-- /#pvc-panel-hero -->
 
-			<!-- ── Sidebar ── -->
+			<!-- â”€â”€ Sidebar â”€â”€ -->
 			<div class="pvc-panel" id="pvc-panel-sidebar">
 
 				<!-- New Releases -->
@@ -562,7 +562,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 
 			</div><!-- /#pvc-panel-sidebar -->
 
-			<!-- ── Style ── -->
+			<!-- â”€â”€ Style â”€â”€ -->
 			<div class="pvc-panel" id="pvc-panel-style">
 				<div class="pvc-field">
 					<span class="pvc-label">Accent Color</span>
@@ -612,7 +612,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					<span class="pvc-hint">Scales card titles, metadata, and section headings. Instant preview.</span>
 				</div>
 				<div class="pvc-divider"></div>
-				<!-- ── Music EQ Bars ── -->
+				<!-- â”€â”€ Music EQ Bars â”€â”€ -->
 				<div class="pvc-aside-section">
 					<div class="pvc-aside-section__head">
 						<div>
@@ -623,22 +623,22 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					</div>
 				</div>
 				<div class="pvc-divider"></div>
-				<!-- ── Vertical text ── -->
+				<!-- â”€â”€ Vertical text â”€â”€ -->
 				<div class="pvc-field">
 					<span class="pvc-label">Archive Vertical Label</span>
 					<input type="text" class="pvc-text-input" data-setting="archive_vertical_text"
 					       placeholder="VIDEOS"
 					       value="<?php echo esc_attr( $vtext ); ?>">
-					<span class="pvc-hint">Large decorative text along the left edge of the archive page. Leave empty to hide. Best seen on screens ≥ 1280px wide.</span>
+					<span class="pvc-hint">Large decorative text along the left edge of the archive page. Leave empty to hide. Best seen on screens â‰¥ 1280px wide.</span>
 				</div>
 				<div class="pvc-field" style="margin-top:10px;">
 					<span class="pvc-label">Vertical Label Color</span>
-					<input type="text" class="pvc-color-picker" data-setting="archive_vertical_text_color" value="<?php echo esc_attr( $vtext_color ?: '#4f46e5' ); ?>">
+					<input type="text" class="pvc-color-picker" data-setting="archive_vertical_text_color" value="<?php echo esc_attr( $vtext_color ?: '#ffffff' ); ?>">
 					<span class="pvc-hint">Defaults to your Accent Color when left blank.</span>
 				</div>
 			</div><!-- /#pvc-panel-style -->
 
-			<!-- ── Notifications ── -->
+			<!-- â”€â”€ Notifications â”€â”€ -->
 			<?php
 			$live_feed_on   = isset( $s['live_feed_enabled'] )   ? (bool) $s['live_feed_enabled']   : false;
 			$live_banner_on = isset( $s['live_banner_enabled'] )  ? (bool) $s['live_banner_enabled']  : false;
@@ -739,7 +739,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 
 	</div><!-- /.pvc-sidebar -->
 
-	<!-- ── Preview Pane ───────────────────────────────────── -->
+	<!-- â”€â”€ Preview Pane â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 	<div class="pvc-preview">
 		<div class="pvc-preview-bar">
 			<div class="pvc-devices">
@@ -769,7 +769,7 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 				<iframe id="pvc-preview-iframe" src="about:blank" title="Archive preview"></iframe>
 				<div class="pvc-frame-loading" id="pvc-frame-loading"><div class="pvc-frame-loading__spinner"></div></div>
 				<div class="pvc-frame-dim" id="pvc-frame-dim"></div>
-				<!-- Tour preview callout — points to where banner/toast appear in the iframe -->
+				<!-- Tour preview callout â€” points to where banner/toast appear in the iframe -->
 				<div class="pvc-preview-callout" id="pvc-preview-callout">
 					<span class="pvc-preview-callout__label" id="pvc-preview-callout-label"></span>
 				</div>
@@ -783,3 +783,4 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 	<div class="pvc-tip-pop__arrow"></div>
 	<p class="pvc-tip-pop__text"></p>
 </div>
+
