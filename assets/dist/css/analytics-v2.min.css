@@ -2097,6 +2097,18 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	from { transform: scale(0) rotate(-20deg); opacity: 0; }
 	to   { transform: scale(1) rotate(0deg);   opacity: 0.9; }
 }
+.pv-card__title {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+.pva-title-spark {
+	flex-shrink: 0;
+	color: #a78bfa;
+	opacity: 0.85;
+	animation: pva-spark-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+	animation-delay: 0.15s;
+}
 
 .pva-coach-move__title {
 	margin: 0;
