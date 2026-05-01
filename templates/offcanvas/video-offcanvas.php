@@ -119,6 +119,27 @@ $_pvm_eq_bars = ! empty( $_pvm_s['music_eq_bars'] );
 
 	<div class="pvm-backdrop"></div>
 
+	<div class="pvm-eq-bars" aria-hidden="true">
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+		<span class="pvm-eq-bar"></span>
+	</div>
+
 	<div class="pvm-panel">
 
 		<div class="pvm-hd">
@@ -135,14 +156,6 @@ $_pvm_eq_bars = ! empty( $_pvm_s['music_eq_bars'] );
 			<div class="pvm-art-wrap">
 				<div class="pvm-spinner" aria-hidden="true" hidden></div>
 				<div class="pvm-iframe-holder"></div>
-				<div class="pvm-eq-bars" aria-hidden="true">
-					<span class="pvm-eq-bar"></span>
-					<span class="pvm-eq-bar"></span>
-					<span class="pvm-eq-bar"></span>
-					<span class="pvm-eq-bar"></span>
-					<span class="pvm-eq-bar"></span>
-					<span class="pvm-eq-bar"></span>
-				</div>
 			</div>
 		</div>
 

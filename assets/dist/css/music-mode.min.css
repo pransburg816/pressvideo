@@ -847,22 +847,17 @@
     letter-spacing: .02em;
 }
 
-/* ── Equalizer bars (optional — enabled in Style settings) ────────── */
+/* ── Equalizer bars — full-width ambient layer behind the panel ──── */
 .pvm-eq-bars {
-    display: none; /* hidden unless pvm-player--eq is set */
+    display: none;
     position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    inset: 0;
     align-items: flex-end;
-    gap: 5px;
-    z-index: 5;
+    gap: 3px;
+    padding: 0 3px;
     pointer-events: none;
-    background: rgba(0,0,0,.42);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border-radius: 24px;
-    padding: 8px 18px;
+    overflow: hidden;
+    /* sits above backdrop, below panel (DOM order handles stacking) */
 }
 
 .pvm-player--eq .pvm-eq-bars {
@@ -870,29 +865,42 @@
 }
 
 .pvm-eq-bar {
-    width: 4px;
-    border-radius: 3px;
+    flex: 1;
+    border-radius: 3px 3px 0 0;
     background: var(--pv-accent, #4f46e5);
+    opacity: .09;
     transform-origin: bottom center;
-    transform: scaleY(0.12);
+    transform: scaleY(0.08);
     animation: pvm-eq-bounce var(--pvm-eq-dur, .6s) ease-in-out infinite alternate;
     animation-play-state: paused;
 }
 
-/* Animate only while playing */
+/* Animate when playing */
 .pvm-player--eq.pvm-player--playing .pvm-eq-bar {
     animation-play-state: running;
 }
 
-/* Per-bar: height (max) + duration + delay */
-.pvm-eq-bar:nth-child(1) { height: 14px; --pvm-eq-dur: .52s; animation-delay: 0s;    }
-.pvm-eq-bar:nth-child(2) { height: 26px; --pvm-eq-dur: .72s; animation-delay: .09s;  }
-.pvm-eq-bar:nth-child(3) { height: 36px; --pvm-eq-dur: .44s; animation-delay: .20s;  }
-.pvm-eq-bar:nth-child(4) { height: 22px; --pvm-eq-dur: .64s; animation-delay: .05s;  }
-.pvm-eq-bar:nth-child(5) { height: 16px; --pvm-eq-dur: .56s; animation-delay: .14s;  }
-.pvm-eq-bar:nth-child(6) { height: 30px; --pvm-eq-dur: .48s; animation-delay: .28s;  }
+/* 18 bars — varied max heights (vh) + durations + staggered delays */
+.pvm-eq-bar:nth-child(1)  { height: 55vh; --pvm-eq-dur: .52s; animation-delay: 0s;    }
+.pvm-eq-bar:nth-child(2)  { height: 72vh; --pvm-eq-dur: .68s; animation-delay: .10s;  }
+.pvm-eq-bar:nth-child(3)  { height: 40vh; --pvm-eq-dur: .44s; animation-delay: .22s;  }
+.pvm-eq-bar:nth-child(4)  { height: 65vh; --pvm-eq-dur: .62s; animation-delay: .06s;  }
+.pvm-eq-bar:nth-child(5)  { height: 80vh; --pvm-eq-dur: .50s; animation-delay: .18s;  }
+.pvm-eq-bar:nth-child(6)  { height: 48vh; --pvm-eq-dur: .70s; animation-delay: .02s;  }
+.pvm-eq-bar:nth-child(7)  { height: 60vh; --pvm-eq-dur: .46s; animation-delay: .14s;  }
+.pvm-eq-bar:nth-child(8)  { height: 35vh; --pvm-eq-dur: .66s; animation-delay: .08s;  }
+.pvm-eq-bar:nth-child(9)  { height: 70vh; --pvm-eq-dur: .54s; animation-delay: .20s;  }
+.pvm-eq-bar:nth-child(10) { height: 50vh; --pvm-eq-dur: .42s; animation-delay: .04s;  }
+.pvm-eq-bar:nth-child(11) { height: 75vh; --pvm-eq-dur: .64s; animation-delay: .16s;  }
+.pvm-eq-bar:nth-child(12) { height: 45vh; --pvm-eq-dur: .58s; animation-delay: .12s;  }
+.pvm-eq-bar:nth-child(13) { height: 58vh; --pvm-eq-dur: .48s; animation-delay: .24s;  }
+.pvm-eq-bar:nth-child(14) { height: 68vh; --pvm-eq-dur: .72s; animation-delay: 0s;    }
+.pvm-eq-bar:nth-child(15) { height: 38vh; --pvm-eq-dur: .56s; animation-delay: .10s;  }
+.pvm-eq-bar:nth-child(16) { height: 62vh; --pvm-eq-dur: .44s; animation-delay: .18s;  }
+.pvm-eq-bar:nth-child(17) { height: 52vh; --pvm-eq-dur: .60s; animation-delay: .06s;  }
+.pvm-eq-bar:nth-child(18) { height: 78vh; --pvm-eq-dur: .66s; animation-delay: .14s;  }
 
 @keyframes pvm-eq-bounce {
-    from { transform: scaleY(0.1);  }
+    from { transform: scaleY(0.08); }
     to   { transform: scaleY(1);    }
 }

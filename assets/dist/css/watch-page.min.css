@@ -15,7 +15,6 @@
 	--pv-font-scale: 1;
 	background: #0c0c18;
 	position: relative;
-	overflow-x: hidden;
 }
 
 /* ── Vertical accent label ────────────────────────────────────────── */
@@ -25,10 +24,9 @@
 	left: 0;
 	top: 0;
 	bottom: 0;
-	width: 0;
+	width: 0;          /* no layout footprint — text overflows visually */
 	overflow: visible;
-	align-items: flex-start;
-	padding-top: 5vh;
+	align-items: center;
 	pointer-events: none;
 	user-select: none;
 	z-index: 0;
@@ -47,10 +45,10 @@
 	text-transform: uppercase;
 	white-space: nowrap;
 	line-height: .9;
-	opacity: .1;
+	opacity: .15;
 	color: var(--pv-vtext-color, var(--pv-accent, #4f46e5));
-	overflow: hidden;
 	max-height: 80vh;
+	overflow: hidden;
 }
 
 /* ── Hero header ────────────────────────────────────────────────── */
