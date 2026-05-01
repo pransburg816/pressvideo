@@ -185,6 +185,10 @@ if ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) {
 			'accent'    => pv_resolve_accent_color( $_p->ID ),
 			'thumb'     => get_the_post_thumbnail_url( $_p->ID, 'medium' ) ?: '',
 			'duration'  => get_post_meta( $_p->ID, '_pv_duration', true ) ?: '',
+			'isMusic'   => (bool) get_post_meta( $_p->ID, '_pv_is_music', true ),
+			'artist'    => get_post_meta( $_p->ID, '_pv_artist', true ) ?: '',
+			'album'     => get_post_meta( $_p->ID, '_pv_album', true ) ?: '',
+			'permalink' => get_permalink( $_p->ID ),
 		];
 	}
 	$pv_playlist_json = wp_json_encode( $_pv_pl );
@@ -529,6 +533,14 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 				<?php endif; ?>
 				<?php endif; /* end non-broadcast control bar */ ?>
 
+				<?php if ( 'broadcast' !== $pv_layout ) : ?>
+				<div class="pv-type-toggle" role="group" aria-label="<?php esc_attr_e( 'Filter by type', 'pv-youtube-importer' ); ?>">
+					<button class="pv-type-btn pv-type-btn--active" data-type="*" type="button"><?php esc_html_e( 'All', 'pv-youtube-importer' ); ?></button>
+					<button class="pv-type-btn" data-type="video" type="button"><?php esc_html_e( 'Videos', 'pv-youtube-importer' ); ?></button>
+					<button class="pv-type-btn" data-type="music" type="button"><?php esc_html_e( 'Music', 'pv-youtube-importer' ); ?></button>
+				</div>
+				<?php endif; ?>
+
 				<div id="pv-layout-wrap"<?php if ( $pv_is_tax_archive ) echo ' data-pv-entry="1"'; ?>>
 
 
@@ -757,19 +769,22 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 
 					// Broadcast card helper: YouTube-style (thumb + info below)
 					$render_bc_card = function( $_bcp ) use ( $pv_display, $pv_cards_views ) {
-						$_bc_yt     = get_post_meta( $_bcp->ID, '_pv_youtube_id', true );
-						$_bc_accent = pv_resolve_accent_color( $_bcp->ID );
-						$_bc_embed  = $_bc_yt ? 'https://www.youtube.com/embed/' . $_bc_yt . '?rel=0&modestbranding=1' : '';
-						$_bc_thumb  = get_the_post_thumbnail_url( $_bcp->ID, 'medium' ) ?: '';
-						$_bc_dur    = get_post_meta( $_bcp->ID, '_pv_duration', true );
-						$_bc_cats   = get_the_terms( $_bcp->ID, 'pv_category' );
-						$_bc_cat    = ( $_bc_cats && ! is_wp_error( $_bc_cats ) ) ? $_bc_cats[0]->name : '';
-						$_bc_cslug  = ( $_bc_cats && ! is_wp_error( $_bc_cats ) ) ? $_bc_cats[0]->slug : '';
-						$_bc_date   = get_the_date( 'M j, Y', $_bcp->ID );
-						$_bc_ts     = strtotime( $_bcp->post_date );
-						$_bc_views  = (int) get_post_meta( $_bcp->ID, '_pv_view_count', true );
+						$_bc_yt       = get_post_meta( $_bcp->ID, '_pv_youtube_id', true );
+						$_bc_accent   = pv_resolve_accent_color( $_bcp->ID );
+						$_bc_embed    = $_bc_yt ? 'https://www.youtube.com/embed/' . $_bc_yt . '?rel=0&modestbranding=1' : '';
+						$_bc_thumb    = get_the_post_thumbnail_url( $_bcp->ID, 'medium' ) ?: '';
+						$_bc_dur      = get_post_meta( $_bcp->ID, '_pv_duration', true );
+						$_bc_cats     = get_the_terms( $_bcp->ID, 'pv_category' );
+						$_bc_cat      = ( $_bc_cats && ! is_wp_error( $_bc_cats ) ) ? $_bc_cats[0]->name : '';
+						$_bc_cslug    = ( $_bc_cats && ! is_wp_error( $_bc_cats ) ) ? $_bc_cats[0]->slug : '';
+						$_bc_date     = get_the_date( 'M j, Y', $_bcp->ID );
+						$_bc_ts       = strtotime( $_bcp->post_date );
+						$_bc_views    = (int) get_post_meta( $_bcp->ID, '_pv_view_count', true );
+						$_bc_is_music = get_post_meta( $_bcp->ID, '_pv_is_music', true ) ? '1' : '0';
+						$_bc_artist   = get_post_meta( $_bcp->ID, '_pv_artist', true ) ?: '';
+						$_bc_album    = get_post_meta( $_bcp->ID, '_pv_album', true ) ?: '';
 						?>
-						<div class="pv-bc-card" data-category="<?php echo esc_attr( $_bc_cslug ); ?>" data-date="<?php echo esc_attr( $_bc_ts ); ?>" data-views="<?php echo esc_attr( $_bc_views ); ?>" style="--pv-accent:<?php echo esc_attr( $_bc_accent ); ?>;">
+						<div class="pv-bc-card" data-category="<?php echo esc_attr( $_bc_cslug ); ?>" data-date="<?php echo esc_attr( $_bc_ts ); ?>" data-views="<?php echo esc_attr( $_bc_views ); ?>" data-yt-id="<?php echo esc_attr( $_bc_yt ); ?>" data-is-music="<?php echo esc_attr( $_bc_is_music ); ?>" style="--pv-accent:<?php echo esc_attr( $_bc_accent ); ?>;">
 							<div class="pv-bc-card__thumb">
 								<?php if ( $_bc_thumb ) : ?>
 									<img src="<?php echo esc_url( $_bc_thumb ); ?>" alt="<?php echo esc_attr( $_bcp->post_title ); ?>" loading="lazy">
@@ -777,6 +792,7 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 									<div class="pv-bc-card__thumb-placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>
 								<?php endif; ?>
 								<?php if ( $_bc_dur ) : ?><span class="pv-bc-card__dur"><?php echo esc_html( $_bc_dur ); ?></span><?php endif; ?>
+								<?php if ( $_bc_is_music === '1' ) : ?><span class="pv-music-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg> Music</span><?php endif; ?>
 								<?php if ( $_bc_yt && in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) : ?>
 									<button class="pv-trigger pv-bc-card__play"
 									        data-youtube-id="<?php echo esc_attr( $_bc_yt ); ?>"
@@ -784,6 +800,11 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 									        data-title="<?php echo esc_attr( $_bcp->post_title ); ?>"
 									        data-description=""
 									        data-accent="<?php echo esc_attr( $_bc_accent ); ?>"
+									        data-thumb="<?php echo esc_attr( $_bc_thumb ); ?>"
+									        data-permalink="<?php echo esc_attr( get_permalink( $_bcp->ID ) ); ?>"
+									        data-is-music="<?php echo esc_attr( $_bc_is_music ); ?>"
+									        data-artist="<?php echo esc_attr( $_bc_artist ); ?>"
+									        data-album="<?php echo esc_attr( $_bc_album ); ?>"
 									        aria-label="<?php echo esc_attr( sprintf( __( 'Watch %s', 'pv-youtube-importer' ), $_bcp->post_title ) ); ?>">
 										<svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
 									</button>
@@ -888,6 +909,13 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 							</div>
 							<?php endif; ?>
 
+							<!-- Type toggle: All / Videos / Music -->
+							<div class="pv-type-toggle pv-type-toggle--bc pv-type-toggle--home" role="group" aria-label="<?php esc_attr_e( 'Filter by type', 'pv-youtube-importer' ); ?>">
+								<button class="pv-type-btn pv-type-btn--active" data-type="*" type="button"><?php esc_html_e( 'All', 'pv-youtube-importer' ); ?></button>
+								<button class="pv-type-btn" data-type="video" type="button"><?php esc_html_e( 'Videos', 'pv-youtube-importer' ); ?></button>
+								<button class="pv-type-btn" data-type="music" type="button"><?php esc_html_e( 'Music', 'pv-youtube-importer' ); ?></button>
+							</div>
+
 							<!-- Video grid: AJAX-loaded on activation -->
 							<div class="pv-bc-home-grid" data-bc-lazy="bc_home">
 								<div class="pv-bc-lazy-spinner"><span class="pv-scroll-spinner"></span></div>
@@ -932,6 +960,13 @@ $_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '
 								<?php endforeach; ?>
 							</div>
 							<?php endif; ?>
+
+							<!-- Type toggle: All / Videos / Music -->
+							<div class="pv-type-toggle pv-type-toggle--bc pv-type-toggle--videos" role="group" aria-label="<?php esc_attr_e( 'Filter by type', 'pv-youtube-importer' ); ?>">
+								<button class="pv-type-btn pv-type-btn--active" data-type="*" type="button"><?php esc_html_e( 'All', 'pv-youtube-importer' ); ?></button>
+								<button class="pv-type-btn" data-type="video" type="button"><?php esc_html_e( 'Videos', 'pv-youtube-importer' ); ?></button>
+								<button class="pv-type-btn" data-type="music" type="button"><?php esc_html_e( 'Music', 'pv-youtube-importer' ); ?></button>
+							</div>
 
 							<!-- Video grid — lazy-loaded on first tab click -->
 							<div class="pv-bc-video-grid" data-bc-lazy="videos">

@@ -54,7 +54,7 @@ function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas', bool $sh
 
 	ob_start();
 	?>
-	<div class="pv-bc-card" data-category="<?php echo esc_attr( $cslug ); ?>" data-date="<?php echo esc_attr( $ts ); ?>" data-views="<?php echo esc_attr( $views ); ?>" data-yt-id="<?php echo esc_attr( $yt ); ?>" style="--pv-accent:<?php echo esc_attr( $accent ); ?>;">
+	<div class="pv-bc-card" data-category="<?php echo esc_attr( $cslug ); ?>" data-date="<?php echo esc_attr( $ts ); ?>" data-views="<?php echo esc_attr( $views ); ?>" data-yt-id="<?php echo esc_attr( $yt ); ?>" data-is-music="<?php echo esc_attr( $is_music ); ?>" style="--pv-accent:<?php echo esc_attr( $accent ); ?>;">
 		<div class="pv-bc-card__thumb">
 			<?php if ( $thumb ) : ?>
 				<img src="<?php echo esc_url( $thumb ); ?>" alt="<?php echo esc_attr( $post->post_title ); ?>" loading="lazy">
@@ -62,6 +62,7 @@ function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas', bool $sh
 				<div class="pv-bc-card__thumb-placeholder"><?php echo $play_svg; // phpcs:ignore ?></div>
 			<?php endif; ?>
 			<?php if ( $dur ) : ?><span class="pv-bc-card__dur"><?php echo esc_html( $dur ); ?></span><?php endif; ?>
+			<?php if ( $is_music === '1' ) : ?><span class="pv-music-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg> Music</span><?php endif; ?>
 			<?php if ( $yt && in_array( $display, [ 'offcanvas', 'modal' ], true ) ) : ?>
 				<button class="pv-trigger pv-bc-card__play"
 				        data-youtube-id="<?php echo esc_attr( $yt ); ?>"
