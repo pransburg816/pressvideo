@@ -121,6 +121,12 @@ class PV_Analytics_Tracker {
 			$from
 		) );
 
+		// ── Stat: Unique viewers (distinct sessions) ──────────────────
+		$unique_viewers = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(DISTINCT session_id) FROM {$table} WHERE event = 'play' AND created_at >= %s",
+			$from
+		) );
+
 		// ── Stat: Avg completion ──────────────────────────────────────
 		$depth_rows = $wpdb->get_results( $wpdb->prepare(
 			"SELECT MAX(CASE WHEN event='d100' THEN 100
@@ -179,6 +185,30 @@ class PV_Analytics_Tracker {
 					$trend[ $row['day'] ] = (int) $row['plays'];
 				}
 			}
+		}
+
+		// ── Prev-period trend (same length, shifted back — for chart overlay) ──
+		$trend_prev = [];
+		if ( ! $all_time ) {
+			$prev_trend_rows = $wpdb->get_results( $wpdb->prepare(
+				"SELECT DATE(created_at) AS day, COUNT(*) AS plays
+				 FROM {$table}
+				 WHERE event = 'play' AND created_at >= %s AND created_at < %s
+				 GROUP BY day ORDER BY day ASC",
+				date( 'Y-m-d H:i:s', $now - ( $days * 2 * DAY_IN_SECONDS ) ),
+				$from
+			), ARRAY_A );
+
+			$prev_trend_map = [];
+			for ( $i = $days * 2 - 1; $i >= $days; $i-- ) {
+				$prev_trend_map[ date( 'Y-m-d', $now - ( $i * DAY_IN_SECONDS ) ) ] = 0;
+			}
+			foreach ( $prev_trend_rows as $row ) {
+				if ( isset( $prev_trend_map[ $row['day'] ] ) ) {
+					$prev_trend_map[ $row['day'] ] = (int) $row['plays'];
+				}
+			}
+			$trend_prev = array_values( $prev_trend_map );
 		}
 
 		// ── Per-video avg completion (subquery: max depth per session, then avg per video) ──
@@ -294,12 +324,14 @@ class PV_Analytics_Tracker {
 			'stats'      => [
 				'total_plays'    => $total_plays,
 				'unique_videos'  => $unique_videos,
+				'unique_viewers' => $unique_viewers,
 				'avg_completion' => $avg_completion,
 				'engaged_plays'  => $engaged_plays,
 			],
 			'trend'      => [
 				'labels'     => array_keys( $trend ),
 				'values'     => array_values( $trend ),
+				'prev'       => $trend_prev,
 				'is_monthly' => $all_time,
 			],
 			'period'     => [

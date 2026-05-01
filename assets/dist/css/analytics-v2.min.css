@@ -130,7 +130,7 @@
 .pva-stats-row[hidden] { display: none; }
 .pva-stats-row {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(5, 1fr);
 	gap: 16px;
 	margin-bottom: 20px;
 }
@@ -623,8 +623,12 @@ body.pva-page .pva-stats-period:empty { display: none; }
 
 .pva-col-plays { font-weight: 700; color: #4f46e5; font-size: 0.9375rem; }
 .pva-col-last  { color: #9ca3af; font-size: 0.8125rem; white-space: nowrap; }
-.pva-col-avg   { font-size: 0.875rem; white-space: nowrap; }
+.pva-col-avg   { font-size: 0.875rem; white-space: nowrap; min-width: 110px; }
 .pva-col-trend { font-size: 0.8125rem; white-space: nowrap; }
+
+.pva-completion-wrap { display: flex; align-items: center; gap: 7px; }
+.pva-completion-bar  { flex: 1; height: 5px; background: #e4e4e7; border-radius: 3px; min-width: 48px; overflow: hidden; }
+.pva-completion-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
 
 .pva-trend        { font-weight: 600; font-size: 0.8125rem; }
 .pva-trend--up    { color: #10b981; }
@@ -2559,6 +2563,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	.pva-yt-grid > .pv-card > .pv-card__body { position: relative; overflow: visible; }
 	.pva-yt-grid > .pv-card .pva-chart-wrap { position: relative; inset: auto; height: auto; }
 	.pva-yt-grid .pva-table-wrap { max-height: 320px; }
+	.pva-stats-row { grid-template-columns: repeat(3, 1fr); }
 	.pva-yt-stats-row  { grid-template-columns: repeat(3, 1fr); }
 	.pva-yt-stats-outer { grid-template-columns: repeat(3, 1fr); }
 	.pva-ai-row--three-col { grid-template-columns: 1fr 1fr; }
@@ -2566,6 +2571,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 }
 
 @media (max-width: 900px) {
+	.pva-stats-row { grid-template-columns: repeat(2, 1fr); }
 	.pva-ai-row     { grid-template-columns: 1fr; }
 	.pva-ai-row--three-col { grid-template-columns: 1fr; }
 	.pva-ai-row--three-col .pva-ai-row__integrations { display: flex; }
