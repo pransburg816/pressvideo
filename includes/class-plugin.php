@@ -1063,6 +1063,11 @@ class PV_Plugin {
 		);
 
 		$settings = get_option( 'pv_settings', [] );
+
+		wp_localize_script( 'pv-music-mode', 'pvMusicSettings', [
+			'eqBars' => ! empty( $settings['music_eq_bars'] ),
+		] );
+
 		$ga_id    = sanitize_text_field( $settings['ga_measurement_id'] ?? '' );
 
 		// Inject Google Analytics 4 if a Measurement ID is configured.

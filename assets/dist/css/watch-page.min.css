@@ -24,12 +24,10 @@
 	left: 0;
 	top: 0;
 	bottom: 0;
-	width: 0;          /* no layout footprint — text overflows visually */
-	overflow: visible;
 	align-items: center;
 	pointer-events: none;
 	user-select: none;
-	z-index: 5;        /* above hero + content solid backgrounds */
+	z-index: 5;
 }
 
 @media (min-width: 1280px) {
