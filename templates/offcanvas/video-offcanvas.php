@@ -109,7 +109,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 </div>
 
 <!-- PressVideo Music Player — standalone, rendered after offcanvas -->
-<div id="pv-music-player" class="pvm-player" aria-hidden="true" role="dialog"
+<?php
+$_pvm_s       = get_option( 'pv_settings', [] );
+$_pvm_eq_bars = ! empty( $_pvm_s['music_eq_bars'] );
+?>
+<div id="pv-music-player" class="pvm-player<?php echo $_pvm_eq_bars ? ' pvm-player--eq' : ''; ?>" aria-hidden="true" role="dialog"
      aria-label="<?php esc_attr_e( 'Music Player', 'pv-youtube-importer' ); ?>"
      aria-modal="true">
 
@@ -131,6 +135,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			<div class="pvm-art-wrap">
 				<div class="pvm-spinner" aria-hidden="true" hidden></div>
 				<div class="pvm-iframe-holder"></div>
+				<div class="pvm-eq-bars" aria-hidden="true">
+					<span class="pvm-eq-bar"></span>
+					<span class="pvm-eq-bar"></span>
+					<span class="pvm-eq-bar"></span>
+					<span class="pvm-eq-bar"></span>
+					<span class="pvm-eq-bar"></span>
+					<span class="pvm-eq-bar"></span>
+				</div>
 			</div>
 		</div>
 

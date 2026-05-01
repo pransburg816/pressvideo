@@ -267,7 +267,7 @@ class PV_Customizer_Page {
 			}
 		}
 
-		foreach ( [ 'default_accent', 'hero_title_color', 'hero_subtitle_color', 'page_bg_color', 'sidebar_bg_color' ] as $k ) {
+		foreach ( [ 'default_accent', 'hero_title_color', 'hero_subtitle_color', 'page_bg_color', 'sidebar_bg_color', 'archive_vertical_text_color' ] as $k ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$val = sanitize_hex_color( $raw[ $k ] ?? '' );
 				if ( $val ) {
@@ -280,7 +280,7 @@ class PV_Customizer_Page {
 			}
 		}
 
-		foreach ( [ 'hero_title', 'hero_subtitle', 'aside_new_releases_label', 'aside_topics_label', 'aside_tags_label', 'aside_cat_label', 'aside_tag_label', 'new_video_notify_msg', 'grid_label_text' ] as $k ) {
+		foreach ( [ 'hero_title', 'hero_subtitle', 'aside_new_releases_label', 'aside_topics_label', 'aside_tags_label', 'aside_cat_label', 'aside_tag_label', 'new_video_notify_msg', 'grid_label_text', 'archive_vertical_text' ] as $k ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$clean[ $k ] = sanitize_text_field( $raw[ $k ] );
 			}
@@ -296,7 +296,7 @@ class PV_Customizer_Page {
 			$clean['hero_bg_image'] = esc_url_raw( $raw['hero_bg_image'] );
 		}
 
-		foreach ( [ 'aside_new_releases', 'aside_topics', 'aside_tags', 'cards_show_excerpt', 'cards_show_category', 'cards_show_views', 'aside_cat_on', 'aside_tag_on', 'hero_show', 'live_feed_enabled', 'live_chat_enabled', 'live_hide_content', 'live_banner_enabled', 'new_video_notify', 'grid_label_show' ] as $k ) {
+		foreach ( [ 'aside_new_releases', 'aside_topics', 'aside_tags', 'cards_show_excerpt', 'cards_show_category', 'cards_show_views', 'aside_cat_on', 'aside_tag_on', 'hero_show', 'live_feed_enabled', 'live_chat_enabled', 'live_hide_content', 'live_banner_enabled', 'new_video_notify', 'grid_label_show', 'music_eq_bars' ] as $k ) {
 			if ( array_key_exists( $k, $raw ) ) {
 				$clean[ $k ] = (bool) $raw[ $k ];
 			}

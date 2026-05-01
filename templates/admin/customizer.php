@@ -49,8 +49,11 @@ $cards_excerpt  = isset( $s['cards_show_excerpt'] )  ? (bool) $s['cards_show_exc
 $cards_cat      = isset( $s['cards_show_category'] ) ? (bool) $s['cards_show_category'] : true;
 $cards_views    = isset( $s['cards_show_views'] )    ? (bool) $s['cards_show_views']    : true;
 $search_align   = $s['search_bar_align'] ?? 'center';
-$grid_label_show = isset( $s['grid_label_show'] ) ? (bool) $s['grid_label_show'] : false;
-$grid_label_text = $s['grid_label_text'] ?? 'Latest Videos';
+$grid_label_show  = isset( $s['grid_label_show'] ) ? (bool) $s['grid_label_show'] : false;
+$grid_label_text  = $s['grid_label_text'] ?? 'Latest Videos';
+$eq_bars_on       = isset( $s['music_eq_bars'] )   ? (bool) $s['music_eq_bars']   : false;
+$vtext            = $s['archive_vertical_text']       ?? '';
+$vtext_color      = $s['archive_vertical_text_color'] ?? '';
 
 // Broadcast playlist settings
 $bc_playlists_raw = $s['bc_playlists'] ?? '[]';
@@ -607,6 +610,31 @@ $all_tags = is_wp_error( $all_tags ) ? [] : $all_tags;
 					</div>
 					<input type="hidden" data-setting="font_size" id="pvc-font-size-val" value="<?php echo esc_attr( $font_size ); ?>">
 					<span class="pvc-hint">Scales card titles, metadata, and section headings. Instant preview.</span>
+				</div>
+				<div class="pvc-divider"></div>
+				<!-- ── Music EQ Bars ── -->
+				<div class="pvc-aside-section">
+					<div class="pvc-aside-section__head">
+						<div>
+							<span style="font-size:.78rem;color:rgba(255,255,255,.65);font-weight:600;display:block;">Music EQ Bars</span>
+							<span class="pvc-hint" style="margin:2px 0 0;">Animated equalizer bars overlay on album art while a track plays</span>
+						</div>
+						<label class="pvc-toggle"><input type="checkbox" data-setting="music_eq_bars" <?php checked( $eq_bars_on ); ?>><span class="pvc-toggle__track"></span></label>
+					</div>
+				</div>
+				<div class="pvc-divider"></div>
+				<!-- ── Vertical text ── -->
+				<div class="pvc-field">
+					<span class="pvc-label">Archive Vertical Label</span>
+					<input type="text" class="pvc-text-input" data-setting="archive_vertical_text"
+					       placeholder="VIDEOS"
+					       value="<?php echo esc_attr( $vtext ); ?>">
+					<span class="pvc-hint">Large decorative text along the left edge of the archive page. Leave empty to hide. Best seen on screens ≥ 1280px wide.</span>
+				</div>
+				<div class="pvc-field" style="margin-top:10px;">
+					<span class="pvc-label">Vertical Label Color</span>
+					<input type="text" class="pvc-color-picker" data-setting="archive_vertical_text_color" value="<?php echo esc_attr( $vtext_color ?: '#4f46e5' ); ?>">
+					<span class="pvc-hint">Defaults to your Accent Color when left blank.</span>
 				</div>
 			</div><!-- /#pvc-panel-style -->
 

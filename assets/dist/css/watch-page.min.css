@@ -14,6 +14,43 @@
 	--pv-text-muted: rgba(255,255,255,0.5);
 	--pv-font-scale: 1;
 	background: #0c0c18;
+	position: relative;
+	overflow-x: hidden;
+}
+
+/* ── Vertical accent label ────────────────────────────────────────── */
+.pv-vtext {
+	display: none;
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 0;
+	overflow: visible;
+	align-items: flex-start;
+	padding-top: 5vh;
+	pointer-events: none;
+	user-select: none;
+	z-index: 0;
+}
+
+@media (min-width: 1280px) {
+	.pv-vtext { display: flex; }
+}
+
+.pv-vtext__label {
+	writing-mode: vertical-lr;
+	transform: rotate(180deg);
+	font-size: min(11vw, 140px);
+	font-weight: 900;
+	letter-spacing: .12em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	line-height: .9;
+	opacity: .1;
+	color: var(--pv-vtext-color, var(--pv-accent, #4f46e5));
+	overflow: hidden;
+	max-height: 80vh;
 }
 
 /* ── Hero header ────────────────────────────────────────────────── */

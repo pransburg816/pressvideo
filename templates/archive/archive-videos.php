@@ -320,9 +320,17 @@ $_pv_content_style = $_pv_max_w ? 'max-width:' . esc_attr( $_pv_max_w ) . ';marg
 if ( $_pv_page_bg ) {
 	$_pv_content_style .= 'background-color:' . esc_attr( $_pv_page_bg ) . ';';
 }
-$_pv_width_attr = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '';
+$_pv_width_attr  = $_pv_content_style ? ' style="' . $_pv_content_style . '"' : '';
+$_pv_vtext       = sanitize_text_field( $pv_settings['archive_vertical_text']       ?? '' );
+$_pv_vtext_color = sanitize_hex_color(  $pv_settings['archive_vertical_text_color'] ?? '' );
 ?>
 <div class="pv-archive-wrap" data-pv-theme="<?php echo esc_attr( $_pv_theme ); ?>" style="<?php echo $_pv_wrap_style; // phpcs:ignore ?>">
+
+	<?php if ( $_pv_vtext ) :
+		$_pv_vtext_style = $_pv_vtext_color ? ' style="color:' . esc_attr( $_pv_vtext_color ) . '"' : '';
+		?>
+	<div class="pv-vtext" aria-hidden="true"><span class="pv-vtext__label"<?php echo $_pv_vtext_style; // phpcs:ignore ?>><?php echo esc_html( $_pv_vtext ); ?></span></div>
+	<?php endif; ?>
 
 	<?php if ( $pv_hero_show ) : ?>
 	<div class="pv-archive-hero<?php
