@@ -7,10 +7,10 @@
 
 	var cfg     = window.pvOffcanvas || {};
 	var ajaxUrl = cfg.ajaxUrl || '';
-
 	var CANVAS_ID = 'pv-canvas';
 
-	var canvas, panel, backdrop, closeBtn, titleEl, descEl, badgeEl, iframeHolder, navCount, prevBtn, nextBtn, railEl;
+	var canvas, panel, backdrop, closeBtn, titleEl, descEl, badgeEl, iframeHolder,
+	    navCount, prevBtn, nextBtn, railEl, autoplayToggle;
 
 	var playlist     = [];
 	var current      = 0;
@@ -20,37 +20,88 @@
 	var railBusy     = false;
 	var railSentinel = null;
 	var railObserver = null;
+	var queue        = [];
+	var continuousPlay = localStorage.getItem('pv_continuous_play') !== 'false'; // default on
+	var activeMenu   = null;
+	var toastTimer   = null;
+
+	// ── Init ──────────────────────────────────────────────────────────
 
 	function init() {
 		canvas = document.getElementById(CANVAS_ID);
 		if (!canvas) return;
 
-		panel        = canvas.querySelector('.pv-panel');
-		backdrop     = canvas.querySelector('.pv-backdrop');
-		closeBtn     = canvas.querySelector('.pv-close');
-		titleEl      = canvas.querySelector('.pv-title');
-		descEl       = canvas.querySelector('.pv-desc');
-		badgeEl      = canvas.querySelector('.pv-badge');
-		iframeHolder = canvas.querySelector('.pv-iframe-holder');
-		navCount     = canvas.querySelector('.pv-nav-count');
-		prevBtn      = canvas.querySelector('.pv-prev');
-		nextBtn      = canvas.querySelector('.pv-next');
-		railEl       = canvas.querySelector('.pv-rail');
+		panel          = canvas.querySelector('.pv-panel');
+		backdrop       = canvas.querySelector('.pv-backdrop');
+		closeBtn       = canvas.querySelector('.pv-close');
+		titleEl        = canvas.querySelector('.pv-title');
+		descEl         = canvas.querySelector('.pv-desc');
+		badgeEl        = canvas.querySelector('.pv-playlist-label');
+		iframeHolder   = canvas.querySelector('.pv-iframe-holder');
+		navCount       = canvas.querySelector('.pv-nav-count');
+		prevBtn        = canvas.querySelector('.pv-prev');
+		nextBtn        = canvas.querySelector('.pv-next');
+		railEl         = canvas.querySelector('.pv-rail');
+		autoplayToggle = canvas.querySelector('.pv-autoplay-toggle');
 
 		document.addEventListener('click', onTriggerClick);
+		document.addEventListener('click', onDocClick);
 
-		if (closeBtn) closeBtn.addEventListener('click', close);
-		if (backdrop) backdrop.addEventListener('click', close);
+		if (closeBtn)  closeBtn.addEventListener('click', close);
+		if (backdrop)  backdrop.addEventListener('click', close);
+
+		if (autoplayToggle) {
+			syncAutoplayToggle();
+			autoplayToggle.addEventListener('click', function () {
+				continuousPlay = !continuousPlay;
+				localStorage.setItem('pv_continuous_play', continuousPlay ? 'true' : 'false');
+				syncAutoplayToggle();
+			});
+		}
+
+		canvas.addEventListener('pv:video-ended', onVideoEnded);
 
 		document.addEventListener('keydown', function (e) {
 			if (!canvas.classList.contains('pv-open')) return;
-			if (e.key === 'Escape')     { e.preventDefault(); close(); }
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				if (activeMenu) { closeMenu(); } else { close(); }
+			}
 			if (e.key === 'ArrowRight') { e.preventDefault(); navigate(1); }
 			if (e.key === 'ArrowLeft')  { e.preventDefault(); navigate(-1); }
 		});
 
 		if (prevBtn) prevBtn.addEventListener('click', function () { navigate(-1); });
 		if (nextBtn) nextBtn.addEventListener('click', function () { navigate(1); });
+	}
+
+	function syncAutoplayToggle() {
+		if (!autoplayToggle) return;
+		autoplayToggle.classList.toggle('pv-autoplay-toggle--on', continuousPlay);
+		autoplayToggle.setAttribute('aria-pressed', String(continuousPlay));
+	}
+
+	// ── Video ended (autoplay next) ───────────────────────────────────
+
+	function onVideoEnded() {
+		if (!continuousPlay) return;
+		if (queue.length > 0) {
+			var nextIdx = queue.shift();
+			updateQueueBadges();
+			updateNav();
+			navigateTo(nextIdx);
+		} else if (current < playlist.length - 1) {
+			navigateTo(current + 1);
+		}
+	}
+
+	// ── Document click — close open menu ─────────────────────────────
+
+	function onDocClick(e) {
+		if (!activeMenu) return;
+		if (!e.target.closest('.pv-rail__menu') && !e.target.closest('.pv-rail__menu-btn')) {
+			closeMenu();
+		}
 	}
 
 	// ── Trigger click ─────────────────────────────────────────────────
@@ -62,23 +113,36 @@
 		e.stopPropagation();
 
 		anchorId = trigger.dataset.youtubeId || '';
+		queue    = [];
 
-		// Seed with just the clicked video so the drawer opens immediately
-		playlist = [{
-			youtubeId: anchorId,
-			embedUrl:  trigger.dataset.embedUrl    || '',
-			title:     trigger.dataset.title       || '',
-			desc:      trigger.dataset.description || '',
-			accent:    trigger.dataset.accent      || '#4f46e5',
-			thumb:     '',
-			duration:  '',
-		}];
-		current = 0;
+		var plRaw  = trigger.dataset.playlist || '';
+		var plData = null;
+		try { plData = plRaw ? JSON.parse(plRaw) : null; } catch (err) { plData = null; }
 
-		loadSlide(0);
-		open();
-		resetRail();
-		fetchRailPage(1);
+		if (plData && plData.length > 0 && !document.body.dataset.pvActivePl) {
+			playlist = plData;
+			current  = playlist.findIndex(function (v) { return v.youtubeId === anchorId; });
+			if (current < 0) current = 0;
+			loadSlide(current);
+			open();
+			buildRailFromData(playlist);
+		} else {
+			playlist = [{
+				youtubeId: anchorId,
+				embedUrl:  trigger.dataset.embedUrl    || '',
+				title:     trigger.dataset.title       || '',
+				desc:      trigger.dataset.description || '',
+				accent:    trigger.dataset.accent      || '#4f46e5',
+				thumb:     '',
+				duration:  '',
+				permalink: trigger.dataset.permalink   || '',
+			}];
+			current = 0;
+			loadSlide(0);
+			open();
+			resetRail();
+			fetchRailPage(1);
+		}
 	}
 
 	// ── Rail ──────────────────────────────────────────────────────────
@@ -93,15 +157,26 @@
 		railEl.innerHTML = '';
 		railEl.style.display = '';
 
-		var heading = document.createElement('p');
-		heading.className = 'pv-rail__heading';
-		heading.textContent = 'Up Next';
-		railEl.appendChild(heading);
-
 		var loadingEl = document.createElement('div');
 		loadingEl.className = 'pv-rail__loading';
 		loadingEl.innerHTML = '<span class="pv-rail__spinner"></span>';
 		railEl.appendChild(loadingEl);
+	}
+
+	function buildRailFromData(data) {
+		railPage     = 1;
+		railMaxPages = 1;
+		railBusy     = false;
+		detachSentinel();
+
+		if (!railEl) return;
+		railEl.innerHTML = '';
+		if (data.length <= 1) { railEl.style.display = 'none'; return; }
+		railEl.style.display = '';
+
+		data.forEach(function (slide, i) { railEl.appendChild(makeRailItem(slide, i)); });
+		updateNav();
+		updateRail(current);
 	}
 
 	function fetchRailPage(page) {
@@ -112,7 +187,10 @@
 		railBusy = true;
 
 		var activePl = document.body.dataset.pvActivePl || '';
-		fetch(ajaxUrl + '?action=pv_playlist_page&page=' + page + (activePl ? '&pv_yt_pl=' + encodeURIComponent(activePl) : ''))
+		var url      = ajaxUrl + '?action=pv_playlist_page&page=' + page
+		             + (activePl ? '&pv_yt_pl=' + encodeURIComponent(activePl) : '');
+
+		fetch(url)
 			.then(function (r) { return r.json(); })
 			.then(function (data) {
 				if (!data || !data.success) return;
@@ -124,41 +202,23 @@
 					playlist = res.items;
 					current  = playlist.findIndex(function (v) { return v.youtubeId === anchorId; });
 					if (current < 0) current = 0;
-
 					if (!railEl) return;
 					railEl.innerHTML = '';
-
 					if (playlist.length <= 1) { railEl.style.display = 'none'; return; }
-
-					var heading = document.createElement('p');
-					heading.className = 'pv-rail__heading';
-					heading.textContent = 'Up Next';
-					railEl.appendChild(heading);
-
-					playlist.forEach(function (slide, i) {
-						railEl.appendChild(makeRailItem(slide, i));
-					});
+					playlist.forEach(function (slide, i) { railEl.appendChild(makeRailItem(slide, i)); });
 				} else {
 					var offset = playlist.length;
 					playlist   = playlist.concat(res.items);
 					res.items.forEach(function (slide, i) {
-						var before = railSentinel || null;
-						railEl.insertBefore(makeRailItem(slide, offset + i), before);
+						railEl.insertBefore(makeRailItem(slide, offset + i), railSentinel || null);
 					});
 				}
 
 				updateNav();
 				updateRail(current);
-
-				if (railPage < railMaxPages) {
-					attachSentinel();
-				} else {
-					detachSentinel();
-				}
+				if (railPage < railMaxPages) { attachSentinel(); } else { detachSentinel(); }
 			})
-			.catch(function () {
-				if (railEl) railEl.style.display = 'none';
-			})
+			.catch(function () { if (railEl) railEl.style.display = 'none'; })
 			.finally(function () { railBusy = false; });
 	}
 
@@ -170,51 +230,245 @@
 		item.setAttribute('aria-label', slide.title || ('Video ' + (idx + 1)));
 		item.setAttribute('aria-current', idx === current ? 'true' : 'false');
 
-		var thumbHtml = slide.thumb
+		var thumbInner = slide.thumb
 			? '<img class="pv-rail__thumb" src="' + esc(slide.thumb) + '" alt="" loading="lazy">'
 			: '<div class="pv-rail__thumb pv-rail__thumb--placeholder"></div>';
-		var durHtml = slide.duration
-			? '<span class="pv-rail__dur">' + esc(slide.duration) + '</span>'
-			: '';
+		var durHtml = slide.duration ? '<span class="pv-rail__dur">' + esc(slide.duration) + '</span>' : '';
+		var wlSaved = isWatchLater(slide.youtubeId);
 
-		item.innerHTML = thumbHtml
-			+ '<div class="pv-rail__info"><p class="pv-rail__title">' + esc(slide.title) + '</p>' + durHtml + '</div>';
+		item.innerHTML =
+			'<div class="pv-rail__thumb-wrap">' + thumbInner + '</div>'
+			+ '<div class="pv-rail__info">'
+			+   '<span class="pv-rail__now-playing">Now Playing</span>'
+			+   '<p class="pv-rail__title">' + esc(slide.title) + '</p>'
+			+   durHtml
+			+ '</div>'
+			+ '<span class="pv-rail__wl-icon' + (wlSaved ? ' pv-rail__wl-icon--saved' : '') + '" aria-hidden="true">'
+			+   '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>'
+			+ '</span>'
+			+ '<div class="pv-rail__actions">'
+			+   '<button class="pv-rail__menu-btn" type="button" aria-label="More options" aria-haspopup="true">'
+			+     '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+			+       '<circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>'
+			+     '</svg>'
+			+   '</button>'
+			+ '</div>';
 
-		item.addEventListener('click', (function (i) { return function () { navigateTo(i); }; }(idx)));
+		item.addEventListener('click', (function (i) {
+			return function (e) {
+				if (e.target.closest('.pv-rail__menu-btn') || e.target.closest('.pv-rail__menu')) return;
+				navigateTo(i);
+			};
+		}(idx)));
+
 		item.addEventListener('keydown', (function (i) {
 			return function (e) {
 				if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigateTo(i); }
 			};
 		}(idx)));
 
+		var menuBtn = item.querySelector('.pv-rail__menu-btn');
+		menuBtn.addEventListener('click', (function (s, i, btn) {
+			return function (e) {
+				e.stopPropagation();
+				if (activeMenu && activeMenu.dataset.forIdx === String(i)) {
+					closeMenu();
+				} else {
+					openMenu(s, i, btn);
+				}
+			};
+		}(slide, idx, menuBtn)));
+
 		return item;
 	}
 
-	function attachSentinel() {
-		if (!railEl) return;
-		if (!railSentinel) {
-			railSentinel = document.createElement('div');
-			railSentinel.className = 'pv-rail__sentinel';
-		}
-		railEl.appendChild(railSentinel);
+	// ── Three-dot menu ────────────────────────────────────────────────
 
-		if ('IntersectionObserver' in window && panel) {
-			if (railObserver) railObserver.disconnect();
-			railObserver = new IntersectionObserver(function (entries) {
-				if (entries[0].isIntersecting && !railBusy) {
-					fetchRailPage(railPage + 1);
+	function openMenu(slide, idx, anchor) {
+		closeMenu();
+
+		var inQueue = queue.indexOf(idx) >= 0;
+		var inWL    = isWatchLater(slide.youtubeId);
+
+		var menu = document.createElement('div');
+		menu.className      = 'pv-rail__menu';
+		menu.dataset.forIdx = String(idx);
+		menu.setAttribute('role', 'menu');
+
+		var menuItems = [
+			{
+				svg:    '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>',
+				label:  inQueue ? 'Remove from Queue' : 'Add to Queue',
+				action: function () { toggleQueue(idx); closeMenu(); },
+			},
+			{
+				svg:    '<path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>',
+				label:  inWL ? 'Remove from Watch Later' : 'Save to Watch Later',
+				action: function () { toggleWatchLater(slide, idx); closeMenu(); },
+			},
+			{
+				svg:    '<path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>',
+				label:  'Share',
+				action: function () { shareVideo(slide); closeMenu(); },
+			},
+		];
+
+		menuItems.forEach(function (it) {
+			var btn = document.createElement('button');
+			btn.type      = 'button';
+			btn.className = 'pv-rail__menu-item';
+			btn.setAttribute('role', 'menuitem');
+			btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' + it.svg + '</svg>'
+			              + '<span>' + esc(it.label) + '</span>';
+			btn.addEventListener('click', it.action);
+			menu.appendChild(btn);
+		});
+
+		anchor.appendChild(menu);
+		activeMenu = menu;
+
+		// Flip above the button if it overflows the panel bottom
+		requestAnimationFrame(function () {
+			if (!panel) return;
+			var r  = menu.getBoundingClientRect();
+			var pr = panel.getBoundingClientRect();
+			if (r.bottom > pr.bottom - 8) {
+				menu.style.top          = 'auto';
+				menu.style.bottom       = '100%';
+				menu.style.marginTop    = '0';
+				menu.style.marginBottom = '4px';
+			}
+		});
+	}
+
+	function closeMenu() {
+		if (activeMenu && activeMenu.parentNode) activeMenu.parentNode.removeChild(activeMenu);
+		activeMenu = null;
+	}
+
+	// ── Queue ─────────────────────────────────────────────────────────
+
+	function toggleQueue(idx) {
+		var pos = queue.indexOf(idx);
+		if (pos >= 0) {
+			queue.splice(pos, 1);
+			showToast('Removed from queue');
+		} else {
+			queue.push(idx);
+			showToast('Added to queue');
+		}
+		updateQueueBadges();
+		updateNav();
+	}
+
+	function updateQueueBadges() {
+		if (!railEl) return;
+		railEl.querySelectorAll('.pv-rail__item').forEach(function (el, i) {
+			var pos   = queue.indexOf(i);
+			var wrap  = el.querySelector('.pv-rail__thumb-wrap');
+			var badge = el.querySelector('.pv-rail__queue-badge');
+			if (pos >= 0) {
+				if (!badge) {
+					badge = document.createElement('span');
+					badge.className = 'pv-rail__queue-badge';
+					if (wrap) wrap.appendChild(badge);
 				}
-			}, { root: panel, rootMargin: '150px' });
-			railObserver.observe(railSentinel);
+				badge.textContent = pos + 1;
+			} else if (badge) {
+				badge.remove();
+			}
+		});
+	}
+
+	// ── Watch Later ───────────────────────────────────────────────────
+
+	function getWatchLater() {
+		try { return JSON.parse(localStorage.getItem('pv_watch_later') || '[]'); }
+		catch (e) { return []; }
+	}
+
+	function isWatchLater(youtubeId) {
+		return getWatchLater().some(function (v) { return v.youtubeId === youtubeId; });
+	}
+
+	function toggleWatchLater(slide, idx) {
+		var list   = getWatchLater();
+		var pos    = list.findIndex(function (v) { return v.youtubeId === slide.youtubeId; });
+		var adding = pos < 0;
+		if (adding) {
+			list.push({
+				youtubeId: slide.youtubeId,
+				title:     slide.title,
+				thumb:     slide.thumb,
+				embedUrl:  slide.embedUrl,
+				permalink: slide.permalink || '',
+			});
+		} else {
+			list.splice(pos, 1);
+		}
+		localStorage.setItem('pv_watch_later', JSON.stringify(list));
+		showToast(adding ? 'Saved to Watch Later' : 'Removed from Watch Later');
+
+		// Reflect state in the rail icon
+		if (railEl) {
+			var items = railEl.querySelectorAll('.pv-rail__item');
+			var item  = items[idx];
+			if (item) {
+				var icon = item.querySelector('.pv-rail__wl-icon');
+				if (icon) icon.classList.toggle('pv-rail__wl-icon--saved', adding);
+			}
 		}
 	}
 
-	function detachSentinel() {
-		if (railObserver) { railObserver.disconnect(); railObserver = null; }
-		if (railSentinel && railSentinel.parentNode) {
-			railSentinel.parentNode.removeChild(railSentinel);
-			railSentinel = null;
+	// ── Share ─────────────────────────────────────────────────────────
+
+	function shareVideo(slide) {
+		var url   = slide.permalink || window.location.href;
+		var title = slide.title || 'Watch this video';
+
+		if (navigator.share) {
+			navigator.share({ title: title, url: url }).catch(function () {});
+			return;
 		}
+		if (navigator.clipboard) {
+			navigator.clipboard.writeText(url)
+				.then(function () { showToast('Link copied to clipboard'); })
+				.catch(function () { fallbackCopy(url); });
+			return;
+		}
+		fallbackCopy(url);
+	}
+
+	function fallbackCopy(text) {
+		var ta = document.createElement('textarea');
+		ta.value    = text;
+		ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+		document.body.appendChild(ta);
+		ta.select();
+		try {
+			document.execCommand('copy');
+			showToast('Link copied to clipboard');
+		} catch (e) {
+			showToast('Copy failed — try manually');
+		}
+		document.body.removeChild(ta);
+	}
+
+	// ── Toast ─────────────────────────────────────────────────────────
+
+	function showToast(msg) {
+		var toast = document.getElementById('pv-toast');
+		if (!toast) {
+			toast = document.createElement('div');
+			toast.id = 'pv-toast';
+			toast.setAttribute('role', 'status');
+			toast.setAttribute('aria-live', 'polite');
+			document.body.appendChild(toast);
+		}
+		toast.textContent = msg;
+		toast.classList.add('pv-toast--show');
+		clearTimeout(toastTimer);
+		toastTimer = setTimeout(function () { toast.classList.remove('pv-toast--show'); }, 2200);
 	}
 
 	// ── Drawer open / close ───────────────────────────────────────────
@@ -231,6 +485,7 @@
 		canvas.classList.remove('pv-open');
 		canvas.setAttribute('aria-hidden', 'true');
 		document.body.style.overflow = '';
+		closeMenu();
 		canvas.dispatchEvent(new CustomEvent('pv:closed', { bubbles: true }));
 	}
 
@@ -241,9 +496,13 @@
 		if (!slide) return;
 
 		canvas.style.setProperty('--pv-accent', slide.accent || '#4f46e5');
-		if (titleEl)     titleEl.textContent = slide.title || '';
-		if (descEl)      descEl.textContent  = slide.desc  || '';
-		if (badgeEl)     badgeEl.textContent = 'Video';
+		if (titleEl)   titleEl.textContent = slide.title || '';
+		if (descEl)    descEl.textContent  = slide.desc  || '';
+		if (badgeEl) {
+			var _plTitle = document.body.dataset.pvActivePlTitle || '';
+			badgeEl.textContent   = _plTitle ? (/videos?$/i.test(_plTitle) ? _plTitle : (_plTitle + ' Videos')) : '';
+			badgeEl.style.display = _plTitle ? '' : 'none';
+		}
 		if (iframeHolder) {
 			iframeHolder.dataset.embedUrl = slide.embedUrl || '';
 			delete iframeHolder.dataset.loaded;
@@ -251,13 +510,25 @@
 
 		updateNav();
 		updateRail(index);
-		canvas.dispatchEvent(new CustomEvent('pv:slide-changed', { bubbles: true, detail: { index: index, slide: slide } }));
+		canvas.dispatchEvent(new CustomEvent('pv:slide-changed', {
+			bubbles: true,
+			detail:  { index: index, slide: slide },
+		}));
 	}
 
-	function navigate(delta) { navigateTo(current + delta); }
+	function navigate(delta) {
+		if (delta === 1 && queue.length > 0) {
+			var nextIdx = queue.shift();
+			updateQueueBadges();
+			updateNav();
+			navigateTo(nextIdx);
+		} else {
+			navigateTo(current + delta);
+		}
+	}
 
 	function navigateTo(index) {
-		if (index === current || index < 0 || index >= playlist.length) return;
+		if (index < 0 || index >= playlist.length || index === current) return;
 		current = index;
 		canvas.dispatchEvent(new CustomEvent('pv:closed', { bubbles: false }));
 		loadSlide(current);
@@ -265,11 +536,15 @@
 	}
 
 	function updateNav() {
+		var hasNext = current < playlist.length - 1 || queue.length > 0;
 		if (navCount) {
-			navCount.textContent = playlist.length > 1 ? (current + 1) + ' / ' + playlist.length : '';
+			var qStr = queue.length > 0 ? ' · Queue: ' + queue.length : '';
+			navCount.textContent = playlist.length > 1
+				? (current + 1) + ' / ' + playlist.length + qStr
+				: (qStr || '');
 		}
 		if (prevBtn) prevBtn.disabled = (current === 0);
-		if (nextBtn) nextBtn.disabled = (current >= playlist.length - 1);
+		if (nextBtn) nextBtn.disabled = !hasNext;
 	}
 
 	function updateRail(index) {
@@ -282,6 +557,34 @@
 		var activeItem = railEl.querySelectorAll('.pv-rail__item')[index];
 		if (activeItem) activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 	}
+
+	// ── Sentinel / IntersectionObserver ───────────────────────────────
+
+	function attachSentinel() {
+		if (!railEl) return;
+		if (!railSentinel) {
+			railSentinel = document.createElement('div');
+			railSentinel.className = 'pv-rail__sentinel';
+		}
+		railEl.appendChild(railSentinel);
+		if ('IntersectionObserver' in window && panel) {
+			if (railObserver) railObserver.disconnect();
+			railObserver = new IntersectionObserver(function (entries) {
+				if (entries[0].isIntersecting && !railBusy) { fetchRailPage(railPage + 1); }
+			}, { root: panel, rootMargin: '150px' });
+			railObserver.observe(railSentinel);
+		}
+	}
+
+	function detachSentinel() {
+		if (railObserver) { railObserver.disconnect(); railObserver = null; }
+		if (railSentinel && railSentinel.parentNode) {
+			railSentinel.parentNode.removeChild(railSentinel);
+			railSentinel = null;
+		}
+	}
+
+	// ── Utilities ─────────────────────────────────────────────────────
 
 	function esc(str) {
 		return String(str || '')

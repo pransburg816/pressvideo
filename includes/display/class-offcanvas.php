@@ -72,6 +72,7 @@ class PV_Offcanvas {
 				'accent'    => pv_resolve_accent_color( $p->ID ),
 				'thumb'     => get_the_post_thumbnail_url( $p->ID, 'medium' ) ?: '',
 				'duration'  => get_post_meta( $p->ID, '_pv_duration', true ) ?: '',
+				'permalink' => get_permalink( $p->ID ),
 			];
 		}
 		wp_reset_postdata();

@@ -36,6 +36,7 @@ class PV_Video_Grid {
 				'accent'    => pv_resolve_accent_color( $post->ID ),
 				'thumb'     => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '',
 				'duration'  => get_post_meta( $post->ID, '_pv_duration', true ) ?: '',
+				'permalink' => get_permalink( $post->ID ),
 			];
 		}
 
@@ -99,6 +100,7 @@ class PV_Video_Grid {
 					        data-title="<?php echo esc_attr( $post->post_title ); ?>"
 					        data-description="<?php echo esc_attr( $desc ); ?>"
 					        data-accent="<?php echo esc_attr( $accent ); ?>"
+					        data-permalink="<?php echo esc_attr( get_permalink( $post->ID ) ); ?>"
 					        data-playlist="<?php echo esc_attr( $pl_json ); ?>">
 						<svg class="pv-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> <?php esc_html_e( 'Watch Now', 'pv-youtube-importer' ); ?>
 					</button>

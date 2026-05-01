@@ -27,6 +27,19 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			<p class="pv-desc"></p>
 		</div>
 
+		<div class="pv-controls">
+			<button class="pv-autoplay-toggle" type="button" aria-pressed="true"
+			        title="<?php esc_attr_e( 'Toggle continuous play', 'pv-youtube-importer' ); ?>">
+				<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+					<path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+				</svg>
+				<span class="pv-autoplay-toggle__label"><?php esc_html_e( 'Autoplay', 'pv-youtube-importer' ); ?></span>
+				<span class="pv-autoplay-toggle__track" aria-hidden="true">
+					<span class="pv-autoplay-toggle__thumb"></span>
+				</span>
+			</button>
+		</div>
+
 		<div class="pv-rail" aria-label="<?php esc_attr_e( 'Playlist', 'pv-youtube-importer' ); ?>" role="list"></div>
 
 		<div class="pv-nav" aria-label="<?php esc_attr_e( 'Video navigation', 'pv-youtube-importer' ); ?>">
