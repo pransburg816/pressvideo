@@ -346,7 +346,6 @@ class PV_Plugin {
 						[ 'id' => 'watch-depth',  'label' => 'Engagement',           'icon' => $svgi( '<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>' ) ],
 						[ 'id' => 'yt-retention', 'label' => 'Lowest Retention',     'icon' => $svgi( '<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>' ) ],
 						[ 'id' => 'all-videos',   'label' => 'YouTube Performance',  'icon' => $svgi( '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>' ) ],
-						[ 'id' => 'integrations', 'label' => 'Integrations',         'icon' => $svgi( '<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>' ) ],
 					];
 					?>
 					<div class="pv-aside__focus-divider"></div>
