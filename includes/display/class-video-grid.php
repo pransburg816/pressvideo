@@ -89,6 +89,9 @@ class PV_Video_Grid {
 			<?php if ( $duration ) : ?>
 				<span class="pv-card__duration"><?php echo esc_html( $duration ); ?></span>
 			<?php endif; ?>
+			<?php if ( $is_music ) : ?>
+				<span class="pv-music-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg> Music</span>
+			<?php endif; ?>
 			<div class="pv-card__footer">
 				<div class="pv-card__title"><?php echo esc_html( $post->post_title ); ?></div>
 			</div>

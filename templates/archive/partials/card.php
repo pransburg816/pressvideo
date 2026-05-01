@@ -29,6 +29,7 @@ $album     = get_post_meta( get_the_ID(), '_pv_album', true ) ?: '';
      style="--pv-accent:<?php echo esc_attr( $accent ); ?>;<?php if ( $thumb_url ) : ?> background-image: linear-gradient(to top right,rgba(0,0,0,.75),rgba(0,0,0,.05)),url(<?php echo esc_url( $thumb_url ); ?>);<?php endif; ?>">
 	<?php if ( $pv_cards_cat && $cat_name ) : ?><span class="pv-card__cat"><?php echo esc_html( $cat_name ); ?></span><?php endif; ?>
 	<?php if ( $duration ) : ?><span class="pv-card__duration"><?php echo esc_html( $duration ); ?></span><?php endif; ?>
+	<?php if ( $is_music ) : ?><span class="pv-music-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg> Music</span><?php endif; ?>
 	<div class="pv-card__footer">
 		<div class="pv-card__title"><?php the_title(); ?></div>
 		<?php if ( ! empty( $pv_cards_views ) && $views > 0 ) : ?>

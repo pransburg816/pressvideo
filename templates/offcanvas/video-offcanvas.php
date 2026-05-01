@@ -27,8 +27,6 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 		<div class="pv-meta">
 			<h3 class="pv-title"></h3>
-			<p class="pv-artist" hidden></p>
-			<span class="pv-album-pill" hidden></span>
 			<p class="pv-desc"></p>
 		</div>
 
@@ -107,37 +105,107 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			</button>
 		</div>
 
-		<!-- Mini-player bar — visible only when pv-offcanvas--minimized is active -->
-		<div class="pv-mini-bar" aria-hidden="true">
-			<div class="pv-mini-bar__progress"><div class="pv-mini-bar__progress-fill"></div></div>
-			<div class="pv-mini-bar__body">
-				<div class="pv-mini-bar__art">
-					<img class="pv-mini-bar__thumb" src="" alt="">
-				</div>
-				<div class="pv-mini-bar__info">
-					<span class="pv-mini-bar__title"></span>
-					<span class="pv-mini-bar__artist"></span>
-				</div>
-				<div class="pv-mini-bar__controls">
-					<button class="pv-mini-prev" type="button" aria-label="<?php esc_attr_e( 'Previous', 'pv-youtube-importer' ); ?>">
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-					</button>
-					<button class="pv-mini-play" type="button" aria-label="<?php esc_attr_e( 'Play / Pause', 'pv-youtube-importer' ); ?>">
-						<svg class="pv-mini-play__icon--play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-						<svg class="pv-mini-play__icon--pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-					</button>
-					<button class="pv-mini-next" type="button" aria-label="<?php esc_attr_e( 'Next', 'pv-youtube-importer' ); ?>">
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-					</button>
-				</div>
-				<button class="pv-mini-expand" type="button" aria-label="<?php esc_attr_e( 'Expand player', 'pv-youtube-importer' ); ?>">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
-				</button>
-				<button class="pv-mini-close" type="button" aria-label="<?php esc_attr_e( 'Stop and close', 'pv-youtube-importer' ); ?>">
-					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-				</button>
+	</div>
+</div>
+
+<!-- PressVideo Music Player — standalone, rendered after offcanvas -->
+<div id="pv-music-player" class="pvm-player" aria-hidden="true" role="dialog"
+     aria-label="<?php esc_attr_e( 'Music Player', 'pv-youtube-importer' ); ?>"
+     aria-modal="true">
+
+	<div class="pvm-backdrop"></div>
+
+	<div class="pvm-panel">
+
+		<div class="pvm-hd">
+			<button class="pvm-minimize" type="button" aria-label="<?php esc_attr_e( 'Minimize player', 'pv-youtube-importer' ); ?>">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
+			</button>
+			<span class="pvm-hd-label"><?php esc_html_e( 'Now Playing', 'pv-youtube-importer' ); ?></span>
+			<button class="pvm-close-btn" type="button" aria-label="<?php esc_attr_e( 'Close player', 'pv-youtube-importer' ); ?>">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+			</button>
+		</div>
+
+		<div class="pvm-art-section">
+			<div class="pvm-art-wrap">
+				<div class="pvm-spinner" aria-hidden="true" hidden></div>
+				<div class="pvm-iframe-holder"></div>
 			</div>
 		</div>
 
+		<div class="pvm-info">
+			<h3 class="pvm-title"></h3>
+			<p class="pvm-artist"></p>
+			<span class="pvm-album-pill" hidden></span>
+		</div>
+
+		<div class="pvm-progress-row">
+			<span class="pvm-time-cur">0:00</span>
+			<div class="pvm-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+				<div class="pvm-progress-fill"></div>
+			</div>
+			<span class="pvm-time-dur">0:00</span>
+		</div>
+
+		<div class="pvm-controls">
+			<button class="pvm-shuffle-btn" type="button" aria-pressed="false"
+			        title="<?php esc_attr_e( 'Shuffle', 'pv-youtube-importer' ); ?>"
+			        aria-label="<?php esc_attr_e( 'Shuffle', 'pv-youtube-importer' ); ?>">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+			</button>
+			<button class="pvm-prev-btn" type="button" aria-label="<?php esc_attr_e( 'Previous track', 'pv-youtube-importer' ); ?>">
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+			</button>
+			<button class="pvm-play-btn" type="button" aria-label="<?php esc_attr_e( 'Play / Pause', 'pv-youtube-importer' ); ?>">
+				<svg class="pvm-icon--play" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+				<svg class="pvm-icon--pause" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+			</button>
+			<button class="pvm-next-btn" type="button" aria-label="<?php esc_attr_e( 'Next track', 'pv-youtube-importer' ); ?>">
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+			</button>
+			<button class="pvm-loop-btn" type="button" aria-pressed="false"
+			        title="<?php esc_attr_e( 'Loop', 'pv-youtube-importer' ); ?>"
+			        aria-label="<?php esc_attr_e( 'Loop', 'pv-youtube-importer' ); ?>">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+			</button>
+		</div>
+
+		<div class="pvm-queue-section">
+			<div class="pvm-queue-hd"><span><?php esc_html_e( 'Up Next', 'pv-youtube-importer' ); ?></span></div>
+			<div class="pvm-queue-list" role="list"></div>
+		</div>
+
 	</div>
+
+	<!-- Mini-bar — visible when pvm-player has pvm-minimized class -->
+	<div class="pvm-mini-bar" aria-hidden="true">
+		<div class="pvm-mini-progress"><div class="pvm-mini-progress-fill"></div></div>
+		<div class="pvm-mini-body">
+			<div class="pvm-mini-art"><img class="pvm-mini-thumb" src="" alt=""></div>
+			<div class="pvm-mini-info">
+				<span class="pvm-mini-title"></span>
+				<span class="pvm-mini-artist"></span>
+			</div>
+			<div class="pvm-mini-controls">
+				<button class="pvm-mini-prev" type="button" aria-label="<?php esc_attr_e( 'Previous', 'pv-youtube-importer' ); ?>">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+				</button>
+				<button class="pvm-mini-play" type="button" aria-label="<?php esc_attr_e( 'Play / Pause', 'pv-youtube-importer' ); ?>">
+					<svg class="pvm-mini-icon--play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+					<svg class="pvm-mini-icon--pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+				</button>
+				<button class="pvm-mini-next" type="button" aria-label="<?php esc_attr_e( 'Next', 'pv-youtube-importer' ); ?>">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+				</button>
+			</div>
+			<button class="pvm-mini-expand" type="button" aria-label="<?php esc_attr_e( 'Expand player', 'pv-youtube-importer' ); ?>">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
+			</button>
+			<button class="pvm-mini-close" type="button" aria-label="<?php esc_attr_e( 'Stop and close', 'pv-youtube-importer' ); ?>">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+			</button>
+		</div>
+	</div>
+
 </div>
