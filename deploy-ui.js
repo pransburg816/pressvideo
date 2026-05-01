@@ -91,6 +91,7 @@ const FILES = [
 	'assets/dist/css/analytics.min.css',
 	'assets/dist/css/analytics-v2.min.css',
 	'assets/dist/css/modal.min.css',
+	'assets/dist/css/music-mode.min.css',
 	// JS
 	'assets/dist/js/admin-color-picker.min.js',
 	'assets/dist/js/offcanvas.min.js',
@@ -101,6 +102,7 @@ const FILES = [
 	'assets/dist/js/pv-tracker.min.js',
 	'assets/dist/js/analytics-admin.min.js',
 	'assets/dist/js/modal.min.js',
+	'assets/dist/js/music-mode.min.js',
 ];
 
 async function main() {
