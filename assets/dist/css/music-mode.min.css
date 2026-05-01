@@ -860,7 +860,8 @@
     /* sits above backdrop, below panel (DOM order handles stacking) */
 }
 
-.pvm-player--eq .pvm-eq-bars {
+/* Only when player is fully open (not closed, not minimized) */
+.pvm-player--eq.pvm-open:not(.pvm-minimized) .pvm-eq-bars {
     display: flex;
 }
 
