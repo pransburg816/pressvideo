@@ -44,9 +44,12 @@ function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas', bool $sh
 	$cslug  = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0]->slug : '';
 	$date   = get_the_date( 'M j, Y', $post->ID );
 	$ts     = strtotime( $post->post_date );
-	$views  = (int) get_post_meta( $post->ID, '_pv_view_count', true );
-	$title  = esc_html( $post->post_title );
-	$link   = esc_url( get_permalink( $post->ID ) );
+	$views    = (int) get_post_meta( $post->ID, '_pv_view_count', true );
+	$is_music = get_post_meta( $post->ID, '_pv_is_music', true ) ? '1' : '0';
+	$artist   = get_post_meta( $post->ID, '_pv_artist', true ) ?: '';
+	$album    = get_post_meta( $post->ID, '_pv_album', true ) ?: '';
+	$title    = esc_html( $post->post_title );
+	$link     = esc_url( get_permalink( $post->ID ) );
 	$play_svg = '<svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 
 	ob_start();
@@ -67,6 +70,10 @@ function pv_bc_card_html( WP_Post $post, string $display = 'offcanvas', bool $sh
 				        data-description=""
 				        data-accent="<?php echo esc_attr( $accent ); ?>"
 				        data-thumb="<?php echo esc_attr( $thumb ); ?>"
+				        data-permalink="<?php echo esc_attr( get_permalink( $post->ID ) ); ?>"
+				        data-is-music="<?php echo esc_attr( $is_music ); ?>"
+				        data-artist="<?php echo esc_attr( $artist ); ?>"
+				        data-album="<?php echo esc_attr( $album ); ?>"
 				        aria-label="<?php echo esc_attr( sprintf( __( 'Watch %s', 'pv-youtube-importer' ), $post->post_title ) ); ?>">
 					<?php echo $play_svg; // phpcs:ignore ?>
 				</button>
