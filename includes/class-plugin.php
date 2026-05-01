@@ -617,6 +617,9 @@ class PV_Plugin {
 					'accent'    => pv_resolve_accent_color( $_p->ID ),
 					'thumb'     => get_the_post_thumbnail_url( $_p->ID, 'medium' ) ?: '',
 					'duration'  => get_post_meta( $_p->ID, '_pv_duration', true ) ?: '',
+					'isMusic'   => (bool) get_post_meta( $_p->ID, '_pv_is_music', true ),
+					'artist'    => get_post_meta( $_p->ID, '_pv_artist', true ) ?: '',
+					'album'     => get_post_meta( $_p->ID, '_pv_album', true ) ?: '',
 				];
 			}
 			$pv_playlist_json = wp_json_encode( $_pl );
@@ -814,6 +817,9 @@ class PV_Plugin {
 					'accent'    => pv_resolve_accent_color( $_bc_p->ID ),
 					'thumb'     => get_the_post_thumbnail_url( $_bc_p->ID, 'medium' ) ?: '',
 					'duration'  => get_post_meta( $_bc_p->ID, '_pv_duration', true ) ?: '',
+					'isMusic'   => (bool) get_post_meta( $_bc_p->ID, '_pv_is_music', true ),
+					'artist'    => get_post_meta( $_bc_p->ID, '_pv_artist', true ) ?: '',
+					'album'     => get_post_meta( $_bc_p->ID, '_pv_album', true ) ?: '',
 				];
 			}
 			$_bc_playlist_json = wp_json_encode( $_bc_pl );
@@ -1039,6 +1045,19 @@ class PV_Plugin {
 			'pv-tracker',
 			PV_PLUGIN_URL . 'assets/dist/js/pv-tracker.min.js',
 			[],
+			PV_VERSION,
+			true
+		);
+		wp_enqueue_style(
+			'pv-music-mode',
+			PV_PLUGIN_URL . 'assets/dist/css/music-mode.min.css',
+			[ 'pv-offcanvas' ],
+			PV_VERSION
+		);
+		wp_enqueue_script(
+			'pv-music-mode',
+			PV_PLUGIN_URL . 'assets/dist/js/music-mode.min.js',
+			[ 'pv-offcanvas', 'pv-lazy-video' ],
 			PV_VERSION,
 			true
 		);

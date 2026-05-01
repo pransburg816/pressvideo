@@ -18,6 +18,9 @@ $cats      = get_the_terms( get_the_ID(), 'pv_category' );
 $cat       = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0] : null;
 $cat_name  = $cat ? $cat->name : '';
 $cat_slug  = $cat ? $cat->slug : '';
+$is_music  = get_post_meta( get_the_ID(), '_pv_is_music', true ) ? '1' : '0';
+$artist    = get_post_meta( get_the_ID(), '_pv_artist', true ) ?: '';
+$album     = get_post_meta( get_the_ID(), '_pv_album', true ) ?: '';
 ?>
 <div class="pv-card <?php echo $thumb_url ? '' : 'pv-card--no-thumb'; ?>"
      data-category="<?php echo esc_attr( $cat_slug ); ?>"
@@ -44,6 +47,10 @@ $cat_slug  = $cat ? $cat->slug : '';
 			        data-title="<?php echo esc_attr( get_the_title() ); ?>"
 			        data-description="<?php echo esc_attr( $excerpt ); ?>"
 			        data-accent="<?php echo esc_attr( $accent ); ?>"
+			        data-permalink="<?php echo esc_attr( get_permalink() ); ?>"
+			        data-is-music="<?php echo esc_attr( $is_music ); ?>"
+			        data-artist="<?php echo esc_attr( $artist ); ?>"
+			        data-album="<?php echo esc_attr( $album ); ?>"
 			        data-playlist="<?php echo esc_attr( $pv_playlist_json ); ?>"
 			        aria-label="<?php echo esc_attr( sprintf( __( 'Watch %s', 'pv-youtube-importer' ), get_the_title() ) ); ?>">
 				<svg class="pv-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> <?php esc_html_e( 'Watch Now', 'pv-youtube-importer' ); ?>

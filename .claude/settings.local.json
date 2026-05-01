@@ -13,7 +13,19 @@
       "Bash(git commit *)",
       "Bash(cp \"C:\\\\Users\\\\pransburg\\\\iac-dev\\\\plugins\\\\pressvideo\\\\assets\\\\src\\\\js\\\\modal.js\" \"C:\\\\Users\\\\pransburg\\\\iac-dev\\\\plugins\\\\pressvideo\\\\assets\\\\dist\\\\js\\\\modal.min.js\")",
       "Bash(cp \"C:\\\\Users\\\\pransburg\\\\iac-dev\\\\plugins\\\\pressvideo\\\\assets\\\\src\\\\js\\\\archive-filter.js\" \"C:\\\\Users\\\\pransburg\\\\iac-dev\\\\plugins\\\\pressvideo\\\\assets\\\\dist\\\\js\\\\archive-filter.min.js\")",
-      "Bash(node deploy-mu-flush.js)"
+      "Bash(node deploy-mu-flush.js)",
+      "Bash(python3 *)",
+      "Bash(git show *)",
+      "Read(//c/Users/pransburg/AppData/Local/Temp/**)",
+      "Bash(del *)",
+      "Bash(node _deploy-iac-ga4.js)",
+      "Bash(git reset *)",
+      "Bash(grep -n 'pv_yt_analytics_data\\\\|$days\\\\|sanitize_int\\\\|absint' includes/admin/class-analytics-page.php)",
+      "Bash(grep -n 'ajax_yt_data\\\\|days\\\\|$days' includes/analytics/class-analytics-tracker.php)",
+      "Bash(xargs grep *)",
+      "Bash(git checkout *)",
+      "Bash(node deploy-php.js)",
+      "Bash(git revert *)"
     ]
   }
 }

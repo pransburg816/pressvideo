@@ -27,6 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 		<div class="pv-meta">
 			<h3 class="pv-title"></h3>
+			<p class="pv-artist" hidden></p>
+			<span class="pv-album-pill" hidden></span>
 			<p class="pv-desc"></p>
 		</div>
 
@@ -103,6 +105,38 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 				<?php esc_html_e( 'Next', 'pv-youtube-importer' ); ?>
 				<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
 			</button>
+		</div>
+
+		<!-- Mini-player bar — visible only when pv-offcanvas--minimized is active -->
+		<div class="pv-mini-bar" aria-hidden="true">
+			<div class="pv-mini-bar__progress"><div class="pv-mini-bar__progress-fill"></div></div>
+			<div class="pv-mini-bar__body">
+				<div class="pv-mini-bar__art">
+					<img class="pv-mini-bar__thumb" src="" alt="">
+				</div>
+				<div class="pv-mini-bar__info">
+					<span class="pv-mini-bar__title"></span>
+					<span class="pv-mini-bar__artist"></span>
+				</div>
+				<div class="pv-mini-bar__controls">
+					<button class="pv-mini-prev" type="button" aria-label="<?php esc_attr_e( 'Previous', 'pv-youtube-importer' ); ?>">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+					</button>
+					<button class="pv-mini-play" type="button" aria-label="<?php esc_attr_e( 'Play / Pause', 'pv-youtube-importer' ); ?>">
+						<svg class="pv-mini-play__icon--play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+						<svg class="pv-mini-play__icon--pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+					</button>
+					<button class="pv-mini-next" type="button" aria-label="<?php esc_attr_e( 'Next', 'pv-youtube-importer' ); ?>">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+					</button>
+				</div>
+				<button class="pv-mini-expand" type="button" aria-label="<?php esc_attr_e( 'Expand player', 'pv-youtube-importer' ); ?>">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
+				</button>
+				<button class="pv-mini-close" type="button" aria-label="<?php esc_attr_e( 'Stop and close', 'pv-youtube-importer' ); ?>">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+				</button>
+			</div>
 		</div>
 
 	</div>

@@ -9,6 +9,7 @@ class PV_Video_Taxonomies {
 
 	public function register(): void {
 		add_action( 'init', [ $this, 'register_taxonomies' ] );
+		add_action( 'init', [ $this, 'seed_type_terms' ], 20 );
 
 		// Noindex all PV taxonomy archive pages — they are filtered views of the
 		// main archive (thin/duplicate content). The main /pv-videos/ archive
@@ -121,6 +122,28 @@ class PV_Video_Taxonomies {
 
 	public function add_color_column( array $columns ): array {
 		return array_merge( [ 'pv_color' => __( 'Color', 'pv-youtube-importer' ) ], $columns );
+	}
+
+	public function seed_type_terms(): void {
+		if ( get_option( 'pv_type_terms_seeded' ) ) return;
+
+		$terms = [
+			'Music Video',
+			'Single',
+			'Live Performance',
+			'Album Track',
+			'Podcast',
+			'Tutorial',
+			'Short Film',
+		];
+
+		foreach ( $terms as $term ) {
+			if ( ! term_exists( $term, 'pv_type' ) ) {
+				wp_insert_term( $term, 'pv_type' );
+			}
+		}
+
+		update_option( 'pv_type_terms_seeded', true );
 	}
 
 	public function render_color_column( string $out, string $column, int $term_id ): string {

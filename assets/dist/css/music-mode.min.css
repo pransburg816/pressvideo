@@ -1,0 +1,266 @@
+/**
+ * PressVideo — Music mode styles.
+ * Applied when .pv-panel--music is active or .pv-offcanvas--minimized.
+ */
+
+/* ── Music panel skin ────────────────────────────────────────────── */
+
+/* Square album-art aspect ratio */
+.pv-panel--music .pv-video-wrap {
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 0 auto;
+    max-width: min(340px, calc(100% - 32px));
+}
+
+/* Artist name — bold, muted */
+.pv-artist {
+    font-size: .8rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.7);
+    margin: 2px 0 0;
+    letter-spacing: .01em;
+}
+
+/* Album / EP pill */
+.pv-album-pill {
+    display: inline-block;
+    font-size: .7rem;
+    color: rgba(255,255,255,.5);
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+    padding: 2px 8px;
+    margin-top: 4px;
+    letter-spacing: .02em;
+}
+
+/* Slightly larger title in music mode */
+.pv-panel--music .pv-title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+/* Hide long description in music mode — art + artist/album is enough */
+.pv-panel--music .pv-desc {
+    display: none;
+}
+
+/* ── Minimized state — 72px bottom bar ───────────────────────────── */
+
+.pv-offcanvas--minimized {
+    pointer-events: none; /* backdrop covers nothing */
+}
+
+.pv-offcanvas--minimized .pv-backdrop {
+    display: none;
+}
+
+/* Full panel transforms to a slim bar pinned to bottom */
+.pv-offcanvas--minimized .pv-panel {
+    pointer-events: all;
+    border-radius: 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,.45);
+}
+
+/* Desktop: right-side panel becomes full-width bottom bar */
+@media (min-width: 768px) {
+    .pv-offcanvas--minimized .pv-panel {
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 72px !important;
+        transform: none !important;
+        max-width: none;
+        overflow: hidden;
+    }
+}
+
+/* Mobile: bottom-sheet panel stays translateY-based, shrinks to 72px */
+@media (max-width: 767px) {
+    .pv-offcanvas--minimized .pv-panel {
+        transform: translateY(calc(100% - 72px)) !important;
+        overflow: hidden;
+    }
+}
+
+/* Hide everything inside panel except mini-bar when minimized */
+.pv-offcanvas--minimized .pv-panel-hd,
+.pv-offcanvas--minimized .pv-video-wrap,
+.pv-offcanvas--minimized .pv-meta,
+.pv-offcanvas--minimized .pv-player-controls,
+.pv-offcanvas--minimized .pv-rail-hd,
+.pv-offcanvas--minimized .pv-rail-search,
+.pv-offcanvas--minimized .pv-rail,
+.pv-offcanvas--minimized .pv-nav {
+    display: none !important;
+}
+
+/* Keep iframe off-screen but in DOM so audio continues */
+.pv-offcanvas--minimized .pv-video-wrap {
+    display: block !important;
+    position: fixed !important;
+    left: -10000px !important;
+    top: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    visibility: hidden;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Show mini-bar */
+.pv-offcanvas--minimized .pv-mini-bar {
+    display: flex;
+    flex-direction: column;
+    height: 72px;
+    overflow: hidden;
+}
+
+/* ── Mini-bar layout ─────────────────────────────────────────────── */
+
+/* Hidden by default */
+.pv-mini-bar {
+    display: none;
+    flex-direction: column;
+    background: transparent;
+    flex-shrink: 0;
+}
+
+/* Thin progress line at top of bar */
+.pv-mini-bar__progress {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,.1);
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.pv-mini-bar__progress-fill {
+    height: 100%;
+    background: var(--pv-accent, #4f46e5);
+    width: 0%;
+    transition: width .5s linear;
+    pointer-events: none;
+}
+
+/* Main content row */
+.pv-mini-bar__body {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Square album art thumbnail */
+.pv-mini-bar__art {
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255,255,255,.08);
+}
+
+.pv-mini-bar__thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Title + artist stack */
+.pv-mini-bar__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pv-mini-bar__title {
+    font-size: .8rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.pv-mini-bar__artist {
+    font-size: .7rem;
+    color: rgba(255,255,255,.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+/* Playback controls cluster */
+.pv-mini-bar__controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.pv-mini-prev,
+.pv-mini-next,
+.pv-mini-play,
+.pv-mini-expand,
+.pv-mini-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,.65);
+    padding: 6px;
+    border-radius: 50%;
+    transition: background .15s, color .15s;
+    flex-shrink: 0;
+}
+
+.pv-mini-prev:hover,
+.pv-mini-next:hover,
+.pv-mini-play:hover,
+.pv-mini-expand:hover,
+.pv-mini-close:hover {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+}
+
+/* Play button slightly larger */
+.pv-mini-play {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,.1);
+    color: #fff;
+}
+
+.pv-mini-play:hover {
+    background: var(--pv-accent, #4f46e5);
+}
+
+/* Pause icon hidden by default; swaps with play icon */
+.pv-mini-play__icon--pause {
+    display: none;
+}
+
+.pv-mini-bar--playing .pv-mini-play__icon--play {
+    display: none;
+}
+
+.pv-mini-bar--playing .pv-mini-play__icon--pause {
+    display: block;
+}

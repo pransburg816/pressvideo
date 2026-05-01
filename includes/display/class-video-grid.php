@@ -37,6 +37,9 @@ class PV_Video_Grid {
 				'thumb'     => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '',
 				'duration'  => get_post_meta( $post->ID, '_pv_duration', true ) ?: '',
 				'permalink' => get_permalink( $post->ID ),
+				'isMusic'   => (bool) get_post_meta( $post->ID, '_pv_is_music', true ),
+				'artist'    => get_post_meta( $post->ID, '_pv_artist', true ) ?: '',
+				'album'     => get_post_meta( $post->ID, '_pv_album', true ) ?: '',
 			];
 		}
 
@@ -64,6 +67,9 @@ class PV_Video_Grid {
 		$duration  = get_post_meta( $post->ID, '_pv_duration', true );
 		$embed_url = 'https://www.youtube.com/embed/' . $youtube_id;
 		$desc      = wp_trim_words( get_the_excerpt( $post ) ?: $post->post_content, 30 );
+		$is_music  = (bool) get_post_meta( $post->ID, '_pv_is_music', true );
+		$artist    = get_post_meta( $post->ID, '_pv_artist', true ) ?: '';
+		$album     = get_post_meta( $post->ID, '_pv_album', true ) ?: '';
 
 		$cats     = get_the_terms( $post->ID, 'pv_category' );
 		$cat_name = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0]->name : '';
@@ -101,6 +107,9 @@ class PV_Video_Grid {
 					        data-description="<?php echo esc_attr( $desc ); ?>"
 					        data-accent="<?php echo esc_attr( $accent ); ?>"
 					        data-permalink="<?php echo esc_attr( get_permalink( $post->ID ) ); ?>"
+					        data-is-music="<?php echo $is_music ? '1' : '0'; ?>"
+					        data-artist="<?php echo esc_attr( $artist ); ?>"
+					        data-album="<?php echo esc_attr( $album ); ?>"
 					        data-playlist="<?php echo esc_attr( $pl_json ); ?>">
 						<svg class="pv-play-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg> <?php esc_html_e( 'Watch Now', 'pv-youtube-importer' ); ?>
 					</button>

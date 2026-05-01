@@ -43,6 +43,10 @@ class PV_Video_Meta {
 		$channel_id   = get_post_meta( $post->ID, '_pv_channel_id',   true );
 		$imported_at  = get_post_meta( $post->ID, '_pv_imported_at',  true );
 		$watch_layout = get_post_meta( $post->ID, '_pv_watch_layout', true ) ?: 'inherit';
+		$is_music     = get_post_meta( $post->ID, '_pv_is_music',     true );
+		$artist       = get_post_meta( $post->ID, '_pv_artist',       true );
+		$album        = get_post_meta( $post->ID, '_pv_album',        true );
+		$track_num    = absint( get_post_meta( $post->ID, '_pv_track_number', true ) );
 		?>
 		<table class="form-table pv-meta-table">
 			<tr>
@@ -81,6 +85,53 @@ class PV_Video_Meta {
 					       class="regular-text" min="0" />
 				</td>
 			</tr>
+			<tr>
+				<!-- Music fields -->
+			<tr>
+				<th><label for="pv_is_music"><?php esc_html_e( 'Music Content', 'pv-youtube-importer' ); ?></label></th>
+				<td>
+					<label>
+						<input type="checkbox" id="pv_is_music" name="pv_is_music" value="1" <?php checked( $is_music, '1' ); ?> />
+						<?php esc_html_e( 'This is a music video / audio track', 'pv-youtube-importer' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Enables the music panel skin and persistent mini-player.', 'pv-youtube-importer' ); ?></p>
+				</td>
+			</tr>
+			<tr class="pv-music-field"<?php echo $is_music ? '' : ' style="display:none"'; ?>>
+				<th><label for="pv_artist"><?php esc_html_e( 'Artist', 'pv-youtube-importer' ); ?></label></th>
+				<td>
+					<input type="text" id="pv_artist" name="pv_artist"
+					       value="<?php echo esc_attr( $artist ); ?>"
+					       class="regular-text" placeholder="<?php esc_attr_e( 'Artist name', 'pv-youtube-importer' ); ?>" />
+				</td>
+			</tr>
+			<tr class="pv-music-field"<?php echo $is_music ? '' : ' style="display:none"'; ?>>
+				<th><label for="pv_album"><?php esc_html_e( 'Album / EP', 'pv-youtube-importer' ); ?></label></th>
+				<td>
+					<input type="text" id="pv_album" name="pv_album"
+					       value="<?php echo esc_attr( $album ); ?>"
+					       class="regular-text" placeholder="<?php esc_attr_e( 'Album or EP title', 'pv-youtube-importer' ); ?>" />
+				</td>
+			</tr>
+			<tr class="pv-music-field"<?php echo $is_music ? '' : ' style="display:none"'; ?>>
+				<th><label for="pv_track_number"><?php esc_html_e( 'Track #', 'pv-youtube-importer' ); ?></label></th>
+				<td>
+					<input type="number" id="pv_track_number" name="pv_track_number"
+					       value="<?php echo esc_attr( $track_num ?: '' ); ?>"
+					       class="small-text" min="1" max="999" />
+				</td>
+			</tr>
+			<script>
+			(function(){
+				var cb = document.getElementById('pv_is_music');
+				if (!cb) return;
+				cb.addEventListener('change', function(){
+					document.querySelectorAll('.pv-music-field').forEach(function(r){
+						r.style.display = cb.checked ? '' : 'none';
+					});
+				});
+			}());
+			</script>
 			<tr>
 				<th style="vertical-align:top;padding-top:12px;">
 					<?php esc_html_e( 'Watch Page Layout', 'pv-youtube-importer' ); ?>
@@ -268,6 +319,21 @@ class PV_Video_Meta {
 			if ( in_array( $width, [ 'full', 'wide', 'medium', 'narrow' ], true ) ) {
 				update_post_meta( $post_id, '_pv_watch_width', $width );
 			}
+		}
+
+		// Music fields.
+		update_post_meta( $post_id, '_pv_is_music', isset( $_POST['pv_is_music'] ) ? '1' : '' );
+
+		if ( isset( $_POST['pv_artist'] ) ) {
+			update_post_meta( $post_id, '_pv_artist', sanitize_text_field( wp_unslash( $_POST['pv_artist'] ) ) );
+		}
+
+		if ( isset( $_POST['pv_album'] ) ) {
+			update_post_meta( $post_id, '_pv_album', sanitize_text_field( wp_unslash( $_POST['pv_album'] ) ) );
+		}
+
+		if ( isset( $_POST['pv_track_number'] ) ) {
+			update_post_meta( $post_id, '_pv_track_number', absint( $_POST['pv_track_number'] ) );
 		}
 	}
 }
