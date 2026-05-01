@@ -858,8 +858,9 @@
     position: absolute;
     inset: 0;
     align-items: flex-end;
+    justify-content: space-between;
     gap: 3px;
-    padding: 0 3px;
+    padding: 0 6px;
     pointer-events: none;
     overflow: hidden;
     z-index: 0;
@@ -882,12 +883,12 @@
 }
 
 .pvm-eq-bar {
-    flex: 1;
-    border-radius: 3px 3px 0 0;
+    flex: 0 0 4px;
+    border-radius: 2px 2px 0 0;
     background: var(--pv-accent, #4f46e5);
-    opacity: .22;
+    opacity: .06;
     transform-origin: bottom center;
-    transform: scaleY(0.22); /* visible at rest */
+    transform: scaleY(0.22);
     animation: pvm-eq-bounce var(--pvm-eq-dur, .6s) ease-in-out infinite alternate;
     animation-play-state: paused;
 }
@@ -928,8 +929,9 @@
     position: absolute;
     inset: 0;
     align-items: flex-end;
+    justify-content: space-between;
     gap: 2px;
-    padding: 0 2px;
+    padding: 0 4px;
     pointer-events: none;
     overflow: hidden;
     z-index: 0;
@@ -940,11 +942,11 @@
 }
 
 .pvm-mini-eq-bar {
-    flex: 1;
+    flex: 0 0 2px;
     height: 58px;
-    border-radius: 2px 2px 0 0;
+    border-radius: 1px 1px 0 0;
     background: var(--pv-accent, #4f46e5);
-    opacity: .20;
+    opacity: .22;
     transform-origin: bottom center;
     transform: scaleY(0.18);
     animation: pvm-eq-bounce var(--pvm-mini-eq-dur, .6s) ease-in-out infinite alternate;
