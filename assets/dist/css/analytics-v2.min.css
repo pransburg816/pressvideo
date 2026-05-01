@@ -2077,7 +2077,9 @@ body.pva-page .pva-empty__graphic circle:first-child {
 .pva-coach-move__meta { flex: 1; min-width: 0; }
 
 .pva-coach-move__type {
-	display: block;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
 	font-size: 0.65rem;
 	font-weight: 700;
 	text-transform: uppercase;
@@ -2085,6 +2087,15 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	color: var(--move-clr, #818cf8);
 	margin-bottom: 3px;
 	opacity: 0.85;
+}
+.pva-coach-move__ai-spark {
+	flex-shrink: 0;
+	opacity: 0.9;
+	animation: pva-spark-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes pva-spark-pop {
+	from { transform: scale(0) rotate(-20deg); opacity: 0; }
+	to   { transform: scale(1) rotate(0deg);   opacity: 0.9; }
 }
 
 .pva-coach-move__title {
