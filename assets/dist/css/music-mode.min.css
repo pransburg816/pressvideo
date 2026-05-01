@@ -607,6 +607,7 @@
     height: 72px;
     width: 100%;
     overflow: hidden;
+    position: relative;
 }
 
 .pvm-player.pvm-minimized .pvm-mini-bar {
@@ -620,6 +621,8 @@
     background: rgba(255,255,255,.1);
     flex-shrink: 0;
     cursor: pointer;
+    position: relative;
+    z-index: 1;
 }
 
 .pvm-mini-progress-fill {
@@ -637,6 +640,8 @@
     padding: 0 12px;
     flex: 1;
     min-width: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .pvm-mini-art {
@@ -847,7 +852,7 @@
     letter-spacing: .02em;
 }
 
-/* ── Equalizer bars — full-width ambient layer behind the panel ──── */
+/* ── Equalizer bars — full-width ambient layer inside the panel ──── */
 .pvm-eq-bars {
     display: none;
     position: absolute;
@@ -857,12 +862,23 @@
     padding: 0 3px;
     pointer-events: none;
     overflow: hidden;
-    /* sits above backdrop, below panel (DOM order handles stacking) */
+    z-index: 0;
 }
 
 /* Only when player is fully open (not closed, not minimized) */
 .pvm-player--eq.pvm-open:not(.pvm-minimized) .pvm-eq-bars {
     display: flex;
+}
+
+/* Panel content sits above the ambient bars */
+.pvm-art-section,
+.pvm-info,
+.pvm-progress-row,
+.pvm-volume-row,
+.pvm-controls,
+.pvm-queue-section {
+    position: relative;
+    z-index: 1;
 }
 
 .pvm-eq-bar {
@@ -905,3 +921,50 @@
     from { transform: scaleY(0.22); }
     to   { transform: scaleY(1);    }
 }
+
+/* ── Mini-bar equalizer bars ─────────────────────────────────────── */
+.pvm-mini-eq-bars {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 0 2px;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.pvm-player--eq.pvm-minimized .pvm-mini-eq-bars {
+    display: flex;
+}
+
+.pvm-mini-eq-bar {
+    flex: 1;
+    height: 58px;
+    border-radius: 2px 2px 0 0;
+    background: var(--pv-accent, #4f46e5);
+    opacity: .20;
+    transform-origin: bottom center;
+    transform: scaleY(0.18);
+    animation: pvm-eq-bounce var(--pvm-mini-eq-dur, .6s) ease-in-out infinite alternate;
+    animation-play-state: paused;
+}
+
+.pvm-player--eq.pvm-minimized.pvm-player--playing .pvm-mini-eq-bar {
+    animation-play-state: running;
+}
+
+/* 12 bars — varied durations + staggered delays */
+.pvm-mini-eq-bar:nth-child(1)  { --pvm-mini-eq-dur: .52s; animation-delay: 0s;    }
+.pvm-mini-eq-bar:nth-child(2)  { --pvm-mini-eq-dur: .68s; animation-delay: .08s;  }
+.pvm-mini-eq-bar:nth-child(3)  { --pvm-mini-eq-dur: .44s; animation-delay: .16s;  }
+.pvm-mini-eq-bar:nth-child(4)  { --pvm-mini-eq-dur: .62s; animation-delay: .04s;  }
+.pvm-mini-eq-bar:nth-child(5)  { --pvm-mini-eq-dur: .50s; animation-delay: .12s;  }
+.pvm-mini-eq-bar:nth-child(6)  { --pvm-mini-eq-dur: .70s; animation-delay: .20s;  }
+.pvm-mini-eq-bar:nth-child(7)  { --pvm-mini-eq-dur: .46s; animation-delay: .06s;  }
+.pvm-mini-eq-bar:nth-child(8)  { --pvm-mini-eq-dur: .66s; animation-delay: .14s;  }
+.pvm-mini-eq-bar:nth-child(9)  { --pvm-mini-eq-dur: .54s; animation-delay: .02s;  }
+.pvm-mini-eq-bar:nth-child(10) { --pvm-mini-eq-dur: .42s; animation-delay: .18s;  }
+.pvm-mini-eq-bar:nth-child(11) { --pvm-mini-eq-dur: .64s; animation-delay: .10s;  }
+.pvm-mini-eq-bar:nth-child(12) { --pvm-mini-eq-dur: .58s; animation-delay: .22s;  }

@@ -37,17 +37,15 @@
 .pv-vtext__label {
 	writing-mode: vertical-lr;
 	transform: rotate(180deg);
-	font-size: min(11vw, 140px);
+	font-size: min(11vw, 200px);
 	font-weight: 900;
-	letter-spacing: .12em;
 	text-transform: uppercase;
 	white-space: nowrap;
 	line-height: .9;
 	opacity: .18;
-	color: var(--pv-vtext-color, #ffffff); /* default white — readable on dark bg */
+	color: var(--pv-vtext-color, #ffffff);
 	max-height: 80vh;
 	overflow: hidden;
-	text-shadow: 0 0 100px currentColor;
 }
 
 /* ── Hero header ────────────────────────────────────────────────── */
