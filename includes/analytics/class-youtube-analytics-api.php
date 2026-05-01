@@ -45,24 +45,24 @@ class PV_YouTube_Analytics_API {
 			'ids'        => 'channel==MINE',
 			'startDate'  => $start_date,
 			'endDate'    => $end_date,
-			'metrics'    => 'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,comments,shares,subscribersGained,subscribersLost,impressions,impressionClickThroughRate',
+			'metrics'    => 'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,comments,shares,subscribersGained,subscribersLost',
 		] );
 
 		if ( empty( $response['rows'][0] ) ) return [];
 
 		$row    = $response['rows'][0];
 		$result = [
-			'views'             => (int)   ( $row[0]  ?? 0 ),
-			'watch_minutes'     => (int)   ( $row[1]  ?? 0 ),
-			'avg_view_duration' => (float) ( $row[2]  ?? 0 ),
+			'views'             => (int)   ( $row[0] ?? 0 ),
+			'watch_minutes'     => (int)   ( $row[1] ?? 0 ),
+			'avg_view_duration' => (float) ( $row[2] ?? 0 ),
 			'avg_view_pct'      => round( (float) ( $row[3] ?? 0 ), 1 ),
-			'likes'             => (int)   ( $row[4]  ?? 0 ),
-			'comments'          => (int)   ( $row[5]  ?? 0 ),
-			'shares'            => (int)   ( $row[6]  ?? 0 ),
-			'subs_gained'       => (int)   ( $row[7]  ?? 0 ),
-			'subs_lost'         => (int)   ( $row[8]  ?? 0 ),
-			'impressions'       => (int)   ( $row[9]  ?? 0 ),
-			'ctr'               => round( (float) ( $row[10] ?? 0 ), 2 ),
+			'likes'             => (int)   ( $row[4] ?? 0 ),
+			'comments'          => (int)   ( $row[5] ?? 0 ),
+			'shares'            => (int)   ( $row[6] ?? 0 ),
+			'subs_gained'       => (int)   ( $row[7] ?? 0 ),
+			'subs_lost'         => (int)   ( $row[8] ?? 0 ),
+			'impressions'       => 0,
+			'ctr'               => 0.0,
 		];
 
 		set_transient( $cache_key, $result, self::CACHE_TTL );
@@ -85,7 +85,7 @@ class PV_YouTube_Analytics_API {
 			'ids'       => 'channel==MINE',
 			'startDate' => $start_date,
 			'endDate'   => $end_date,
-			'metrics'   => 'views,estimatedMinutesWatched,averageViewPercentage,subscribersGained,subscribersLost,impressions,impressionClickThroughRate',
+			'metrics'   => 'views,estimatedMinutesWatched,averageViewPercentage,subscribersGained,subscribersLost',
 		] );
 
 		if ( empty( $response['rows'][0] ) ) return [];
@@ -97,8 +97,8 @@ class PV_YouTube_Analytics_API {
 			'avg_view_pct'  => round( (float) ( $row[2] ?? 0 ), 1 ),
 			'subs_gained'   => (int)   ( $row[3] ?? 0 ),
 			'subs_lost'     => (int)   ( $row[4] ?? 0 ),
-			'impressions'   => (int)   ( $row[5] ?? 0 ),
-			'ctr'           => round( (float) ( $row[6] ?? 0 ), 2 ),
+			'impressions'   => 0,
+			'ctr'           => 0.0,
 		];
 
 		set_transient( $cache_key, $result, self::CACHE_TTL );
