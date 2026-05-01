@@ -1488,10 +1488,12 @@
 
 .pv-search-input {
 	flex: 1;
-	background: none;
+	background: transparent !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
 	border: none;
 	outline: none;
-	color: #fff;
+	color: #fff !important;
 	font-size: 0.875rem;
 	padding: 10px 0;
 	font-family: inherit;
@@ -1699,10 +1701,12 @@
 
 .pv-bc-search-input {
 	flex: 1;
-	background: none;
+	background: transparent !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
 	border: none;
 	outline: none;
-	color: #fff;
+	color: #fff !important;
 	font-size: 0.88rem;
 	padding: 10px 0;
 	-webkit-appearance: none;

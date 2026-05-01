@@ -68,7 +68,7 @@
 /* ─── Rail search ─────────────────────────────────────────────── */
 .pv-rail-search{display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;background:rgba(0,0,0,.28)}
 .pv-rail-search__icon{flex-shrink:0;color:rgba(255,255,255,.28)}
-.pv-rail-search__input{flex:1;background:none;border:none;outline:none;color:rgba(255,255,255,.8);font-size:.78rem;padding:0;min-width:0}
+.pv-rail-search__input{flex:1;background:transparent !important;background-color:transparent !important;box-shadow:none !important;border:none;outline:none;color:rgba(255,255,255,.8) !important;font-size:.78rem;padding:0;min-width:0;-webkit-appearance:none;appearance:none}
 .pv-rail-search__input::placeholder{color:rgba(255,255,255,.22)}
 .pv-rail-search__clear{display:flex;align-items:center;justify-content:center;width:18px;height:18px;background:rgba(255,255,255,.1);border:none;border-radius:50%;cursor:pointer;color:rgba(255,255,255,.5);padding:0;flex-shrink:0;transition:background .15s,color .15s}
 .pv-rail-search__clear:hover{background:rgba(255,255,255,.2);color:#fff}
