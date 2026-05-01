@@ -6,7 +6,7 @@
 	'use strict';
 
 	const CANVAS_ID   = 'pv-canvas';
-	const AUTOPLAY_MS = 2500;
+	const AUTOPLAY_MS = 3000;
 
 	let canvas, holder, spinner;
 	let spinnerTimer = null;
@@ -54,41 +54,48 @@
 
 		showSpinner();
 
-		const url = new URL(embedUrl.replace('watch?v=', 'embed/'));
-		url.searchParams.set('autoplay',       '1');
-		url.searchParams.set('rel',            '0');
-		url.searchParams.set('modestbranding', '1');
-		url.searchParams.set('playsinline',    '1');
-		url.searchParams.set('enablejsapi',    '1');
+		// Extract video ID from embed URL
+		const url  = new URL(embedUrl.replace('watch?v=', 'embed/'));
+		const ytId = url.pathname.split('/').pop().split('?')[0];
+		if (!ytId) { hideSpinner(); return; }
 
-		const iframe       = document.createElement('iframe');
-		iframe.id          = 'pv-yt-iframe';
-		iframe.src         = url.toString();
-		iframe.allow       = 'autoplay; fullscreen; picture-in-picture';
-		iframe.allowFullscreen = true;
-		iframe.title       = canvas.querySelector('.pv-title')?.textContent || 'Video';
+		if (ytPlayer) { try { ytPlayer.destroy(); } catch (e) {} ytPlayer = null; }
 
-		iframe.addEventListener('load', function () {
-			hideSpinner();
-			holder.dataset.loaded = '1';
-		});
+		// Create a div for YT.Player to mount into — more reliable than wrapping an existing iframe
+		const div = document.createElement('div');
+		div.id    = 'pv-yt-player';
+		div.style.cssText = 'width:100%;height:100%';
+		holder.innerHTML = '';
+		holder.appendChild(div);
+
 		spinnerTimer = setTimeout(function () {
 			hideSpinner();
 			holder.dataset.loaded = '1';
 		}, AUTOPLAY_MS);
 
-		if (ytPlayer) { try { ytPlayer.destroy(); } catch (e) {} ytPlayer = null; }
-
-		holder.innerHTML = '';
-		holder.appendChild(iframe);
-
-		// Bind YT.Player to detect video end
 		whenYtReady(function () {
-			var el = document.getElementById('pv-yt-iframe');
+			const el = document.getElementById('pv-yt-player');
 			if (!el || !el.isConnected) return;
 			try {
-				ytPlayer = new YT.Player('pv-yt-iframe', {
+				ytPlayer = new YT.Player('pv-yt-player', {
+					videoId: ytId,
+					width:   '100%',
+					height:  '100%',
+					playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1 },
 					events: {
+						onReady: function () {
+							clearTimeout(spinnerTimer);
+							hideSpinner();
+							holder.dataset.loaded = '1';
+							const iframe = holder.querySelector('iframe');
+							if (iframe) {
+								iframe.style.width   = '100%';
+								iframe.style.height  = '100%';
+								iframe.style.border  = 'none';
+								iframe.style.display = 'block';
+								iframe.title = canvas.querySelector('.pv-title')?.textContent || 'Video';
+							}
+						},
 						onStateChange: function (e) {
 							if (e.data === YT.PlayerState.ENDED) {
 								canvas.dispatchEvent(new CustomEvent('pv:video-ended', { bubbles: false }));
@@ -96,13 +103,15 @@
 						},
 					},
 				});
-			} catch (err) {}
+			} catch (err) {
+				clearTimeout(spinnerTimer);
+				hideSpinner();
+			}
 		});
 
-		const ytId = url.pathname.split('/').pop() || '';
 		canvas.dispatchEvent(new CustomEvent('pv:iframe-ready', {
 			bubbles: false,
-			detail:  { iframe: iframe, youtubeId: ytId },
+			detail:  { youtubeId: ytId },
 		}));
 	}
 

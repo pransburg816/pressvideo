@@ -234,8 +234,6 @@
 			? '<img class="pv-rail__thumb" src="' + esc(slide.thumb) + '" alt="" loading="lazy">'
 			: '<div class="pv-rail__thumb pv-rail__thumb--placeholder"></div>';
 		var durHtml = slide.duration ? '<span class="pv-rail__dur">' + esc(slide.duration) + '</span>' : '';
-		var wlSaved = isWatchLater(slide.youtubeId);
-
 		item.innerHTML =
 			'<div class="pv-rail__thumb-wrap">' + thumbInner + '</div>'
 			+ '<div class="pv-rail__info">'
@@ -243,9 +241,6 @@
 			+   '<p class="pv-rail__title">' + esc(slide.title) + '</p>'
 			+   durHtml
 			+ '</div>'
-			+ '<span class="pv-rail__wl-icon' + (wlSaved ? ' pv-rail__wl-icon--saved' : '') + '" aria-hidden="true">'
-			+   '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>'
-			+ '</span>'
 			+ '<div class="pv-rail__actions">'
 			+   '<button class="pv-rail__menu-btn" type="button" aria-label="More options" aria-haspopup="true">'
 			+     '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
@@ -324,19 +319,21 @@
 			menu.appendChild(btn);
 		});
 
-		anchor.appendChild(menu);
+		var anchorRect = anchor.getBoundingClientRect();
+		menu.style.top   = (anchorRect.bottom + 4) + 'px';
+		menu.style.right = (window.innerWidth - anchorRect.right) + 'px';
+		document.body.appendChild(menu);
 		activeMenu = menu;
 
-		// Flip above the button if it overflows the panel bottom
 		requestAnimationFrame(function () {
-			if (!panel) return;
-			var r  = menu.getBoundingClientRect();
-			var pr = panel.getBoundingClientRect();
-			if (r.bottom > pr.bottom - 8) {
-				menu.style.top          = 'auto';
-				menu.style.bottom       = '100%';
-				menu.style.marginTop    = '0';
-				menu.style.marginBottom = '4px';
+			var mr = menu.getBoundingClientRect();
+			if (mr.bottom > window.innerHeight - 8) {
+				menu.style.top    = 'auto';
+				menu.style.bottom = (window.innerHeight - anchorRect.top + 4) + 'px';
+			}
+			if (mr.left < 8) {
+				menu.style.right = 'auto';
+				menu.style.left  = '8px';
 			}
 		});
 	}
@@ -408,16 +405,6 @@
 		}
 		localStorage.setItem('pv_watch_later', JSON.stringify(list));
 		showToast(adding ? 'Saved to Watch Later' : 'Removed from Watch Later');
-
-		// Reflect state in the rail icon
-		if (railEl) {
-			var items = railEl.querySelectorAll('.pv-rail__item');
-			var item  = items[idx];
-			if (item) {
-				var icon = item.querySelector('.pv-rail__wl-icon');
-				if (icon) icon.classList.toggle('pv-rail__wl-icon--saved', adding);
-			}
-		}
 	}
 
 	// ── Share ─────────────────────────────────────────────────────────
