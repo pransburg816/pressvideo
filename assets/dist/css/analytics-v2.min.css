@@ -2346,6 +2346,78 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	letter-spacing: 0.01em;
 }
 
+/* ── Coach refresh nudge strip ─────────────────────────── */
+.pva-coach__nudge {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: rgba(245,158,11,0.10);
+	border: 1px solid rgba(245,158,11,0.22);
+	border-radius: 8px;
+	padding: 9px 14px;
+	font-size: 12px;
+	color: #fbbf24;
+	margin-bottom: 16px;
+	flex-wrap: wrap;
+}
+.pva-coach__nudge-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #f59e0b;
+	flex-shrink: 0;
+	animation: pva-nudge-pulse 1.8s ease-in-out infinite;
+}
+@keyframes pva-nudge-pulse {
+	0%, 100% { opacity: 1; transform: scale(1); }
+	50%       { opacity: 0.35; transform: scale(0.7); }
+}
+.pva-coach__nudge-link {
+	background: none;
+	border: none;
+	padding: 0;
+	color: #fbbf24;
+	font-weight: 700;
+	cursor: pointer;
+	font-size: 12px;
+	font-family: inherit;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+.pva-coach__nudge-link:hover { color: #fde68a; }
+
+/* ── Refresh button nudge state (amber ring) ───────────── */
+.pva-coach__refresh-btn--nudge {
+	border-color: rgba(245,158,11,0.45) !important;
+	color: #fbbf24 !important;
+	box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
+}
+
+/* ── Refresh button disabled state (quota exhausted) ──── */
+.pva-coach__refresh-btn--disabled {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 12px;
+	font-weight: 600;
+	color: rgba(255,255,255,0.22);
+	cursor: not-allowed;
+	padding: 5px 10px;
+}
+
+/* ── Quota badge ───────────────────────────────────────── */
+.pva-coach__rl {
+	display: block;
+	font-size: 0.68rem;
+	color: rgba(255,255,255,0.28);
+	margin-top: 4px;
+	text-align: center;
+	white-space: nowrap;
+}
+.pva-coach__rl--warn     { color: #d97706; }
+.pva-coach__rl--critical { color: #ef4444; font-weight: 700; }
+.pva-coach__rl--exhausted{ color: #ef4444; font-weight: 700; }
+
 .pva-coach-move__impact {
 	margin: 0;
 	font-size: 0.73rem;

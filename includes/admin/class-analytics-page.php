@@ -191,6 +191,7 @@ class PV_Analytics_Page {
 			'ytPeriodCachedAt'     => $yt_period_cached_at,
 			'sitePeriodSummaries'  => $site_period_summaries,
 			'sitePeriodCachedAt'   => $site_period_cached_at,
+			'coachRl'              => PV_Analytics_Tracker::get_coach_rl_status(),
 			'aiDebug'              => [
 				'source'          => $ai_source,
 				'constantDefined' => defined( 'PV_ANTHROPIC_KEY' ),

@@ -153,6 +153,11 @@ class PV_Analytics_Tracker {
 			$from
 		) );
 
+		// ── Stat: Most recent play event (for coach-refresh nudge) ────
+		$last_event_ts = (int) $wpdb->get_var(
+			"SELECT UNIX_TIMESTAMP(MAX(created_at)) FROM {$table} WHERE event = 'play'"
+		);
+
 		// ── Trend: monthly for All Time, daily otherwise ──────────────
 		if ( $all_time ) {
 			$trend_rows = $wpdb->get_results( $wpdb->prepare(
@@ -327,6 +332,7 @@ class PV_Analytics_Tracker {
 				'unique_viewers' => $unique_viewers,
 				'avg_completion' => $avg_completion,
 				'engaged_plays'  => $engaged_plays,
+				'last_event_ts'  => $last_event_ts,
 			],
 			'trend'      => [
 				'labels'     => array_keys( $trend ),
@@ -343,6 +349,37 @@ class PV_Analytics_Tracker {
 			'depth'      => $depth,
 			'all_videos' => $all_videos,
 		];
+	}
+
+	// ── Coach refresh rate-limit helpers ────────────────────────────────
+	// Applies only to Platinum users running on the master PV_ANTHROPIC_KEY.
+	// Gold users have their own key, so no cap is needed.
+
+	private static function coach_rl_cap(): int {
+		return 5;
+	}
+
+	private function check_and_increment_rl(): ?array {
+		if ( ! PV_Tier::meets( 'platinum' ) || ! defined( 'PV_ANTHROPIC_KEY' ) || ! PV_ANTHROPIC_KEY ) {
+			return null;
+		}
+		$cap    = self::coach_rl_cap();
+		$rl_key = 'pv_coach_rl_' . get_current_user_id();
+		$rl     = get_transient( $rl_key ) ?: [ 'count' => 0 ];
+		if ( (int) $rl['count'] >= $cap ) {
+			return [ 'code' => 'rate_limited', 'used' => (int) $rl['count'], 'cap' => $cap ];
+		}
+		$rl['count'] = (int) $rl['count'] + 1;
+		set_transient( $rl_key, $rl, DAY_IN_SECONDS );
+		return null;
+	}
+
+	public static function get_coach_rl_status(): array {
+		if ( ! PV_Tier::meets( 'platinum' ) || ! defined( 'PV_ANTHROPIC_KEY' ) || ! PV_ANTHROPIC_KEY ) {
+			return [];
+		}
+		$rl = get_transient( 'pv_coach_rl_' . get_current_user_id() ) ?: [ 'count' => 0 ];
+		return [ 'used' => (int) $rl['count'], 'cap' => self::coach_rl_cap() ];
 	}
 
 	// ── Resolve the API key for the current user/tier ───────────────────
@@ -377,6 +414,12 @@ class PV_Analytics_Tracker {
 			return;
 		}
 
+		$rl_error = $this->check_and_increment_rl();
+		if ( $rl_error ) {
+			wp_send_json_error( $rl_error );
+			return;
+		}
+
 		$days = min( 9999, max( 7, (int) ( $_POST['days'] ?? 30 ) ) ); // phpcs:ignore
 		$data = self::get_dashboard_data( $days );
 
@@ -395,6 +438,12 @@ class PV_Analytics_Tracker {
 		if ( ! empty( $result['moves'] ) ) {
 			$result['cached_at'] = time();
 			set_transient( $transient, $result, DAY_IN_SECONDS );
+		}
+
+		$rl_status = self::get_coach_rl_status();
+		if ( $rl_status ) {
+			$result['refreshes_used'] = $rl_status['used'];
+			$result['refreshes_cap']  = $rl_status['cap'];
 		}
 
 		wp_send_json_success( $result );
@@ -474,6 +523,12 @@ class PV_Analytics_Tracker {
 			return;
 		}
 
+		$rl_error = $this->check_and_increment_rl();
+		if ( $rl_error ) {
+			wp_send_json_error( $rl_error );
+			return;
+		}
+
 		$access_token = PV_YouTube_OAuth::get_access_token();
 		if ( ! $access_token ) {
 			wp_send_json_error( 'token_failed' );
@@ -495,6 +550,12 @@ class PV_Analytics_Tracker {
 		if ( ! empty( $result['moves'] ) ) {
 			$result['cached_at'] = time();
 			set_transient( $transient, $result, DAY_IN_SECONDS );
+		}
+
+		$rl_status = self::get_coach_rl_status();
+		if ( $rl_status ) {
+			$result['refreshes_used'] = $rl_status['used'];
+			$result['refreshes_cap']  = $rl_status['cap'];
 		}
 
 		wp_send_json_success( $result );
