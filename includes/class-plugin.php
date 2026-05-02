@@ -373,6 +373,30 @@ class PV_Plugin {
 					</button>
 					<?php endforeach; ?>
 					</div>
+					<?php elseif ( 'pv_youtube_page_pv-youtube-importer-settings' === $screen->id ) :
+					$focus_settings = [
+						[ 'id' => 'yt-connection', 'label' => 'YouTube Connection',  'icon' => $svgi( '<path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.95C18.88 4 12 4 12 4s-6.88 0-8.59.47A2.78 2.78 0 001.46 6.42C1 8.12 1 11.61 1 11.61s0 3.49.46 5.19a2.78 2.78 0 001.95 1.95C5.12 19.22 12 19.22 12 19.22s6.88 0 8.59-.47a2.78 2.78 0 001.95-1.95C23 15.1 23 11.61 23 11.61s0-3.49-.46-5.19zM9.75 15.02l5.75-3.41-5.75-3.41v6.82z"/>' ) ],
+						[ 'id' => 'ga4',           'label' => 'Google Analytics 4',  'icon' => $svgi( '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>' ) ],
+						[ 'id' => 'yt-analytics',  'label' => 'YouTube Analytics',   'icon' => $svgi( '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' ) ],
+						[ 'id' => 'playlists',     'label' => 'Additional Playlists','icon' => $svgi( '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>' ) ],
+						[ 'id' => 'ai-coach',      'label' => 'AI Coach',            'icon' => $svgi( '<path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/><path d="M18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/>' ) ],
+						[ 'id' => 'url-structure', 'label' => 'URL Structure',       'icon' => $svgi( '<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>' ) ],
+					];
+					?>
+					<div class="pv-aside__focus-divider"></div>
+					<div class="pv-aside__focus-header">
+						<span class="pv-aside__focus-label"><?php esc_html_e( 'Quick Focus', 'pv-youtube-importer' ); ?></span>
+					</div>
+					<div class="pv-aside__focus-group" id="pv-focus-group-settings">
+					<?php foreach ( $focus_settings as $fi ) : ?>
+					<button class="pv-aside__nav-item pv-aside__focus-btn"
+					        type="button"
+					        data-pv-focus="<?php echo esc_attr( $fi['id'] ); ?>">
+						<?php echo $fi['icon']; // phpcs:ignore WordPress.Security.EscapeOutput -- trusted internal SVG ?>
+						<span><?php echo esc_html( $fi['label'] ); ?></span>
+					</button>
+					<?php endforeach; ?>
+					</div>
 					<?php endif; ?>
 				</nav>
 

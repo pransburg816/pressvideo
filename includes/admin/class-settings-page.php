@@ -154,16 +154,6 @@ class PV_Settings_Page {
 				<input type="hidden" name="pv_settings[archive_layout]"    value="<?php echo esc_attr( $settings['archive_layout']    ?? 'grid' ); ?>">
 				<input type="hidden" name="pv_settings[content_width]"     value="<?php echo esc_attr( $settings['content_width']     ?? '' ); ?>">
 
-				<div class="pvs-quick-nav">
-					<span class="pvs-quick-nav__label">Quick Focus</span>
-					<button class="pvs-quick-nav__item" data-target="yt-connection" type="button"><?php esc_html_e( 'YouTube Connection', 'pv-youtube-importer' ); ?></button>
-					<button class="pvs-quick-nav__item" data-target="ga4" type="button"><?php esc_html_e( 'Google Analytics 4', 'pv-youtube-importer' ); ?></button>
-					<button class="pvs-quick-nav__item" data-target="yt-analytics" type="button"><?php esc_html_e( 'YouTube Analytics', 'pv-youtube-importer' ); ?></button>
-					<button class="pvs-quick-nav__item" data-target="playlists" type="button"><?php esc_html_e( 'Additional Playlists', 'pv-youtube-importer' ); ?></button>
-					<button class="pvs-quick-nav__item" data-target="ai-coach" type="button"><?php esc_html_e( 'AI Coach', 'pv-youtube-importer' ); ?></button>
-					<button class="pvs-quick-nav__item" data-target="url-structure" type="button"><?php esc_html_e( 'URL Structure', 'pv-youtube-importer' ); ?></button>
-				</div>
-
 				<div class="pvs-two-col">
 
 				<!-- YouTube Connection -->
@@ -576,84 +566,6 @@ class PV_Settings_Page {
 
 		</div><!-- /.pvs-inner -->
 		</div><!-- /.pvs-wrap -->
-		<script>
-		(function() {
-			var focusActive = false;
-			function enterFocus(cardId) {
-				exitFocus();
-				focusActive = true;
-				var card = document.querySelector('.pv-card[data-card-id="' + cardId + '"]');
-				if (!card) return;
-				var row = card.closest('.pvs-two-col');
-				if (!row) return;
-				document.querySelectorAll('.pvs-two-col').forEach(function(r) {
-					r.style.display = r === row ? '' : 'none';
-				});
-				row.classList.add('pvs-focus-row');
-				card.classList.add('pvs-focus-card');
-				row.querySelectorAll('.pv-card').forEach(function(c) {
-					if (c !== card) c.style.display = 'none';
-				});
-				var head = card.querySelector('.pv-card__head');
-				if (head) {
-					var badge = document.createElement('span');
-					badge.className = 'pvs-focus-badge';
-					badge.textContent = 'Focused';
-					head.appendChild(badge);
-				}
-				var nav = document.querySelector('.pvs-quick-nav');
-				if (nav) {
-					var closeBtn = document.createElement('button');
-					closeBtn.id = 'pvs-focus-close';
-					closeBtn.type = 'button';
-					closeBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> <?php esc_html_e( 'Exit Focus', 'pv-youtube-importer' ); ?>';
-					closeBtn.addEventListener('click', exitFocus);
-					nav.appendChild(closeBtn);
-				}
-				document.querySelectorAll('.pvs-quick-nav__item').forEach(function(btn) {
-					btn.classList.toggle('is-active', btn.dataset.target === cardId);
-				});
-			}
-			function exitFocus() {
-				if (!focusActive) return;
-				focusActive = false;
-				document.querySelectorAll('.pvs-two-col').forEach(function(row) {
-					row.style.display = '';
-					row.classList.remove('pvs-focus-row');
-					row.querySelectorAll('.pv-card').forEach(function(c) {
-						c.style.display = '';
-						c.classList.remove('pvs-focus-card');
-					});
-				});
-				document.querySelectorAll('.pvs-focus-badge').forEach(function(b) { b.remove(); });
-				var closeBtn = document.getElementById('pvs-focus-close');
-				if (closeBtn) closeBtn.remove();
-				document.querySelectorAll('.pvs-quick-nav__item').forEach(function(btn) {
-					btn.classList.remove('is-active');
-				});
-			}
-			document.querySelectorAll('.pv-card[data-card-id] .pv-card__head').forEach(function(head) {
-				head.addEventListener('click', function() {
-					var card = head.closest('.pv-card');
-					var cardId = card.dataset.cardId;
-					if (focusActive && card.classList.contains('pvs-focus-card')) {
-						exitFocus();
-					} else {
-						enterFocus(cardId);
-					}
-				});
-			});
-			document.querySelectorAll('.pvs-quick-nav__item').forEach(function(btn) {
-				btn.addEventListener('click', function() {
-					if (btn.classList.contains('is-active')) {
-						exitFocus();
-					} else {
-						enterFocus(btn.dataset.target);
-					}
-				});
-			});
-		})();
-		</script>
 		<?php
 	}
 
