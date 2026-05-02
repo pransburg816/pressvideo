@@ -20,11 +20,22 @@ class PV_YouTube_API {
 	 * @return array|WP_Error  Array of video data arrays on success, WP_Error on failure.
 	 */
 	public function get_channel_videos( string $channel_id, int $max_results = 50 ): array|WP_Error {
-		// First get the uploads playlist ID from the channel.
-		$channel_response = $this->request( 'channels', [
-			'part' => 'contentDetails',
-			'id'   => $channel_id,
-		] );
+		// Resolve the channel lookup parameter:
+		// UC... ID  → id=
+		// @handle   → forHandle=
+		// anything else (legacy username) → forUsername=
+		if ( str_starts_with( $channel_id, 'UC' ) ) {
+			$lookup_param = [ 'id' => $channel_id ];
+		} elseif ( str_starts_with( $channel_id, '@' ) ) {
+			$lookup_param = [ 'forHandle' => $channel_id ];
+		} else {
+			$lookup_param = [ 'forUsername' => $channel_id ];
+		}
+
+		$channel_response = $this->request( 'channels', array_merge(
+			[ 'part' => 'contentDetails' ],
+			$lookup_param
+		) );
 
 		if ( is_wp_error( $channel_response ) ) return $channel_response;
 
@@ -38,7 +49,63 @@ class PV_YouTube_API {
 			return new WP_Error( 'pv_no_uploads', __( 'Could not find uploads playlist for this channel.', 'pv-youtube-importer' ) );
 		}
 
-		return $this->get_playlist_videos( $uploads_playlist, $max_results );
+		$videos = $this->get_playlist_videos( $uploads_playlist, $max_results );
+
+		// Uploads playlist inaccessible (private channel, API restriction, or edge-case env issue)
+		// — fall back to search.list which finds public videos directly by channel ID.
+		if ( is_wp_error( $videos ) ) {
+			return $this->search_channel_videos( $channel_id, $max_results );
+		}
+
+		return $videos;
+	}
+
+	/**
+	 * Fallback: fetch public videos via search.list when the uploads playlist is inaccessible.
+	 * Costs 100 quota units per page vs 1 for playlistItems, but works on restricted channels.
+	 *
+	 * @return array|WP_Error
+	 */
+	public function search_channel_videos( string $channel_id, int $max_results = 50 ): array|WP_Error {
+		$videos     = [];
+		$page_token = '';
+		$fetched    = 0;
+
+		do {
+			$params = [
+				'part'       => 'snippet',
+				'channelId'  => $channel_id,
+				'type'       => 'video',
+				'order'      => 'date',
+				'maxResults' => min( 50, $max_results - $fetched ),
+			];
+			if ( $page_token ) $params['pageToken'] = $page_token;
+
+			$response = $this->request( 'search', $params );
+			if ( is_wp_error( $response ) ) return $response;
+
+			foreach ( $response['items'] ?? [] as $item ) {
+				$video_id = $item['id']['videoId'] ?? '';
+				if ( ! $video_id ) continue;
+
+				$snippet  = $item['snippet'] ?? [];
+				$videos[] = [
+					'youtube_id'    => $video_id,
+					'title'         => $snippet['title'] ?? '',
+					'description'   => $snippet['description'] ?? '',
+					'published_at'  => $snippet['publishedAt'] ?? '',
+					'thumbnail'     => $this->best_thumbnail( $snippet['thumbnails'] ?? [] ),
+					'channel_id'    => $snippet['channelId'] ?? '',
+					'channel_title' => $snippet['channelTitle'] ?? '',
+				];
+				$fetched++;
+				if ( $fetched >= $max_results ) break;
+			}
+
+			$page_token = $response['nextPageToken'] ?? '';
+		} while ( $page_token && $fetched < $max_results );
+
+		return $videos;
 	}
 
 	/**
@@ -281,9 +348,18 @@ class PV_YouTube_API {
 		}
 
 		$params['key'] = $this->api_key;
-		$url = add_query_arg( $params, $this->base_url . $endpoint );
+		// Use http_build_query with RFC 3986 encoding — add_query_arg uses urlencode()
+		// which can produce subtly different output on Windows PHP builds.
+		$url = $this->base_url . $endpoint . '?' . http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
 
-		$response = wp_remote_get( $url, [ 'timeout' => 15 ] );
+		$response = wp_remote_get( $url, [
+			'timeout'    => 15,
+			'user-agent' => 'PressVideoPlugin/1.0',
+			'headers'    => [
+				'Accept'          => 'application/json',
+				'Accept-Encoding' => 'identity',
+			],
+		] );
 
 		if ( is_wp_error( $response ) ) return $response;
 
