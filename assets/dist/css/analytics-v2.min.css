@@ -668,6 +668,40 @@ body.pva-page .pva-stats-period:empty { display: none; }
 	line-height: 1.6;
 }
 
+.pva-empty__cta {
+	display: inline-block;
+	margin-top: 20px;
+}
+
+/* ── Chart section explanations (no-data state) ───────────── */
+.pva-explain-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 32px 24px;
+	gap: 12px;
+	min-height: 160px;
+}
+.pva-explain-placeholder svg { opacity: .35; flex-shrink: 0; fill: #818cf8; }
+.pva-explain-placeholder p { margin: 0; font-size: 0.8125rem; line-height: 1.65; max-width: 300px; color: #6b7280; }
+
+/* ── AI Coach teaser (no-data state) ─────────────────────── */
+.pva-coach-teaser { padding: 8px 4px; }
+.pva-coach-teaser__intro { font-size: 0.875rem; line-height: 1.65; margin: 0 0 14px; color: #6b7280; }
+.pva-coach-teaser__list { margin: 0 0 16px; padding-left: 18px; font-size: 0.8125rem; line-height: 1.85; color: #6b7280; }
+.pva-coach-teaser__cta { font-size: 0.8125rem; margin: 0; color: #6b7280; }
+.pva-coach-teaser__cta a { color: #4f46e5; text-decoration: underline; }
+body.pva-page .pva-explain-placeholder p { color: rgba(255,255,255,0.38); }
+body.pva-page .pva-explain-placeholder svg { fill: #818cf8; opacity: .40; }
+body.pva-page .pva-coach-teaser__intro,
+body.pva-page .pva-coach-teaser__list,
+body.pva-page .pva-coach-teaser__cta { color: rgba(255,255,255,0.48); }
+body.pva-page .pva-coach-teaser__cta a { color: #a5b4fc; }
+body.pva-page .pva-empty__title { color: rgba(255,255,255,0.9); }
+body.pva-page .pva-empty__desc  { color: rgba(255,255,255,0.58); }
+
 /* ── Google Analytics card ────────────────────────────────── */
 .pva-ga-card {
 	background: #fff;

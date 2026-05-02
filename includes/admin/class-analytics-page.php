@@ -172,6 +172,7 @@ class PV_Analytics_Page {
 			'ajaxUrl'              => admin_url( 'admin-ajax.php' ),
 			'nonce'                => wp_create_nonce( 'pv_analytics_admin' ),
 			'hasData'              => $this->has_any_data(),
+			'hasGa4'               => ! empty( $ga_id ),
 			'siteName'             => get_bloginfo( 'name' ),
 			'siteUrl'              => home_url(),
 			'aiMoves'              => $ai_moves,
@@ -565,10 +566,21 @@ class PV_Analytics_Page {
 						<path d="M22 50 L44 34 L66 22" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" opacity=".4"/>
 					</svg>
 				</div>
-				<h2 class="pva-empty__title"><?php esc_html_e( 'No plays recorded yet', 'pv-youtube-importer' ); ?></h2>
-				<p class="pva-empty__desc">
-					<?php esc_html_e( 'Share your videos with your audience and data will appear here as people watch.', 'pv-youtube-importer' ); ?>
-				</p>
+
+				<?php if ( ! $ga_id ) : ?>
+					<h2 class="pva-empty__title"><?php esc_html_e( 'Connect GA4 to start tracking', 'pv-youtube-importer' ); ?></h2>
+					<p class="pva-empty__desc">
+						<?php esc_html_e( 'PressVideo fires play and watch-depth events automatically. Add your GA4 Measurement ID in Settings and data will start flowing the next time someone watches a video.', 'pv-youtube-importer' ); ?>
+					</p>
+					<a href="<?php echo esc_url( $settings_url ); ?>" class="pva-empty__cta button button-primary">
+						<?php esc_html_e( 'Go to Settings →', 'pv-youtube-importer' ); ?>
+					</a>
+				<?php else : ?>
+					<h2 class="pva-empty__title"><?php esc_html_e( 'Waiting for your first play', 'pv-youtube-importer' ); ?></h2>
+					<p class="pva-empty__desc">
+						<?php esc_html_e( 'GA4 is connected. Share your videos — data will appear here as people watch. This page refreshes automatically.', 'pv-youtube-importer' ); ?>
+					</p>
+				<?php endif; ?>
 			</div>
 
 		</div><!-- .pva-inner -->
