@@ -13,6 +13,7 @@ class PV_Dashboard_Page {
 		add_action( 'admin_footer',                [ $this, 'print_js' ] );
 		add_filter( 'admin_body_class',            [ $this, 'body_class' ] );
 		add_action( 'wp_ajax_pv_bulk_music_by_tag', [ $this, 'bulk_music_by_tag' ] );
+	}
 
 	public function body_class( string $classes ): string {
 		$screen = get_current_screen();
