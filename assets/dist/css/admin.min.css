@@ -1761,3 +1761,10 @@ body.pvs-page .pv-slug-preview__field { background: rgba(255,255,255,0.08); }
 body.pvs-page .pv-slug-preview__field:hover { background: rgba(255,255,255,0.11); }
 body.pvs-page .pv-slug-preview input[type="text"] { color: rgba(255,255,255,0.9); }
 body.pvs-page .pv-slug-preview__edit { color: rgba(255,255,255,0.28); }
+
+/* ── Settings Quick Focus — card pulse ──────────────────────────── */
+@keyframes pvs-focus-pulse {
+	0%,100% { box-shadow: 0 4px 28px rgba(0,0,0,.4); }
+	40%     { box-shadow: 0 4px 28px rgba(0,0,0,.4), 0 0 0 5px rgba(99,102,241,.6); }
+}
+.pvs-card-focused { animation: pvs-focus-pulse 1s ease-out; }

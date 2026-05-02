@@ -491,6 +491,28 @@ class PV_Plugin {
 					});
 				}());
 
+				// ── Settings Quick Focus — explicit scroll + visual pulse ─────
+				// scrollIntoView() is unreliable when WP sets overflow:hidden on
+				// #wpwrap; window.scrollTo() targets the viewport directly.
+				var settingsGrp = document.getElementById('pv-focus-group-settings');
+				if (settingsGrp) {
+					settingsGrp.querySelectorAll('.pv-aside__focus-btn').forEach(function(btn) {
+						btn.addEventListener('click', function() {
+							var cardId = btn.getAttribute('data-pv-focus');
+							var card = document.querySelector('[data-card-id="' + cardId + '"]');
+							if (!card) return;
+							var rect = card.getBoundingClientRect();
+							var target = window.pageYOffset + rect.top - Math.max(40, (window.innerHeight - card.offsetHeight) / 2);
+							window.scrollTo({ top: target, behavior: 'smooth' });
+							setTimeout(function() {
+								card.classList.remove('pvs-card-focused');
+								void card.offsetWidth;
+								card.classList.add('pvs-card-focused');
+							}, 300);
+						});
+					});
+				}
+
 				// ── Customizer panel bridge ───────────────────────────────────
 				// Wire aside panel buttons to the existing pvc-nav-btn click logic
 				var asideBtns = document.querySelectorAll('.pv-aside__panel-btn[data-pv-panel]');
