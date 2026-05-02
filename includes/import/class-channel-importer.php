@@ -193,6 +193,16 @@ class PV_Channel_Importer {
 			if ( ! empty( $details['category_name'] ) ) {
 				wp_set_object_terms( $post_id, [ $details['category_name'] ], 'pv_category' );
 			}
+
+			// Auto-enable music mode when YouTube category is Music or tags contain "music".
+			$is_music = 'Music' === ( $details['category_name'] ?? '' );
+			if ( ! $is_music && ! empty( $details['tags'] ) ) {
+				$tag_slugs = array_map( 'strtolower', $details['tags'] );
+				$is_music  = in_array( 'music', $tag_slugs, true );
+			}
+			if ( $is_music ) {
+				update_post_meta( $post_id, '_pv_is_music', '1' );
+			}
 		}
 
 		if ( ! empty( $video_data['thumbnail'] ) ) {

@@ -66,7 +66,7 @@ class PV_Video_Meta {
 		$channel_id   = get_post_meta( $post->ID, '_pv_channel_id',   true );
 		$imported_at  = get_post_meta( $post->ID, '_pv_imported_at',  true );
 		$watch_layout = get_post_meta( $post->ID, '_pv_watch_layout', true ) ?: 'inherit';
-		$is_music     = get_post_meta( $post->ID, '_pv_is_music',     true );
+		$is_music     = pv_is_music_video( $post->ID ) ? '1' : '';
 		$artist       = get_post_meta( $post->ID, '_pv_artist',       true );
 		$album        = get_post_meta( $post->ID, '_pv_album',        true );
 		$track_num    = absint( get_post_meta( $post->ID, '_pv_track_number', true ) );
