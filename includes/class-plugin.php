@@ -491,27 +491,121 @@ class PV_Plugin {
 					});
 				}());
 
-				// ── Settings Quick Focus — explicit scroll + visual pulse ─────
-				// scrollIntoView() is unreliable when WP sets overflow:hidden on
-				// #wpwrap; window.scrollTo() targets the viewport directly.
-				var settingsGrp = document.getElementById('pv-focus-group-settings');
-				if (settingsGrp) {
-					settingsGrp.querySelectorAll('.pv-aside__focus-btn').forEach(function(btn) {
-						btn.addEventListener('click', function() {
-							var cardId = btn.getAttribute('data-pv-focus');
-							var card = document.querySelector('[data-card-id="' + cardId + '"]');
-							if (!card) return;
-							var rect = card.getBoundingClientRect();
-							var target = window.pageYOffset + rect.top - Math.max(40, (window.innerHeight - card.offsetHeight) / 2);
-							window.scrollTo({ top: target, behavior: 'smooth' });
-							setTimeout(function() {
-								card.classList.remove('pvs-card-focused');
-								void card.offsetWidth;
-								card.classList.add('pvs-card-focused');
-							}, 300);
+				// ── Settings Quick Focus — same enter/exit focus mode as analytics ──
+				(function() {
+					if (!document.getElementById('pv-focus-group-settings')) return;
+					var SVG_EXPAND  = '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
+					var SVG_RESTORE = '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>';
+					var FOCUS_MS    = 220;
+					var focusedCard = null;
+					var hiddenByFocus = [];
+
+					function exitFocusMode() {
+						if (!focusedCard) return;
+						var card = focusedCard;
+						var row  = card.closest('.pvs-two-col');
+						focusedCard = null;
+						var closeBtn = document.getElementById('pva-focus-close');
+						if (closeBtn) closeBtn.remove();
+						var btn = card.querySelector('.pva-expand-btn');
+						if (btn) {
+							btn.setAttribute('aria-label', 'Focus this block');
+							var icon = btn.querySelector('svg');
+							if (icon) icon.innerHTML = SVG_EXPAND;
+						}
+						card.style.opacity    = '0';
+						card.style.transition = 'opacity 0.18s ease';
+						var toShow = hiddenByFocus.slice();
+						hiddenByFocus = [];
+						setTimeout(function() {
+							card.style.opacity    = '';
+							card.style.transition = '';
+							var focusBadgeEl = card.querySelector('.pva-focus-badge');
+							if (focusBadgeEl) focusBadgeEl.remove();
+							card.classList.remove('pva-focus-card');
+							if (row) row.classList.remove('pva-focus-row');
+							toShow.forEach(function(el) { el.style.display = ''; el.style.opacity = '0'; });
+							requestAnimationFrame(function() {
+								requestAnimationFrame(function() {
+									toShow.forEach(function(el) { el.style.opacity = ''; });
+								});
+							});
+						}, 190);
+					}
+
+					function enterFocusMode(card) {
+						if (focusedCard) exitFocusMode();
+						focusedCard = card;
+						hiddenByFocus = [];
+						var row = card.closest('.pvs-two-col');
+						document.querySelectorAll('.pvs-two-col').forEach(function(r) {
+							if (r !== row && !r.hidden) {
+								r.style.opacity = '0';
+								r.style.pointerEvents = 'none';
+								hiddenByFocus.push(r);
+							}
 						});
+						if (row) {
+							Array.from(row.children).forEach(function(child) {
+								if (child !== card && !child.contains(card) && !child.hidden) {
+									child.style.opacity = '0';
+									child.style.pointerEvents = 'none';
+									hiddenByFocus.push(child);
+								}
+							});
+						}
+						setTimeout(function() {
+							if (focusedCard !== card) return;
+							hiddenByFocus.forEach(function(el) {
+								el.style.display       = 'none';
+								el.style.opacity       = '';
+								el.style.pointerEvents = '';
+							});
+							if (row) row.classList.add('pva-focus-row');
+							card.classList.add('pva-focus-card');
+							if (!card.querySelector('.pva-focus-badge')) {
+								var focusBadge = document.createElement('span');
+								focusBadge.className = 'pva-focus-badge';
+								focusBadge.setAttribute('aria-hidden', 'true');
+								focusBadge.textContent = 'Focused';
+								var focusHead = card.querySelector('.pv-card__head');
+								if (focusHead) focusHead.appendChild(focusBadge);
+							}
+							var eBtn = card.querySelector('.pva-expand-btn');
+							if (eBtn) {
+								eBtn.setAttribute('aria-label', 'Exit focus mode');
+								var eIcon = eBtn.querySelector('svg');
+								if (eIcon) eIcon.innerHTML = SVG_RESTORE;
+							}
+							if (!document.getElementById('pva-focus-close')) {
+								var closeBtn = document.createElement('button');
+								closeBtn.id = 'pva-focus-close';
+								closeBtn.type = 'button';
+								closeBtn.setAttribute('aria-label', 'Exit focus mode');
+								closeBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"><\/svg>Exit focus';
+								var head = card.querySelector('.pv-card__head');
+								if (head) head.appendChild(closeBtn);
+								closeBtn.addEventListener('click', exitFocusMode);
+							}
+						}, FOCUS_MS);
+					}
+
+					document.addEventListener('click', function(e) {
+						var eBtn = e.target.closest('.pva-expand-btn');
+						if (eBtn) {
+							var eBtnCard = eBtn.closest('.pv-card');
+							if (!eBtnCard) return;
+							if (focusedCard === eBtnCard) exitFocusMode(); else enterFocusMode(eBtnCard);
+							return;
+						}
+						if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input') || e.target.closest('select') || e.target.closest('#pva-focus-close')) return;
+						var head = e.target.closest('.pv-card__head');
+						if (!head) return;
+						var headCard = head.closest('.pv-card');
+						if (!headCard) return;
+						if (focusedCard === headCard) exitFocusMode(); else enterFocusMode(headCard);
 					});
-				}
+				}());
 
 				// ── Customizer panel bridge ───────────────────────────────────
 				// Wire aside panel buttons to the existing pvc-nav-btn click logic

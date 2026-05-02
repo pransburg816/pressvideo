@@ -154,7 +154,8 @@ class PV_Settings_Page {
 				<input type="hidden" name="pv_settings[archive_layout]"    value="<?php echo esc_attr( $settings['archive_layout']    ?? 'grid' ); ?>">
 				<input type="hidden" name="pv_settings[content_width]"     value="<?php echo esc_attr( $settings['content_width']     ?? '' ); ?>">
 
-				<div class="pvs-two-col">
+				<?php $_sbtn = '<button class="pva-expand-btn" type="button" aria-label="' . esc_attr__( 'Focus this block', 'pv-youtube-importer' ) . '"><svg class="pva-expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>'; ?>
+			<div class="pvs-two-col">
 
 				<!-- YouTube Connection -->
 				<div class="pv-card" data-card-id="yt-connection">
@@ -166,6 +167,7 @@ class PV_Settings_Page {
 							<h2><?php esc_html_e( 'YouTube Connection', 'pv-youtube-importer' ); ?></h2>
 							<p><?php esc_html_e( 'API credentials used for importing and fetching video data.', 'pv-youtube-importer' ); ?></p>
 						</div>
+						<?php echo $_sbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pv-card__body">
 
@@ -231,6 +233,15 @@ class PV_Settings_Page {
 							</div>
 
 						</div>
+
+						<div style="padding:0 24px 20px">
+							<button type="button" id="pv-test-connection" class="button">
+								<?php esc_html_e( 'Test Connection', 'pv-youtube-importer' ); ?>
+							</button>
+							<div id="pv-import-result" style="margin-top:8px"></div>
+							<?php wp_nonce_field( 'pv_manual_import_nonce', 'pv_import_nonce' ); ?>
+						</div>
+
 					</div>
 				</div>
 
@@ -244,6 +255,7 @@ class PV_Settings_Page {
 							<h2><?php esc_html_e( 'Google Analytics 4', 'pv-youtube-importer' ); ?></h2>
 							<p><?php esc_html_e( 'Automatically track video plays and watch depth in your GA4 property.', 'pv-youtube-importer' ); ?></p>
 						</div>
+						<?php echo $_sbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pv-card__body">
 						<div class="pv-field-rows">
@@ -293,6 +305,7 @@ class PV_Settings_Page {
 							</h2>
 							<p><?php esc_html_e( 'Pull your real YouTube channel stats — views, watch time, CTR, and subscriber growth — directly into your PressVideo Analytics dashboard.', 'pv-youtube-importer' ); ?></p>
 						</div>
+						<?php echo $_sbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pv-card__body">
 
@@ -421,6 +434,7 @@ class PV_Settings_Page {
 							<h2><?php esc_html_e( 'Additional Playlists', 'pv-youtube-importer' ); ?></h2>
 							<p><?php esc_html_e( 'Import from specific playlists, including private and unlisted ones.', 'pv-youtube-importer' ); ?></p>
 						</div>
+						<?php echo $_sbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pv-card__body">
 						<div class="pv-field-rows">
@@ -456,6 +470,7 @@ class PV_Settings_Page {
 							<h2><?php esc_html_e( 'AI Coach', 'pv-youtube-importer' ); ?></h2>
 							<p><?php esc_html_e( 'Personalized growth recommendations powered by Claude AI, based on your real analytics data.', 'pv-youtube-importer' ); ?></p>
 						</div>
+						<?php echo $_sbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pv-card__body">
 
@@ -528,6 +543,7 @@ class PV_Settings_Page {
 							<h2><?php esc_html_e( 'URL Structure', 'pv-youtube-importer' ); ?></h2>
 							<p><?php esc_html_e( 'Customize the base URL slug for your video archive and individual video pages.', 'pv-youtube-importer' ); ?></p>
 						</div>
+						<?php echo $_sbtn; // phpcs:ignore ?>
 					</div>
 					<div class="pv-card__body">
 						<div class="pv-field-rows">

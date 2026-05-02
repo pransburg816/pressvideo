@@ -1762,9 +1762,17 @@ body.pvs-page .pv-slug-preview__field:hover { background: rgba(255,255,255,0.11)
 body.pvs-page .pv-slug-preview input[type="text"] { color: rgba(255,255,255,0.9); }
 body.pvs-page .pv-slug-preview__edit { color: rgba(255,255,255,0.28); }
 
-/* ── Settings Quick Focus — card pulse ──────────────────────────── */
-@keyframes pvs-focus-pulse {
-	0%,100% { box-shadow: 0 4px 28px rgba(0,0,0,.4); }
-	40%     { box-shadow: 0 4px 28px rgba(0,0,0,.4), 0 0 0 5px rgba(99,102,241,.6); }
-}
-.pvs-card-focused { animation: pvs-focus-pulse 1s ease-out; }
+/* ── Settings card focus mode — mirrors analytics-v2 focus UI ───── */
+body.pvs-page .pva-expand-btn { opacity: 0 !important; pointer-events: none !important; width: 0 !important; overflow: hidden !important; padding: 0 !important; margin: 0 !important; border: none !important; position: absolute !important; }
+body.pvs-page .pv-card__head { cursor: pointer; }
+body.pvs-page .pv-card:not(.pva-focus-card) .pv-card__head:hover { background: rgba(255,255,255,0.07); }
+body.pvs-page .pva-focus-card.pv-card { height: auto !important; min-height: 812px; width: 100%; animation: pvaFocusIn 0.32s ease forwards; }
+@keyframes pvaFocusIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+body.pvs-page .pva-focus-row { display: block !important; }
+body.pvs-page .pva-focus-card.pv-card { border-color: rgba(99,102,241,0.5) !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.12), 0 4px 24px rgba(0,0,0,0.35) !important; }
+.pva-focus-badge { display: inline-flex; align-items: center; background: rgba(99,102,241,0.18); color: #a5b4fc; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; margin-left: 8px; border: 1px solid rgba(99,102,241,0.35); flex-shrink: 0; line-height: 1.4; pointer-events: none; }
+body.pvs-page .pva-focus-card > .pv-card__head { background: rgba(99,102,241,0.12) !important; border-bottom-color: rgba(99,102,241,0.3) !important; }
+body.pvs-page .pva-focus-card > .pv-card__head .pv-card__title,
+body.pvs-page .pva-focus-card > .pv-card__head h2 { color: #a5b4fc !important; }
+#pva-focus-close { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; padding: 5px 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: rgba(255,255,255,0.5); font-size: 0.74rem; font-weight: 500; font-family: inherit; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s; line-height: 1; }
+#pva-focus-close:hover { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.22); }
