@@ -279,7 +279,7 @@ class PV_Dashboard_Page {
 								<a href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=pv_category&post_type=pv_youtube' ) ); ?>" class="pvd-qlink">
 									<span class="dashicons dashicons-category"></span><?php esc_html_e( 'Categories', 'pv-youtube-importer' ); ?>
 								</a>
-								<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-youtube-analytics' ) ); ?>" class="pvd-qlink">
+								<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=pv_youtube&page=pv-analytics' ) ); ?>" class="pvd-qlink">
 									<span class="dashicons dashicons-chart-bar"></span><?php esc_html_e( 'Analytics', 'pv-youtube-importer' ); ?>
 								</a>
 							</div>
