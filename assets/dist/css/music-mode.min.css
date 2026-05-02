@@ -852,7 +852,7 @@
     letter-spacing: .02em;
 }
 
-/* ── Equalizer bars — contained ambient cluster, bottom 420px of panel ── */
+/* ── Equalizer bars — full-width ambient, bottom 420px, top+edge fade ── */
 .pvm-eq-bars {
     display: none;
     position: absolute;
@@ -862,13 +862,17 @@
     top: auto;
     height: 420px;
     align-items: flex-end;
-    justify-content: center;
     gap: 3px;
     pointer-events: none;
     overflow: hidden;
     z-index: 0;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%);
+    /* Safari: left/right fade only */
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    /* Modern browsers: intersect top fade + left/right fade */
+    mask-image:
+        linear-gradient(to bottom, transparent 0%, black 32%),
+        linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    mask-composite: intersect;
 }
 
 /* Only when player is fully open (not closed, not minimized) */
@@ -888,7 +892,7 @@
 }
 
 .pvm-eq-bar {
-    flex: 0 0 20px;
+    flex: 1;
     border-radius: 3px 3px 0 0;
     background: var(--pv-accent, #4f46e5);
     opacity: .06;
@@ -950,13 +954,15 @@
     top: auto;
     height: 54px;
     align-items: flex-end;
-    justify-content: center;
     gap: 3px;
     pointer-events: none;
     overflow: hidden;
     z-index: 0;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    mask-image:
+        linear-gradient(to bottom, transparent 0%, black 28%),
+        linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    mask-composite: intersect;
 }
 
 .pvm-player--eq.pvm-minimized .pvm-mini-eq-bars {
@@ -964,7 +970,7 @@
 }
 
 .pvm-mini-eq-bar {
-    flex: 0 0 10px;
+    flex: 1;
     height: 52px;
     border-radius: 2px 2px 0 0;
     background: var(--pv-accent, #4f46e5);
