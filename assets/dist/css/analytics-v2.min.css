@@ -2812,6 +2812,24 @@ body.pva-page .pva-empty__graphic circle:first-child {
 /* Card header is the focus trigger — show pointer on hover */
 .pv-card__head {
 	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease;
+}
+/* Hover: subtle tint to signal clickability */
+.pv-card:not(.pva-focus-card) .pv-card__head:hover {
+	background: rgba(255,255,255,0.07);
+}
+.pv-card:not(.pva-focus-card) .pv-card__head:hover .pv-card__title,
+.pv-card:not(.pva-focus-card) .pv-card__head:hover h2 {
+	color: #fff;
+}
+/* Active/focused state on the card header itself */
+.pva-focus-card > .pv-card__head {
+	background: rgba(99,102,241,0.12) !important;
+	border-bottom-color: rgba(99,102,241,0.3) !important;
+}
+.pva-focus-card > .pv-card__head .pv-card__title,
+.pva-focus-card > .pv-card__head h2 {
+	color: #a5b4fc !important;
 }
 /* Range button muted state (no data) */
 .pva-range-btn--muted,
