@@ -1386,6 +1386,7 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	background: rgba(99,102,241,0.28);
 	border-color: rgba(99,102,241,0.6);
 }
+#pva-copy-report[hidden] { display: none !important; }
 
 /* ── Analytics Summary card ───────────────────────────────── */
 #pva-summary-section,
@@ -2859,6 +2860,24 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	flex-shrink: 0;
 	line-height: 1.4;
 	pointer-events: none;
+}
+
+/* Card header hover — signals it is a clickable focus trigger */
+.pv-card:not(.pva-focus-card) .pv-card__head:hover {
+	background: rgba(255,255,255,0.07);
+}
+.pv-card:not(.pva-focus-card) .pv-card__head:hover .pv-card__title,
+.pv-card:not(.pva-focus-card) .pv-card__head:hover h2 {
+	color: #fff;
+}
+/* Focused card header active state */
+.pva-focus-card > .pv-card__head {
+	background: rgba(99,102,241,0.12) !important;
+	border-bottom-color: rgba(99,102,241,0.3) !important;
+}
+.pva-focus-card > .pv-card__head .pv-card__title,
+.pva-focus-card > .pv-card__head h2 {
+	color: #a5b4fc !important;
 }
 
 /* ── Focus mode close button ────────────────────────────────── */
