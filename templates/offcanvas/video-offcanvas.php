@@ -122,36 +122,7 @@ $_pvm_eq_bars = ! empty( $_pvm_s['music_eq_bars'] );
 	<div class="pvm-panel">
 
 		<div class="pvm-eq-bars" aria-hidden="true">
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
-			<span class="pvm-eq-bar"></span>
+			<?php for ( $i = 0; $i < 180; $i++ ) : ?><span class="pvm-eq-bar"></span><?php endfor; ?>
 		</div>
 
 		<div class="pvm-hd">
@@ -236,46 +207,7 @@ $_pvm_eq_bars = ! empty( $_pvm_s['music_eq_bars'] );
 	<!-- Mini-bar — visible when pvm-player has pvm-minimized class -->
 	<div class="pvm-mini-bar" aria-hidden="true">
 		<div class="pvm-mini-eq-bars" aria-hidden="true">
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
-			<span class="pvm-mini-eq-bar"></span>
+			<?php for ( $i = 0; $i < 180; $i++ ) : ?><span class="pvm-mini-eq-bar"></span><?php endfor; ?>
 		</div>
 		<div class="pvm-mini-progress"><div class="pvm-mini-progress-fill"></div></div>
 		<div class="pvm-mini-body">

@@ -892,8 +892,8 @@
 }
 
 .pvm-eq-bar {
-    flex: 1;
-    border-radius: 3px 3px 0 0;
+    flex: 0 0 5px;
+    border-radius: 2px 2px 0 0;
     background: var(--pv-accent, #4f46e5);
     opacity: .06;
     transform-origin: bottom center;
@@ -907,37 +907,19 @@
     animation-play-state: running;
 }
 
-/* 30 bars — varied heights (clipped to 420px container) + staggered timing */
-.pvm-eq-bar:nth-child(1)  { height: 55vh; --pvm-eq-dur: .52s; animation-delay: 0s;    }
-.pvm-eq-bar:nth-child(2)  { height: 72vh; --pvm-eq-dur: .68s; animation-delay: .10s;  }
-.pvm-eq-bar:nth-child(3)  { height: 40vh; --pvm-eq-dur: .44s; animation-delay: .22s;  }
-.pvm-eq-bar:nth-child(4)  { height: 65vh; --pvm-eq-dur: .62s; animation-delay: .06s;  }
-.pvm-eq-bar:nth-child(5)  { height: 80vh; --pvm-eq-dur: .50s; animation-delay: .18s;  }
-.pvm-eq-bar:nth-child(6)  { height: 48vh; --pvm-eq-dur: .70s; animation-delay: .02s;  }
-.pvm-eq-bar:nth-child(7)  { height: 60vh; --pvm-eq-dur: .46s; animation-delay: .14s;  }
-.pvm-eq-bar:nth-child(8)  { height: 35vh; --pvm-eq-dur: .66s; animation-delay: .08s;  }
-.pvm-eq-bar:nth-child(9)  { height: 70vh; --pvm-eq-dur: .54s; animation-delay: .20s;  }
-.pvm-eq-bar:nth-child(10) { height: 50vh; --pvm-eq-dur: .42s; animation-delay: .04s;  }
-.pvm-eq-bar:nth-child(11) { height: 75vh; --pvm-eq-dur: .64s; animation-delay: .16s;  }
-.pvm-eq-bar:nth-child(12) { height: 45vh; --pvm-eq-dur: .58s; animation-delay: .12s;  }
-.pvm-eq-bar:nth-child(13) { height: 58vh; --pvm-eq-dur: .48s; animation-delay: .24s;  }
-.pvm-eq-bar:nth-child(14) { height: 68vh; --pvm-eq-dur: .72s; animation-delay: 0s;    }
-.pvm-eq-bar:nth-child(15) { height: 38vh; --pvm-eq-dur: .56s; animation-delay: .10s;  }
-.pvm-eq-bar:nth-child(16) { height: 62vh; --pvm-eq-dur: .44s; animation-delay: .18s;  }
-.pvm-eq-bar:nth-child(17) { height: 52vh; --pvm-eq-dur: .60s; animation-delay: .06s;  }
-.pvm-eq-bar:nth-child(18) { height: 78vh; --pvm-eq-dur: .66s; animation-delay: .14s;  }
-.pvm-eq-bar:nth-child(19) { height: 50vh; --pvm-eq-dur: .58s; animation-delay: .02s;  }
-.pvm-eq-bar:nth-child(20) { height: 65vh; --pvm-eq-dur: .46s; animation-delay: .20s;  }
-.pvm-eq-bar:nth-child(21) { height: 42vh; --pvm-eq-dur: .64s; animation-delay: .08s;  }
-.pvm-eq-bar:nth-child(22) { height: 73vh; --pvm-eq-dur: .54s; animation-delay: .16s;  }
-.pvm-eq-bar:nth-child(23) { height: 57vh; --pvm-eq-dur: .44s; animation-delay: .06s;  }
-.pvm-eq-bar:nth-child(24) { height: 68vh; --pvm-eq-dur: .70s; animation-delay: .22s;  }
-.pvm-eq-bar:nth-child(25) { height: 36vh; --pvm-eq-dur: .52s; animation-delay: .04s;  }
-.pvm-eq-bar:nth-child(26) { height: 62vh; --pvm-eq-dur: .60s; animation-delay: .12s;  }
-.pvm-eq-bar:nth-child(27) { height: 47vh; --pvm-eq-dur: .48s; animation-delay: .24s;  }
-.pvm-eq-bar:nth-child(28) { height: 76vh; --pvm-eq-dur: .66s; animation-delay: .04s;  }
-.pvm-eq-bar:nth-child(29) { height: 55vh; --pvm-eq-dur: .42s; animation-delay: .18s;  }
-.pvm-eq-bar:nth-child(30) { height: 44vh; --pvm-eq-dur: .62s; animation-delay: .10s;  }
+/* 180 bars via PHP loop — cycling 12-pattern for height + timing variety */
+.pvm-eq-bar:nth-child(12n+1)  { height: 55vh; --pvm-eq-dur: .52s; animation-delay: 0s;    }
+.pvm-eq-bar:nth-child(12n+2)  { height: 72vh; --pvm-eq-dur: .68s; animation-delay: .10s;  }
+.pvm-eq-bar:nth-child(12n+3)  { height: 40vh; --pvm-eq-dur: .44s; animation-delay: .22s;  }
+.pvm-eq-bar:nth-child(12n+4)  { height: 65vh; --pvm-eq-dur: .62s; animation-delay: .06s;  }
+.pvm-eq-bar:nth-child(12n+5)  { height: 80vh; --pvm-eq-dur: .50s; animation-delay: .18s;  }
+.pvm-eq-bar:nth-child(12n+6)  { height: 48vh; --pvm-eq-dur: .70s; animation-delay: .02s;  }
+.pvm-eq-bar:nth-child(12n+7)  { height: 60vh; --pvm-eq-dur: .46s; animation-delay: .14s;  }
+.pvm-eq-bar:nth-child(12n+8)  { height: 35vh; --pvm-eq-dur: .66s; animation-delay: .08s;  }
+.pvm-eq-bar:nth-child(12n+9)  { height: 70vh; --pvm-eq-dur: .54s; animation-delay: .20s;  }
+.pvm-eq-bar:nth-child(12n+10) { height: 50vh; --pvm-eq-dur: .42s; animation-delay: .04s;  }
+.pvm-eq-bar:nth-child(12n+11) { height: 75vh; --pvm-eq-dur: .64s; animation-delay: .16s;  }
+.pvm-eq-bar:nth-child(12n+12) { height: 45vh; --pvm-eq-dur: .58s; animation-delay: .12s;  }
 
 @keyframes pvm-eq-bounce {
     from { transform: scaleY(0.22); }
@@ -970,7 +952,7 @@
 }
 
 .pvm-mini-eq-bar {
-    flex: 1;
+    flex: 0 0 5px;
     height: 52px;
     border-radius: 2px 2px 0 0;
     background: var(--pv-accent, #4f46e5);
@@ -985,44 +967,14 @@
     animation-play-state: running;
 }
 
-/* 40 bars — staggered timing, height clipped to 54px container */
-.pvm-mini-eq-bar:nth-child(1)  { --pvm-mini-eq-dur: .52s; animation-delay: 0s;    }
-.pvm-mini-eq-bar:nth-child(2)  { --pvm-mini-eq-dur: .68s; animation-delay: .06s;  }
-.pvm-mini-eq-bar:nth-child(3)  { --pvm-mini-eq-dur: .44s; animation-delay: .13s;  }
-.pvm-mini-eq-bar:nth-child(4)  { --pvm-mini-eq-dur: .62s; animation-delay: .03s;  }
-.pvm-mini-eq-bar:nth-child(5)  { --pvm-mini-eq-dur: .50s; animation-delay: .10s;  }
-.pvm-mini-eq-bar:nth-child(6)  { --pvm-mini-eq-dur: .70s; animation-delay: .18s;  }
-.pvm-mini-eq-bar:nth-child(7)  { --pvm-mini-eq-dur: .46s; animation-delay: .05s;  }
-.pvm-mini-eq-bar:nth-child(8)  { --pvm-mini-eq-dur: .66s; animation-delay: .12s;  }
-.pvm-mini-eq-bar:nth-child(9)  { --pvm-mini-eq-dur: .54s; animation-delay: .02s;  }
-.pvm-mini-eq-bar:nth-child(10) { --pvm-mini-eq-dur: .42s; animation-delay: .16s;  }
-.pvm-mini-eq-bar:nth-child(11) { --pvm-mini-eq-dur: .64s; animation-delay: .08s;  }
-.pvm-mini-eq-bar:nth-child(12) { --pvm-mini-eq-dur: .58s; animation-delay: .20s;  }
-.pvm-mini-eq-bar:nth-child(13) { --pvm-mini-eq-dur: .48s; animation-delay: .04s;  }
-.pvm-mini-eq-bar:nth-child(14) { --pvm-mini-eq-dur: .72s; animation-delay: .14s;  }
-.pvm-mini-eq-bar:nth-child(15) { --pvm-mini-eq-dur: .56s; animation-delay: .01s;  }
-.pvm-mini-eq-bar:nth-child(16) { --pvm-mini-eq-dur: .44s; animation-delay: .17s;  }
-.pvm-mini-eq-bar:nth-child(17) { --pvm-mini-eq-dur: .60s; animation-delay: .07s;  }
-.pvm-mini-eq-bar:nth-child(18) { --pvm-mini-eq-dur: .66s; animation-delay: .11s;  }
-.pvm-mini-eq-bar:nth-child(19) { --pvm-mini-eq-dur: .52s; animation-delay: .19s;  }
-.pvm-mini-eq-bar:nth-child(20) { --pvm-mini-eq-dur: .46s; animation-delay: .09s;  }
-.pvm-mini-eq-bar:nth-child(21) { --pvm-mini-eq-dur: .68s; animation-delay: 0s;    }
-.pvm-mini-eq-bar:nth-child(22) { --pvm-mini-eq-dur: .54s; animation-delay: .15s;  }
-.pvm-mini-eq-bar:nth-child(23) { --pvm-mini-eq-dur: .42s; animation-delay: .06s;  }
-.pvm-mini-eq-bar:nth-child(24) { --pvm-mini-eq-dur: .70s; animation-delay: .22s;  }
-.pvm-mini-eq-bar:nth-child(25) { --pvm-mini-eq-dur: .48s; animation-delay: .03s;  }
-.pvm-mini-eq-bar:nth-child(26) { --pvm-mini-eq-dur: .62s; animation-delay: .13s;  }
-.pvm-mini-eq-bar:nth-child(27) { --pvm-mini-eq-dur: .44s; animation-delay: .21s;  }
-.pvm-mini-eq-bar:nth-child(28) { --pvm-mini-eq-dur: .58s; animation-delay: .05s;  }
-.pvm-mini-eq-bar:nth-child(29) { --pvm-mini-eq-dur: .64s; animation-delay: .16s;  }
-.pvm-mini-eq-bar:nth-child(30) { --pvm-mini-eq-dur: .50s; animation-delay: .10s;  }
-.pvm-mini-eq-bar:nth-child(31) { --pvm-mini-eq-dur: .72s; animation-delay: .02s;  }
-.pvm-mini-eq-bar:nth-child(32) { --pvm-mini-eq-dur: .46s; animation-delay: .18s;  }
-.pvm-mini-eq-bar:nth-child(33) { --pvm-mini-eq-dur: .60s; animation-delay: .08s;  }
-.pvm-mini-eq-bar:nth-child(34) { --pvm-mini-eq-dur: .42s; animation-delay: .23s;  }
-.pvm-mini-eq-bar:nth-child(35) { --pvm-mini-eq-dur: .66s; animation-delay: .04s;  }
-.pvm-mini-eq-bar:nth-child(36) { --pvm-mini-eq-dur: .52s; animation-delay: .12s;  }
-.pvm-mini-eq-bar:nth-child(37) { --pvm-mini-eq-dur: .44s; animation-delay: .20s;  }
-.pvm-mini-eq-bar:nth-child(38) { --pvm-mini-eq-dur: .68s; animation-delay: .07s;  }
-.pvm-mini-eq-bar:nth-child(39) { --pvm-mini-eq-dur: .56s; animation-delay: .14s;  }
-.pvm-mini-eq-bar:nth-child(40) { --pvm-mini-eq-dur: .48s; animation-delay: .01s;  }
+/* 180 bars via PHP loop — cycling 10-pattern for timing variety */
+.pvm-mini-eq-bar:nth-child(10n+1)  { --pvm-mini-eq-dur: .52s; animation-delay: 0s;    }
+.pvm-mini-eq-bar:nth-child(10n+2)  { --pvm-mini-eq-dur: .68s; animation-delay: .08s;  }
+.pvm-mini-eq-bar:nth-child(10n+3)  { --pvm-mini-eq-dur: .44s; animation-delay: .18s;  }
+.pvm-mini-eq-bar:nth-child(10n+4)  { --pvm-mini-eq-dur: .62s; animation-delay: .04s;  }
+.pvm-mini-eq-bar:nth-child(10n+5)  { --pvm-mini-eq-dur: .50s; animation-delay: .14s;  }
+.pvm-mini-eq-bar:nth-child(10n+6)  { --pvm-mini-eq-dur: .70s; animation-delay: .02s;  }
+.pvm-mini-eq-bar:nth-child(10n+7)  { --pvm-mini-eq-dur: .46s; animation-delay: .20s;  }
+.pvm-mini-eq-bar:nth-child(10n+8)  { --pvm-mini-eq-dur: .66s; animation-delay: .10s;  }
+.pvm-mini-eq-bar:nth-child(10n+9)  { --pvm-mini-eq-dur: .54s; animation-delay: .06s;  }
+.pvm-mini-eq-bar:nth-child(10n+10) { --pvm-mini-eq-dur: .42s; animation-delay: .16s;  }
