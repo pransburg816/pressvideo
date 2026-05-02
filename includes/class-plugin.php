@@ -617,7 +617,7 @@ class PV_Plugin {
 					'accent'    => pv_resolve_accent_color( $_p->ID ),
 					'thumb'     => get_the_post_thumbnail_url( $_p->ID, 'medium' ) ?: '',
 					'duration'  => get_post_meta( $_p->ID, '_pv_duration', true ) ?: '',
-					'isMusic'   => (bool) get_post_meta( $_p->ID, '_pv_is_music', true ),
+					'isMusic'   => pv_is_music_video( $_p->ID ),
 					'artist'    => get_post_meta( $_p->ID, '_pv_artist', true ) ?: '',
 					'album'     => get_post_meta( $_p->ID, '_pv_album', true ) ?: '',
 				];
@@ -817,7 +817,7 @@ class PV_Plugin {
 					'accent'    => pv_resolve_accent_color( $_bc_p->ID ),
 					'thumb'     => get_the_post_thumbnail_url( $_bc_p->ID, 'medium' ) ?: '',
 					'duration'  => get_post_meta( $_bc_p->ID, '_pv_duration', true ) ?: '',
-					'isMusic'   => (bool) get_post_meta( $_bc_p->ID, '_pv_is_music', true ),
+					'isMusic'   => pv_is_music_video( $_bc_p->ID ),
 					'artist'    => get_post_meta( $_bc_p->ID, '_pv_artist', true ) ?: '',
 					'album'     => get_post_meta( $_bc_p->ID, '_pv_album', true ) ?: '',
 				];

@@ -73,7 +73,7 @@ class PV_Offcanvas {
 				'thumb'     => get_the_post_thumbnail_url( $p->ID, 'medium' ) ?: '',
 				'duration'  => get_post_meta( $p->ID, '_pv_duration', true ) ?: '',
 				'permalink' => get_permalink( $p->ID ),
-				'isMusic'   => (bool) get_post_meta( $p->ID, '_pv_is_music', true ),
+				'isMusic'   => pv_is_music_video( $p->ID ),
 				'artist'    => get_post_meta( $p->ID, '_pv_artist', true ) ?: '',
 				'album'     => get_post_meta( $p->ID, '_pv_album', true ) ?: '',
 			];

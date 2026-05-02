@@ -37,7 +37,7 @@ class PV_Video_Grid {
 				'thumb'     => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: '',
 				'duration'  => get_post_meta( $post->ID, '_pv_duration', true ) ?: '',
 				'permalink' => get_permalink( $post->ID ),
-				'isMusic'   => (bool) get_post_meta( $post->ID, '_pv_is_music', true ),
+				'isMusic'   => pv_is_music_video( $post->ID ),
 				'artist'    => get_post_meta( $post->ID, '_pv_artist', true ) ?: '',
 				'album'     => get_post_meta( $post->ID, '_pv_album', true ) ?: '',
 			];
@@ -67,7 +67,7 @@ class PV_Video_Grid {
 		$duration  = get_post_meta( $post->ID, '_pv_duration', true );
 		$embed_url = 'https://www.youtube.com/embed/' . $youtube_id;
 		$desc      = wp_trim_words( get_the_excerpt( $post ) ?: $post->post_content, 30 );
-		$is_music  = (bool) get_post_meta( $post->ID, '_pv_is_music', true );
+		$is_music  = pv_is_music_video( $post->ID );
 		$artist    = get_post_meta( $post->ID, '_pv_artist', true ) ?: '';
 		$album     = get_post_meta( $post->ID, '_pv_album', true ) ?: '';
 

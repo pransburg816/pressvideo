@@ -25,7 +25,11 @@
       "Bash(xargs grep *)",
       "Bash(git checkout *)",
       "Bash(node deploy-php.js)",
-      "Bash(git revert *)"
+      "Bash(git revert *)",
+      "Bash(powershell -Command '\\(Get-Content '\\\\''templates/admin/customizer.php'\\\\'' -Raw\\) -replace \"esc_attr\\\\\\( \\\\$vtext_color \\\\?: '\\\\''#4f46e5'\\\\'' \\\\\\)\", \"esc_attr\\( \\\\$vtext_color ?: '\\\\''#ffffff'\\\\'' \\)\" | Set-Content '\\\\''templates/admin/customizer.php'\\\\'' -Encoding UTF8')",
+      "Bash(python -c ' *)",
+      "Bash(Remove-Item C:\\\\Users\\\\pransburg\\\\Local Sites\\\\pressvideo\\\\app\\\\public\\\\wp-content\\\\plugins\\\\pressvideo *)",
+      "PowerShell(Get-Item *)"
     ]
   }
 }

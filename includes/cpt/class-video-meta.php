@@ -9,8 +9,31 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class PV_Video_Meta {
 
 	public function register(): void {
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_boxes' ] );
-		add_action( 'save_post_pv_youtube', [ $this, 'save_meta' ] );
+		add_action( 'add_meta_boxes',                         [ $this, 'add_meta_boxes' ] );
+		add_action( 'save_post_pv_youtube',                   [ $this, 'save_meta' ] );
+		add_filter( 'manage_pv_youtube_posts_columns',        [ $this, 'add_music_column' ] );
+		add_action( 'manage_pv_youtube_posts_custom_column',  [ $this, 'render_music_column' ], 10, 2 );
+	}
+
+	public function add_music_column( array $columns ): array {
+		// Insert after the title column.
+		$new = [];
+		foreach ( $columns as $key => $label ) {
+			$new[ $key ] = $label;
+			if ( 'title' === $key ) {
+				$new['pv_music'] = '<span class="dashicons dashicons-playlist-audio" title="' . esc_attr__( 'Music Mode', 'pv-youtube-importer' ) . '"></span>';
+			}
+		}
+		return $new;
+	}
+
+	public function render_music_column( string $column, int $post_id ): void {
+		if ( 'pv_music' !== $column ) return;
+		if ( pv_is_music_video( $post_id ) ) {
+			echo '<span class="dashicons dashicons-yes-alt" style="color:#4f46e5;" title="' . esc_attr__( 'Music mode enabled', 'pv-youtube-importer' ) . '"></span>';
+		} else {
+			echo '<span class="dashicons dashicons-minus" style="color:#ccc;"></span>';
+		}
 	}
 
 	public function add_meta_boxes(): void {
@@ -321,8 +344,10 @@ class PV_Video_Meta {
 			}
 		}
 
-		// Music fields.
-		update_post_meta( $post_id, '_pv_is_music', isset( $_POST['pv_is_music'] ) ? '1' : '' );
+		// Music fields — checkbox OR Music tag implies music mode.
+		$music_via_tag = has_term( 'music', 'pv_tag', $post_id );
+		$is_music_val  = ( isset( $_POST['pv_is_music'] ) || $music_via_tag ) ? '1' : '';
+		update_post_meta( $post_id, '_pv_is_music', $is_music_val );
 
 		if ( isset( $_POST['pv_artist'] ) ) {
 			update_post_meta( $post_id, '_pv_artist', sanitize_text_field( wp_unslash( $_POST['pv_artist'] ) ) );
@@ -336,6 +361,19 @@ class PV_Video_Meta {
 			update_post_meta( $post_id, '_pv_track_number', absint( $_POST['pv_track_number'] ) );
 		}
 	}
+}
+
+/**
+ * Returns true if a video should use music mode.
+ * True when the _pv_is_music meta is '1' OR the post has the "music" pv_tag.
+ * Checking the tag means music mode works automatically without needing the
+ * meta to be explicitly set — tag-based and cache-proof.
+ */
+function pv_is_music_video( int $post_id ): bool {
+	if ( '1' === get_post_meta( $post_id, '_pv_is_music', true ) ) {
+		return true;
+	}
+	return (bool) has_term( 'music', 'pv_tag', $post_id );
 }
 
 /**

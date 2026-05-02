@@ -185,7 +185,7 @@ if ( in_array( $pv_display, [ 'offcanvas', 'modal' ], true ) ) {
 			'accent'    => pv_resolve_accent_color( $_p->ID ),
 			'thumb'     => get_the_post_thumbnail_url( $_p->ID, 'medium' ) ?: '',
 			'duration'  => get_post_meta( $_p->ID, '_pv_duration', true ) ?: '',
-			'isMusic'   => (bool) get_post_meta( $_p->ID, '_pv_is_music', true ),
+			'isMusic'   => pv_is_music_video( $_p->ID ),
 			'artist'    => get_post_meta( $_p->ID, '_pv_artist', true ) ?: '',
 			'album'     => get_post_meta( $_p->ID, '_pv_album', true ) ?: '',
 			'permalink' => get_permalink( $_p->ID ),
@@ -788,7 +788,7 @@ $_pv_vtext_color = sanitize_hex_color(  $pv_settings['archive_vertical_text_colo
 						$_bc_date     = get_the_date( 'M j, Y', $_bcp->ID );
 						$_bc_ts       = strtotime( $_bcp->post_date );
 						$_bc_views    = (int) get_post_meta( $_bcp->ID, '_pv_view_count', true );
-						$_bc_is_music = get_post_meta( $_bcp->ID, '_pv_is_music', true ) ? '1' : '0';
+						$_bc_is_music = pv_is_music_video( $_bcp->ID ) ? '1' : '0';
 						$_bc_artist   = get_post_meta( $_bcp->ID, '_pv_artist', true ) ?: '';
 						$_bc_album    = get_post_meta( $_bcp->ID, '_pv_album', true ) ?: '';
 						?>

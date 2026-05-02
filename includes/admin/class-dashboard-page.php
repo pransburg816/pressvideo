@@ -12,7 +12,7 @@ class PV_Dashboard_Page {
 		add_action( 'manage_posts_extra_tablenav', [ $this, 'list_info_bar' ] );
 		add_action( 'admin_footer',                [ $this, 'print_js' ] );
 		add_filter( 'admin_body_class',            [ $this, 'body_class' ] );
-	}
+		add_action( 'wp_ajax_pv_bulk_music_by_tag', [ $this, 'bulk_music_by_tag' ] );
 
 	public function body_class( string $classes ): string {
 		$screen = get_current_screen();
@@ -72,6 +72,101 @@ class PV_Dashboard_Page {
 			</a>
 		</div>
 		<?php
+	}
+
+	// ── Bulk: enable music mode for all "Music"-tagged videos ────────
+
+	public function bulk_music_by_tag(): void {
+		check_ajax_referer( 'pv_bulk_music_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'pv-youtube-importer' ) ] );
+		}
+
+		$tag = get_term_by( 'slug', 'music', 'pv_tag' );
+		if ( ! $tag ) {
+			wp_send_json_error( [ 'message' => __( 'No "Music" tag found in PressVideo tags.', 'pv-youtube-importer' ) ] );
+		}
+
+		$ids = get_posts( [
+			'post_type'      => 'pv_youtube',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'tax_query'      => [ [
+				'taxonomy' => 'pv_tag',
+				'field'    => 'slug',
+				'terms'    => 'music',
+			] ],
+		] );
+
+		if ( empty( $ids ) ) {
+			wp_send_json_error( [ 'message' => __( 'No published videos found with the "Music" tag.', 'pv-youtube-importer' ) ] );
+		}
+
+		global $wpdb;
+
+		$updated = 0;
+		$skipped = 0;
+		$failed  = 0;
+
+		foreach ( $ids as $id ) {
+			// Read directly from DB — bypass any object cache.
+			$row = $wpdb->get_row( $wpdb->prepare(
+				"SELECT meta_id, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_pv_is_music' LIMIT 1",
+				$id
+			) );
+
+			if ( $row && '1' === $row->meta_value ) {
+				$skipped++;
+				continue;
+			}
+
+			if ( $row ) {
+				// Row exists but value isn't '1' — update it.
+				$result = $wpdb->update(
+					$wpdb->postmeta,
+					[ 'meta_value' => '1' ],
+					[ 'meta_id' => $row->meta_id ],
+					[ '%s' ],
+					[ '%d' ]
+				);
+			} else {
+				// No row at all — insert fresh.
+				$result = $wpdb->insert(
+					$wpdb->postmeta,
+					[ 'post_id' => $id, 'meta_key' => '_pv_is_music', 'meta_value' => '1' ],
+					[ '%d', '%s', '%s' ]
+				);
+			}
+
+			wp_cache_delete( $id, 'post_meta' );
+			clean_post_cache( $id );
+
+			if ( false !== $result ) {
+				$updated++;
+			} else {
+				$failed++;
+			}
+		}
+
+		// Read-back: count how many now have '1' directly from DB.
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$verified = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id IN ($placeholders) AND meta_key = '_pv_is_music' AND meta_value = '1'",
+			...$ids
+		) );
+
+		$msg = sprintf(
+			'Done — %1$d updated, %2$d already enabled. DB verified: %3$d of %4$d now have music mode.',
+			$updated,
+			$skipped,
+			$verified,
+			count( $ids )
+		);
+		if ( $failed > 0 ) {
+			$msg .= sprintf( ' %d write(s) failed.', $failed );
+		}
+		wp_send_json_success( [ 'message' => $msg ] );
 	}
 
 	// ── Page render ──────────────────────────────────────────────────
@@ -286,6 +381,28 @@ class PV_Dashboard_Page {
 						</div>
 					</div>
 
+					<div class="pvd-card">
+						<div class="pvd-card__head">
+							<div class="pvd-card__icon"><span class="dashicons dashicons-controls-volumeon"></span></div>
+							<div class="pvd-card__head-text">
+								<h2><?php esc_html_e( 'Bulk Actions', 'pv-youtube-importer' ); ?></h2>
+								<p><?php esc_html_e( 'Apply settings to groups of videos at once.', 'pv-youtube-importer' ); ?></p>
+							</div>
+						</div>
+						<div class="pvd-card__body">
+							<p style="margin:0 0 10px;font-size:13px;color:#666;">
+								<?php esc_html_e( 'Enable music mode on every published video tagged "Music".', 'pv-youtube-importer' ); ?>
+							</p>
+							<button id="pv-bulk-music" class="button button-secondary" type="button">
+								<span class="dashicons dashicons-playlist-audio" style="vertical-align:middle;margin-right:4px;"></span>
+								<?php esc_html_e( 'Enable Music Mode (tag: Music)', 'pv-youtube-importer' ); ?>
+							</button>
+							<span id="pv-bulk-music-spinner" class="spinner" style="float:none;margin:0 6px;vertical-align:middle;"></span>
+							<?php wp_nonce_field( 'pv_bulk_music_nonce', 'pv_bulk_music_nonce_field' ); ?>
+							<div id="pv-bulk-music-result"></div>
+						</div>
+					</div>
+
 				</div><!-- /.pvd-col--left -->
 
 				<!-- Right: Recent Videos -->
@@ -401,6 +518,37 @@ class PV_Dashboard_Page {
 						.finally(function(){
 							btn.disabled = false;
 							spinner.classList.remove('is-active');
+						});
+				});
+			}
+
+			// Bulk music enable
+			var bulkBtn     = document.getElementById('pv-bulk-music');
+			var bulkSpinner = document.getElementById('pv-bulk-music-spinner');
+			var bulkResult  = document.getElementById('pv-bulk-music-result');
+			var bulkNonce   = document.getElementById('pv_bulk_music_nonce_field');
+
+			if (bulkBtn && bulkNonce) {
+				bulkBtn.addEventListener('click', function () {
+					if (!confirm('Enable music mode on all "Music"-tagged videos?')) return;
+					bulkBtn.disabled = true;
+					bulkSpinner.classList.add('is-active');
+					bulkResult.innerHTML = '';
+					var data = new FormData();
+					data.append('action', 'pv_bulk_music_by_tag');
+					data.append('nonce', bulkNonce.value);
+					fetch(ajaxurl, { method: 'POST', body: data })
+						.then(function(r){ return r.json(); })
+						.then(function(json){
+							var cls = json.success ? 'notice-success' : 'notice-error';
+							bulkResult.innerHTML = '<div class="notice ' + cls + ' inline" style="margin:10px 0 0"><p>' + json.data.message + '</p></div>';
+						})
+						.catch(function(){
+							bulkResult.innerHTML = '<div class="notice notice-error inline" style="margin:10px 0 0"><p>' + pvDash.requestFailed + '</p></div>';
+						})
+						.finally(function(){
+							bulkBtn.disabled = false;
+							bulkSpinner.classList.remove('is-active');
 						});
 				});
 			}

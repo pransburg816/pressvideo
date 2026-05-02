@@ -18,7 +18,7 @@ $cats      = get_the_terms( get_the_ID(), 'pv_category' );
 $cat       = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0] : null;
 $cat_name  = $cat ? $cat->name : '';
 $cat_slug  = $cat ? $cat->slug : '';
-$is_music  = get_post_meta( get_the_ID(), '_pv_is_music', true ) ? '1' : '0';
+$is_music  = pv_is_music_video( get_the_ID() ) ? '1' : '0';
 $artist    = get_post_meta( get_the_ID(), '_pv_artist', true ) ?: '';
 $album     = get_post_meta( get_the_ID(), '_pv_album', true ) ?: '';
 ?>

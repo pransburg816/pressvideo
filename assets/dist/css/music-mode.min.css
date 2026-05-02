@@ -894,7 +894,7 @@
 .pvm-eq-bar {
     flex: 0 0 5px;
     border-radius: 2px 2px 0 0;
-    background: var(--pv-accent, #4f46e5);
+    background: linear-gradient(to top, #22d3ee 0%, #818cf8 42%, #f472b6 75%, #fb923c 100%);
     opacity: .06;
     transform-origin: bottom center;
     transform: scaleY(0.22);
@@ -955,7 +955,7 @@
     flex: 0 0 5px;
     height: 52px;
     border-radius: 2px 2px 0 0;
-    background: var(--pv-accent, #4f46e5);
+    background: linear-gradient(to top, #22d3ee 0%, #818cf8 42%, #f472b6 75%, #fb923c 100%);
     opacity: .20;
     transform-origin: bottom center;
     transform: scaleY(0.18);
