@@ -862,7 +862,7 @@
     top: auto;
     height: 420px;
     align-items: flex-end;
-    gap: 3px;
+    gap: 5px;
     pointer-events: none;
     overflow: hidden;
     z-index: 0;
@@ -936,7 +936,7 @@
     top: auto;
     height: 54px;
     align-items: flex-end;
-    gap: 3px;
+    gap: 5px;
     pointer-events: none;
     overflow: hidden;
     z-index: 0;
