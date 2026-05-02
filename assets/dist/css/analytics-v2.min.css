@@ -217,6 +217,18 @@ body.pva-page .pva-stats-period:empty { display: none; }
 	flex-direction: column;
 }
 .pva-ai-row > div[hidden] { display: none; }
+/* Cards inside AI row columns must fill the container so all cards are equal height */
+.pva-ai-row > div > .pv-card {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+.pva-ai-row > div > .pv-card > .pv-card__body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+}
 
 /* Three-column variant: coach | insights | integrations */
 .pva-ai-row--three-col {
