@@ -466,7 +466,7 @@ class PV_Analytics_Page {
 			</div>
 
 			<!-- ── Row 2: Charts — Play Trend + Top Videos + Watch Depth ── -->
-			<div class="pva-charts-row" id="pva-charts-section">
+			<div class="pva-charts-row" id="pva-charts-section" hidden>
 
 				<!-- Play Trend -->
 				<div class="pv-card" data-card-id="trend">
