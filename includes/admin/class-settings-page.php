@@ -38,6 +38,21 @@ class PV_Settings_Page {
 		register_setting( 'pv_settings_group', 'pv_settings', [
 			'sanitize_callback' => [ $this, 'sanitize_settings' ],
 		] );
+		add_action( 'update_option_pv_settings', [ $this, 'maybe_schedule_rewrite_flush' ], 10, 2 );
+		add_action( 'admin_init',                [ $this, 'flush_rewrites_if_needed' ] );
+	}
+
+	public function maybe_schedule_rewrite_flush( array $old, array $new ): void {
+		if ( ( $old['video_slug'] ?? 'pv-videos' ) !== ( $new['video_slug'] ?? 'pv-videos' ) ) {
+			update_option( 'pv_flush_rewrite_rules', 1 );
+		}
+	}
+
+	public function flush_rewrites_if_needed(): void {
+		if ( get_option( 'pv_flush_rewrite_rules' ) ) {
+			delete_option( 'pv_flush_rewrite_rules' );
+			flush_rewrite_rules();
+		}
 	}
 
 	public function sanitize_settings( array $input ): array {
@@ -69,6 +84,9 @@ class PV_Settings_Page {
 			? $input['content_width'] : ( $existing['content_width'] ?? '' );
 
 		$clean['import_playlists'] = $this->sanitize_playlist_ids( $input['import_playlists'] ?? '' );
+
+		$raw_slug = sanitize_title( $input['video_slug'] ?? '' );
+		$clean['video_slug'] = $raw_slug ?: 'pv-videos';
 
 		// GA4 Measurement ID — format: G-XXXXXXXXXX
 		$raw_ga = strtoupper( sanitize_text_field( $input['ga_measurement_id'] ?? '' ) );
@@ -136,12 +154,24 @@ class PV_Settings_Page {
 				<input type="hidden" name="pv_settings[archive_layout]"    value="<?php echo esc_attr( $settings['archive_layout']    ?? 'grid' ); ?>">
 				<input type="hidden" name="pv_settings[content_width]"     value="<?php echo esc_attr( $settings['content_width']     ?? '' ); ?>">
 
+				<div class="pvs-quick-nav">
+					<span class="pvs-quick-nav__label">Quick Focus</span>
+					<button class="pvs-quick-nav__item" data-target="yt-connection" type="button"><?php esc_html_e( 'YouTube Connection', 'pv-youtube-importer' ); ?></button>
+					<button class="pvs-quick-nav__item" data-target="ga4" type="button"><?php esc_html_e( 'Google Analytics 4', 'pv-youtube-importer' ); ?></button>
+					<button class="pvs-quick-nav__item" data-target="yt-analytics" type="button"><?php esc_html_e( 'YouTube Analytics', 'pv-youtube-importer' ); ?></button>
+					<button class="pvs-quick-nav__item" data-target="playlists" type="button"><?php esc_html_e( 'Additional Playlists', 'pv-youtube-importer' ); ?></button>
+					<button class="pvs-quick-nav__item" data-target="ai-coach" type="button"><?php esc_html_e( 'AI Coach', 'pv-youtube-importer' ); ?></button>
+					<button class="pvs-quick-nav__item" data-target="url-structure" type="button"><?php esc_html_e( 'URL Structure', 'pv-youtube-importer' ); ?></button>
+				</div>
+
 				<div class="pvs-two-col">
 
 				<!-- YouTube Connection -->
-				<div class="pv-card">
+				<div class="pv-card" data-card-id="yt-connection">
 					<div class="pv-card__head">
-						<div class="pv-card__icon"><span class="dashicons dashicons-admin-network"></span></div>
+						<div class="pv-card__icon" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
+						</div>
 						<div class="pv-card__head-text">
 							<h2><?php esc_html_e( 'YouTube Connection', 'pv-youtube-importer' ); ?></h2>
 							<p><?php esc_html_e( 'API credentials used for importing and fetching video data.', 'pv-youtube-importer' ); ?></p>
@@ -215,7 +245,7 @@ class PV_Settings_Page {
 				</div>
 
 				<!-- Google Analytics 4 (2nd card in pvs-two-col) -->
-				<div class="pv-card">
+				<div class="pv-card" data-card-id="ga4">
 					<div class="pv-card__head">
 						<div class="pv-card__icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
 							<span class="dashicons dashicons-chart-area"></span>
@@ -256,116 +286,12 @@ class PV_Settings_Page {
 
 				</div><!-- /.pvs-two-col -->
 
+				<!-- Row 2: YouTube Analytics | Additional Playlists -->
 				<div class="pvs-two-col">
 
-				<!-- Additional Playlists -->
-				<div class="pv-card">
+				<div class="pv-card <?php echo ! PV_Tier::meets( 'platinum' ) ? 'pv-card--locked' : ''; ?>" data-card-id="yt-analytics">
 					<div class="pv-card__head">
-						<div class="pv-card__icon"><span class="dashicons dashicons-playlist-video"></span></div>
-						<div class="pv-card__head-text">
-							<h2><?php esc_html_e( 'Additional Playlists', 'pv-youtube-importer' ); ?></h2>
-							<p><?php esc_html_e( 'Import from specific playlists, including private and unlisted ones.', 'pv-youtube-importer' ); ?></p>
-						</div>
-					</div>
-					<div class="pv-card__body">
-						<div class="pv-field-rows">
-							<div class="pv-field-row">
-								<div class="pv-field-row__label">
-									<label for="pv_import_playlists"><?php esc_html_e( 'Playlist IDs', 'pv-youtube-importer' ); ?></label>
-								</div>
-								<div class="pv-field-row__control">
-									<textarea name="pv_settings[import_playlists]" id="pv_import_playlists"
-									          class="large-text" rows="6"
-									          placeholder="PLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"><?php echo esc_textarea( $settings['import_playlists'] ?? '' ); ?></textarea>
-									<p class="pv-field-row__desc">
-										<?php esc_html_e( 'One playlist ID or full playlist URL per line. Use this for private or unlisted playlists your channel auto-importer cannot discover. Already-imported videos are always skipped, so re-running the importer with the same IDs is safe.', 'pv-youtube-importer' ); ?>
-									</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- AI Coach -->
-				<div class="pv-card">
-					<div class="pv-card__head">
-						<div class="pv-card__icon" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-						</div>
-						<div class="pv-card__head-text">
-							<h2><?php esc_html_e( 'AI Coach', 'pv-youtube-importer' ); ?></h2>
-							<p><?php esc_html_e( 'Personalized growth recommendations powered by Claude AI, based on your real analytics data.', 'pv-youtube-importer' ); ?></p>
-						</div>
-					</div>
-					<div class="pv-card__body">
-
-						<?php if ( PV_Tier::meets( 'platinum' ) ) : ?>
-							<div class="pv-ai-included-notice">
-								<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-								<div>
-									<strong><?php esc_html_e( 'AI coaching is included in your Platinum plan', 'pv-youtube-importer' ); ?></strong>
-									<p><?php esc_html_e( 'No API key needed. AI insights are powered automatically. Optionally add your own Anthropic key below to use a personal account instead.', 'pv-youtube-importer' ); ?></p>
-								</div>
-							</div>
-						<?php else : ?>
-							<div class="pv-ai-upgrade-notice">
-								<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-								<div>
-									<strong><?php esc_html_e( 'Two ways to unlock AI coaching', 'pv-youtube-importer' ); ?></strong>
-									<p>
-										<?php esc_html_e( 'Add your own Anthropic API key below (Gold+), or', 'pv-youtube-importer' ); ?>
-										<a href="https://pressvideo.com" target="_blank" rel="noopener"><?php esc_html_e( 'upgrade to Platinum', 'pv-youtube-importer' ); ?></a>
-										<?php esc_html_e( 'to have it included automatically with no key required.', 'pv-youtube-importer' ); ?>
-									</p>
-								</div>
-							</div>
-						<?php endif; ?>
-
-						<div class="pv-field-rows">
-							<div class="pv-field-row">
-								<div class="pv-field-row__label">
-									<label for="pv_anthropic_api_key"><?php esc_html_e( 'Anthropic API Key', 'pv-youtube-importer' ); ?></label>
-								</div>
-								<div class="pv-field-row__control">
-									<input type="password"
-									       name="pv_settings[anthropic_api_key]"
-									       id="pv_anthropic_api_key"
-									       value="<?php echo esc_attr( $settings['anthropic_api_key'] ?? '' ); ?>"
-									       class="regular-text"
-									       autocomplete="off" />
-									<?php if ( ! empty( $settings['anthropic_api_key'] ) ) : ?>
-										<span class="pv-key-status pv-key-status--saved">
-											<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-											<?php esc_html_e( 'Key saved', 'pv-youtube-importer' ); ?>
-										</span>
-									<?php else : ?>
-										<span class="pv-key-status pv-key-status--empty">
-											<?php esc_html_e( 'Not configured', 'pv-youtube-importer' ); ?>
-										</span>
-									<?php endif; ?>
-									<p class="pv-field-row__desc">
-										<?php printf(
-											wp_kses(
-												__( 'Your personal key from <a href="%s" target="_blank" rel="noopener">console.anthropic.com</a>. Optional for Platinum, required for Gold. Stored securely, never shared.', 'pv-youtube-importer' ),
-												[ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ] ]
-											),
-											'https://console.anthropic.com/'
-										); ?>
-									</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				</div><!-- /.pvs-two-col -->
-
-				<!-- YouTube Analytics (full-width, Platinum) -->
-				<div class="pvs-two-col">
-
-				<div class="pv-card <?php echo ! PV_Tier::meets( 'platinum' ) ? 'pv-card--locked' : ''; ?>">
-					<div class="pv-card__head">
-						<div class="pv-card__icon" style="background:linear-gradient(135deg,#ef4444,#f97316)">
+						<div class="pv-card__icon" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">
 							<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
 						</div>
 						<div class="pv-card__head-text">
@@ -495,15 +421,239 @@ class PV_Settings_Page {
 					</div>
 				</div>
 
-				<div></div><!-- spacer for two-col grid -->
+				<!-- Additional Playlists -->
+				<div class="pv-card" data-card-id="playlists">
+					<div class="pv-card__head">
+						<div class="pv-card__icon" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418a2.506 2.506 0 00-1.768 1.768C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>
+						</div>
+						<div class="pv-card__head-text">
+							<h2><?php esc_html_e( 'Additional Playlists', 'pv-youtube-importer' ); ?></h2>
+							<p><?php esc_html_e( 'Import from specific playlists, including private and unlisted ones.', 'pv-youtube-importer' ); ?></p>
+						</div>
+					</div>
+					<div class="pv-card__body">
+						<div class="pv-field-rows">
+							<div class="pv-field-row">
+								<div class="pv-field-row__label">
+									<label for="pv_import_playlists"><?php esc_html_e( 'Playlist IDs', 'pv-youtube-importer' ); ?></label>
+								</div>
+								<div class="pv-field-row__control">
+									<textarea name="pv_settings[import_playlists]" id="pv_import_playlists"
+									          class="large-text" rows="6"
+									          placeholder="PLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"><?php echo esc_textarea( $settings['import_playlists'] ?? '' ); ?></textarea>
+									<p class="pv-field-row__desc">
+										<?php esc_html_e( 'One playlist ID or full playlist URL per line. Use this for private or unlisted playlists your channel auto-importer cannot discover. Already-imported videos are always skipped, so re-running the importer with the same IDs is safe.', 'pv-youtube-importer' ); ?>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
-				</div><!-- /.pvs-two-col (youtube analytics) -->
+				</div><!-- /.pvs-two-col -->
+
+				<!-- Row 3: AI Coach | URL Structure -->
+				<div class="pvs-two-col">
+
+				<!-- AI Coach -->
+				<div class="pv-card" data-card-id="ai-coach">
+					<div class="pv-card__head">
+						<div class="pv-card__icon" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z"/></svg>
+						</div>
+						<div class="pv-card__head-text">
+							<h2><?php esc_html_e( 'AI Coach', 'pv-youtube-importer' ); ?></h2>
+							<p><?php esc_html_e( 'Personalized growth recommendations powered by Claude AI, based on your real analytics data.', 'pv-youtube-importer' ); ?></p>
+						</div>
+					</div>
+					<div class="pv-card__body">
+
+						<?php if ( PV_Tier::meets( 'platinum' ) ) : ?>
+							<div class="pv-ai-included-notice">
+								<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+								<div>
+									<strong><?php esc_html_e( 'AI coaching is included in your Platinum plan', 'pv-youtube-importer' ); ?></strong>
+									<p><?php esc_html_e( 'No API key needed. AI insights are powered automatically. Optionally add your own Anthropic key below to use a personal account instead.', 'pv-youtube-importer' ); ?></p>
+								</div>
+							</div>
+						<?php else : ?>
+							<div class="pv-ai-upgrade-notice">
+								<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+								<div>
+									<strong><?php esc_html_e( 'Two ways to unlock AI coaching', 'pv-youtube-importer' ); ?></strong>
+									<p>
+										<?php esc_html_e( 'Add your own Anthropic API key below (Gold+), or', 'pv-youtube-importer' ); ?>
+										<a href="https://pressvideo.com" target="_blank" rel="noopener"><?php esc_html_e( 'upgrade to Platinum', 'pv-youtube-importer' ); ?></a>
+										<?php esc_html_e( 'to have it included automatically with no key required.', 'pv-youtube-importer' ); ?>
+									</p>
+								</div>
+							</div>
+						<?php endif; ?>
+
+						<div class="pv-field-rows">
+							<div class="pv-field-row">
+								<div class="pv-field-row__label">
+									<label for="pv_anthropic_api_key"><?php esc_html_e( 'Anthropic API Key', 'pv-youtube-importer' ); ?></label>
+								</div>
+								<div class="pv-field-row__control">
+									<input type="password"
+									       name="pv_settings[anthropic_api_key]"
+									       id="pv_anthropic_api_key"
+									       value="<?php echo esc_attr( $settings['anthropic_api_key'] ?? '' ); ?>"
+									       class="regular-text"
+									       autocomplete="off" />
+									<?php if ( ! empty( $settings['anthropic_api_key'] ) ) : ?>
+										<span class="pv-key-status pv-key-status--saved">
+											<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+											<?php esc_html_e( 'Key saved', 'pv-youtube-importer' ); ?>
+										</span>
+									<?php else : ?>
+										<span class="pv-key-status pv-key-status--empty">
+											<?php esc_html_e( 'Not configured', 'pv-youtube-importer' ); ?>
+										</span>
+									<?php endif; ?>
+									<p class="pv-field-row__desc">
+										<?php printf(
+											wp_kses(
+												__( 'Your personal key from <a href="%s" target="_blank" rel="noopener">console.anthropic.com</a>. Optional for Platinum, required for Gold. Stored securely, never shared.', 'pv-youtube-importer' ),
+												[ 'a' => [ 'href' => [], 'target' => [], 'rel' => [] ] ]
+											),
+											'https://console.anthropic.com/'
+										); ?>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- URL Structure -->
+				<div class="pv-card" data-card-id="url-structure">
+					<div class="pv-card__head">
+						<div class="pv-card__icon" style="background:linear-gradient(135deg,#10b981,#059669)">
+							<span class="dashicons dashicons-admin-links"></span>
+						</div>
+						<div class="pv-card__head-text">
+							<h2><?php esc_html_e( 'URL Structure', 'pv-youtube-importer' ); ?></h2>
+							<p><?php esc_html_e( 'Customize the base URL slug for your video archive and individual video pages.', 'pv-youtube-importer' ); ?></p>
+						</div>
+					</div>
+					<div class="pv-card__body">
+						<div class="pv-field-rows">
+							<div class="pv-field-row">
+								<div class="pv-field-row__label">
+									<label for="pv_video_slug"><?php esc_html_e( 'Video Slug', 'pv-youtube-importer' ); ?></label>
+								</div>
+								<div class="pv-field-row__control">
+									<div class="pv-slug-preview">
+										<span class="pv-slug-preview__base"><?php echo esc_html( trailingslashit( home_url() ) ); ?></span>
+										<div class="pv-slug-preview__field">
+											<input type="text"
+											       name="pv_settings[video_slug]"
+											       id="pv_video_slug"
+											       value="<?php echo esc_attr( $settings['video_slug'] ?? 'pv-videos' ); ?>"
+											       placeholder="pv-videos" />
+											<span class="pv-slug-preview__edit" aria-hidden="true">
+												<span class="dashicons dashicons-edit"></span>
+											</span>
+										</div>
+										<span class="pv-slug-preview__suffix">/video-title</span>
+									</div>
+									<p class="pv-field-row__desc">
+										<?php esc_html_e( 'Use lowercase letters, numbers, and hyphens. Examples: videos, watch, content. Changing this updates both the archive URL and individual video URLs — rewrite rules are flushed automatically on save. If you have existing links or SEO value on the old URL, use a redirect plugin to forward traffic.', 'pv-youtube-importer' ); ?>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				</div><!-- /.pvs-two-col (ai coach + url structure) -->
 
 				<?php submit_button( __( 'Save Settings', 'pv-youtube-importer' ) ); ?>
 			</form>
 
 		</div><!-- /.pvs-inner -->
 		</div><!-- /.pvs-wrap -->
+		<script>
+		(function() {
+			var focusActive = false;
+			function enterFocus(cardId) {
+				exitFocus();
+				focusActive = true;
+				var card = document.querySelector('.pv-card[data-card-id="' + cardId + '"]');
+				if (!card) return;
+				var row = card.closest('.pvs-two-col');
+				if (!row) return;
+				document.querySelectorAll('.pvs-two-col').forEach(function(r) {
+					r.style.display = r === row ? '' : 'none';
+				});
+				row.classList.add('pvs-focus-row');
+				card.classList.add('pvs-focus-card');
+				row.querySelectorAll('.pv-card').forEach(function(c) {
+					if (c !== card) c.style.display = 'none';
+				});
+				var head = card.querySelector('.pv-card__head');
+				if (head) {
+					var badge = document.createElement('span');
+					badge.className = 'pvs-focus-badge';
+					badge.textContent = 'Focused';
+					head.appendChild(badge);
+				}
+				var nav = document.querySelector('.pvs-quick-nav');
+				if (nav) {
+					var closeBtn = document.createElement('button');
+					closeBtn.id = 'pvs-focus-close';
+					closeBtn.type = 'button';
+					closeBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg> <?php esc_html_e( 'Exit Focus', 'pv-youtube-importer' ); ?>';
+					closeBtn.addEventListener('click', exitFocus);
+					nav.appendChild(closeBtn);
+				}
+				document.querySelectorAll('.pvs-quick-nav__item').forEach(function(btn) {
+					btn.classList.toggle('is-active', btn.dataset.target === cardId);
+				});
+			}
+			function exitFocus() {
+				if (!focusActive) return;
+				focusActive = false;
+				document.querySelectorAll('.pvs-two-col').forEach(function(row) {
+					row.style.display = '';
+					row.classList.remove('pvs-focus-row');
+					row.querySelectorAll('.pv-card').forEach(function(c) {
+						c.style.display = '';
+						c.classList.remove('pvs-focus-card');
+					});
+				});
+				document.querySelectorAll('.pvs-focus-badge').forEach(function(b) { b.remove(); });
+				var closeBtn = document.getElementById('pvs-focus-close');
+				if (closeBtn) closeBtn.remove();
+				document.querySelectorAll('.pvs-quick-nav__item').forEach(function(btn) {
+					btn.classList.remove('is-active');
+				});
+			}
+			document.querySelectorAll('.pv-card[data-card-id] .pv-card__head').forEach(function(head) {
+				head.addEventListener('click', function() {
+					var card = head.closest('.pv-card');
+					var cardId = card.dataset.cardId;
+					if (focusActive && card.classList.contains('pvs-focus-card')) {
+						exitFocus();
+					} else {
+						enterFocus(cardId);
+					}
+				});
+			});
+			document.querySelectorAll('.pvs-quick-nav__item').forEach(function(btn) {
+				btn.addEventListener('click', function() {
+					if (btn.classList.contains('is-active')) {
+						exitFocus();
+					} else {
+						enterFocus(btn.dataset.target);
+					}
+				});
+			});
+		})();
+		</script>
 		<?php
 	}
 

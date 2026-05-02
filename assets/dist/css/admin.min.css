@@ -122,6 +122,7 @@
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
+	color: #fff;
 }
 .pv-card__icon .dashicons {
 	color: #fff;
@@ -1681,4 +1682,176 @@ body.pvs-page .submit .button-primary:hover {
 @media (max-width: 1100px) {
 	body.pv-fullscreen-ui #pv-aside { display: none !important; }
 	body.pv-fullscreen-ui #wpcontent { margin-left: 0 !important; }
+}
+
+/* ── Video slug URL preview ─────────────────────────────────────── */
+.pv-slug-preview {
+	align-items: stretch;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	display: flex;
+	font-family: monospace;
+	font-size: .875rem;
+	max-width: 560px;
+	overflow: hidden;
+	transition: border-color .15s, box-shadow .15s;
+}
+.pv-slug-preview:focus-within {
+	border-color: #6366f1;
+	box-shadow: 0 0 0 2px rgba(99,102,241,0.22);
+}
+.pv-slug-preview__base,
+.pv-slug-preview__suffix {
+	align-items: center;
+	background: #f3f4f6;
+	color: #6b7280;
+	display: flex;
+	flex-shrink: 0;
+	padding: 8px 10px;
+	white-space: nowrap;
+}
+.pv-slug-preview__base  { border-right: 1px solid #d1d5db; }
+.pv-slug-preview__suffix { border-left: 1px solid #d1d5db; }
+.pv-slug-preview__field {
+	align-items: center;
+	background: #fff;
+	cursor: text;
+	display: flex;
+	flex: 1;
+	position: relative;
+}
+.pv-slug-preview__field:hover { background: #fafafa; }
+.pv-slug-preview input[type="text"] {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #111827;
+	flex: 1;
+	font-family: monospace;
+	font-size: .875rem;
+	font-weight: 500;
+	min-width: 80px;
+	padding: 8px 30px 8px 10px !important;
+	width: 100%;
+}
+.pv-slug-preview input[type="text"]:focus {
+	box-shadow: none !important;
+	outline: none;
+}
+.pv-slug-preview__edit {
+	color: #9ca3af;
+	flex-shrink: 0;
+	pointer-events: none;
+	position: absolute;
+	right: 8px;
+}
+.pv-slug-preview__edit .dashicons { font-size: 14px; height: 14px; width: 14px; }
+body.pvs-page .pv-slug-preview { border-color: rgba(255,255,255,0.15); }
+body.pvs-page .pv-slug-preview:focus-within {
+	border-color: #6366f1;
+	box-shadow: 0 0 0 2px rgba(99,102,241,0.28);
+}
+body.pvs-page .pv-slug-preview__base,
+body.pvs-page .pv-slug-preview__suffix {
+	background: rgba(255,255,255,0.06);
+	border-color: rgba(255,255,255,0.1);
+	color: rgba(255,255,255,0.35);
+}
+body.pvs-page .pv-slug-preview__field { background: rgba(255,255,255,0.08); }
+body.pvs-page .pv-slug-preview__field:hover { background: rgba(255,255,255,0.11); }
+body.pvs-page .pv-slug-preview input[type="text"] { color: rgba(255,255,255,0.9); }
+body.pvs-page .pv-slug-preview__edit { color: rgba(255,255,255,0.28); }
+
+/* ── Settings Quick Focus nav ───────────────────────────────────── */
+.pvs-quick-nav {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	margin-bottom: 18px;
+	padding: 10px 16px;
+	background: rgba(255,255,255,0.04);
+	border: 1px solid rgba(255,255,255,0.08);
+	border-radius: 10px;
+}
+.pvs-quick-nav__label {
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: rgba(255,255,255,0.30);
+	margin-right: 4px;
+	flex-shrink: 0;
+}
+.pvs-quick-nav__item {
+	background: rgba(255,255,255,0.07);
+	border: 1px solid rgba(255,255,255,0.12);
+	border-radius: 20px;
+	color: rgba(255,255,255,0.60);
+	cursor: pointer;
+	font-size: 0.74rem;
+	font-weight: 500;
+	padding: 4px 12px;
+	transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.pvs-quick-nav__item:hover {
+	background: rgba(79,70,229,0.25);
+	border-color: rgba(99,102,241,0.45);
+	color: #c7d2fe;
+}
+.pvs-quick-nav__item.is-active {
+	background: rgba(79,70,229,0.35);
+	border-color: rgba(99,102,241,0.6);
+	color: #a5b4fc;
+	font-weight: 600;
+}
+
+/* Card head becomes clickable */
+body.pvs-page .pv-card[data-card-id] .pv-card__head {
+	cursor: pointer;
+	transition: background 0.15s;
+}
+body.pvs-page .pv-card[data-card-id] .pv-card__head:hover {
+	background: rgba(255,255,255,0.07);
+}
+
+/* Focus mode: focused card takes full width */
+.pvs-two-col.pvs-focus-row {
+	grid-template-columns: 1fr;
+}
+
+/* Focus badge injected into card head */
+.pvs-focus-badge {
+	margin-left: auto;
+	background: rgba(79,70,229,0.35);
+	border: 1px solid rgba(99,102,241,0.5);
+	border-radius: 10px;
+	color: #a5b4fc;
+	font-size: 0.66rem;
+	font-weight: 700;
+	padding: 2px 9px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	flex-shrink: 0;
+}
+
+/* Exit focus button appended to quick nav */
+#pvs-focus-close {
+	background: rgba(239,68,68,0.15);
+	border: 1px solid rgba(239,68,68,0.3);
+	border-radius: 20px;
+	color: #fca5a5;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.74rem;
+	font-weight: 600;
+	margin-left: auto;
+	padding: 4px 12px;
+	transition: background 0.15s, color 0.15s;
+}
+#pvs-focus-close:hover {
+	background: rgba(239,68,68,0.28);
+	color: #fecaca;
 }
