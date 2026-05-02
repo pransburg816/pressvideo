@@ -2838,6 +2838,29 @@ body.pva-page .pva-empty__graphic circle:first-child {
 	display: block !important;
 }
 
+/* ── Focus active state: card highlight + badge ──────────────── */
+.pva-focus-card.pv-card {
+	border-color: rgba(99,102,241,0.5) !important;
+	box-shadow: 0 0 0 3px rgba(99,102,241,0.12), 0 4px 24px rgba(0,0,0,0.35) !important;
+}
+.pva-focus-badge {
+	display: inline-flex;
+	align-items: center;
+	background: rgba(99,102,241,0.18);
+	color: #a5b4fc;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 3px 9px;
+	border-radius: 20px;
+	margin-left: 8px;
+	border: 1px solid rgba(99,102,241,0.35);
+	flex-shrink: 0;
+	line-height: 1.4;
+	pointer-events: none;
+}
+
 /* ── Focus mode close button ────────────────────────────────── */
 #pva-focus-close {
 	display: inline-flex;
