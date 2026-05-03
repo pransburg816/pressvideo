@@ -176,7 +176,18 @@
 .pv-btn:hover{background:rgba(79,70,229,.25);border-color:rgba(129,140,248,.55);color:#fff}
 .pv-btn:active{opacity:.85}
 
+/* ─── Sheet handle (mobile bottom-sheet drag pill) ────────────── */
+.pv-sheet-handle{display:none;width:36px;height:4px;background:rgba(255,255,255,.22);border-radius:2px;margin:10px auto 2px;flex-shrink:0;cursor:grab}
+
 /* ─── Responsive ──────────────────────────────────────────────── */
 @media (max-width:1399px){.pv-panel{width:50vw}}
 @media (max-width:999px){.pv-panel{width:72vw}}
-@media (max-width:767px){.pv-panel{width:100vw;max-width:none;border-left:none;border-top:2px solid var(--pv-accent);top:auto;height:92dvh;transform:translateY(100%);border-radius:20px 20px 0 0}.pv-offcanvas.pv-open .pv-panel{transform:translateY(0)}}
+@media (max-width:767px){
+  .pv-sheet-handle{display:block}
+  .pv-panel{width:100vw;max-width:none;border-left:none;border-top:none;top:auto;height:92dvh;transform:translateY(100%);border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.55)}
+  .pv-offcanvas.pv-open .pv-panel{transform:translateY(0)}
+  .pv-panel-hd{padding:2px 14px 2px;border-bottom:none}
+  .pv-meta{padding:8px 14px 6px}
+  .pv-player-controls{padding:4px 12px}
+  .pv-rail-hd{padding:6px 12px 6px 14px}
+}
