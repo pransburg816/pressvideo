@@ -138,16 +138,35 @@ $_pvm_eq_bars = ! empty( $_pvm_s['music_eq_bars'] );
 		</div>
 
 		<div class="pvm-art-section">
-			<div class="pvm-art-wrap">
-				<div class="pvm-spinner" aria-hidden="true" hidden></div>
-				<div class="pvm-iframe-holder"></div>
+			<div class="pvm-stage">
+				<button class="pvm-tile pvm-tile--prev" type="button" hidden
+				        aria-label="<?php esc_attr_e( 'Previous track', 'pv-youtube-importer' ); ?>">
+					<span class="pvm-tile__thumb-wrap">
+						<img class="pvm-tile__thumb" src="" alt="" loading="lazy">
+					</span>
+					<span class="pvm-tile__label"></span>
+				</button>
+
+				<div class="pvm-tile pvm-tile--current">
+					<div class="pvm-art-wrap">
+						<img class="pvm-art-poster" src="" alt="" aria-hidden="true">
+						<div class="pvm-spinner" aria-hidden="true" hidden></div>
+						<div class="pvm-iframe-holder"></div>
+					</div>
+				</div>
+
+				<button class="pvm-tile pvm-tile--next" type="button" hidden
+				        aria-label="<?php esc_attr_e( 'Next track', 'pv-youtube-importer' ); ?>">
+					<span class="pvm-tile__thumb-wrap">
+						<img class="pvm-tile__thumb" src="" alt="" loading="lazy">
+					</span>
+					<span class="pvm-tile__label"></span>
+				</button>
 			</div>
 		</div>
 
 		<div class="pvm-info">
 			<h3 class="pvm-title"></h3>
-			<p class="pvm-artist"></p>
-			<span class="pvm-album-pill" hidden></span>
 		</div>
 
 		<div class="pvm-progress-row">
@@ -216,7 +235,6 @@ $_pvm_eq_bars = ! empty( $_pvm_s['music_eq_bars'] );
 			<div class="pvm-mini-art"><img class="pvm-mini-thumb" src="" alt=""></div>
 			<div class="pvm-mini-info">
 				<span class="pvm-mini-title"></span>
-				<span class="pvm-mini-artist"></span>
 			</div>
 			<div class="pvm-mini-controls">
 				<button class="pvm-mini-prev" type="button" aria-label="<?php esc_attr_e( 'Previous', 'pv-youtube-importer' ); ?>">

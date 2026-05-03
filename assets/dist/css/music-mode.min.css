@@ -251,8 +251,8 @@
 /* ── Track info ───────────────────────────────────────────────────── */
 .pvm-info {
     width: 100%;
-    max-width: 360px;
-    margin: 20px auto 0;
+    max-width: 460px;
+    margin: 0;
     text-align: center;
     flex-shrink: 0;
 }
@@ -288,7 +288,7 @@
 /* ── Progress bar ─────────────────────────────────────────────────── */
 .pvm-progress-row {
     width: 100%;
-    max-width: 360px;
+    max-width: 460px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -331,7 +331,7 @@
 /* ── Controls ─────────────────────────────────────────────────────── */
 .pvm-controls {
     width: 100%;
-    max-width: 360px;
+    max-width: 460px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -418,6 +418,22 @@
     border-bottom: 1px solid rgba(255,255,255,.07);
     margin-bottom: 4px;
 }
+
+.pvm-queue-list {
+    max-height: 360px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.25) transparent;
+    padding-right: 4px;
+}
+.pvm-queue-list::-webkit-scrollbar { width: 6px; }
+.pvm-queue-list::-webkit-scrollbar-track { background: transparent; }
+.pvm-queue-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.18);
+    border-radius: 3px;
+}
+.pvm-queue-list::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.32); }
 
 .pvm-queue-item {
     display: flex;
@@ -741,7 +757,7 @@
 /* ── Volume row ───────────────────────────────────────────────────── */
 .pvm-volume-row {
     width: 100%;
-    max-width: 360px;
+    max-width: 460px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -978,3 +994,201 @@
 .pvm-mini-eq-bar:nth-child(10n+8)  { --pvm-mini-eq-dur: .66s; animation-delay: .10s;  }
 .pvm-mini-eq-bar:nth-child(10n+9)  { --pvm-mini-eq-dur: .54s; animation-delay: .06s;  }
 .pvm-mini-eq-bar:nth-child(10n+10) { --pvm-mini-eq-dur: .42s; animation-delay: .16s;  }
+
+
+/* ── Desktop coverflow carousel ───────────────────────────────────── */
+/* Mobile: side tiles stay hidden via the [hidden] attribute (default flow). */
+.pvm-stage {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.pvm-tile--current { width: 100%; z-index: 3; }
+/* Side tiles are desktop-only — hidden by default so they don't render
+   as plain <button> elements in the mobile DOM flow. */
+.pvm-tile--prev,
+.pvm-tile--next { display: none; }
+
+/* Poster image hides the black gap during iframe destroy/recreate. */
+.pvm-art-wrap { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.pvm-art-poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 2;
+    opacity: 1;
+    transition: opacity .35s ease .2s;
+    pointer-events: none;
+    background: #000;
+}
+.pvm-art-poster:not([src]),
+.pvm-art-poster[src=""] { display: none; }
+.pvm-art-wrap--ready .pvm-art-poster { opacity: 0; }
+
+@media (min-width: 1024px) {
+    .pvm-art-section {
+        max-width: 1140px;
+        width: 100%;
+        margin: 16px auto 0;
+        padding: 0;
+    }
+    .pvm-stage {
+        position: relative;
+        height: 580px;
+        perspective: 1700px;
+        perspective-origin: 50% 50%;
+        overflow: visible;
+        display: block;
+    }
+    .pvm-tile {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        aspect-ratio: 1 / 1;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 30px 60px -25px rgba(0,0,0,.7);
+        transition:
+            transform .55s cubic-bezier(.25,.85,.35,1),
+            opacity   .55s ease,
+            filter    .55s ease;
+        will-change: transform, opacity, filter;
+    }
+    .pvm-tile--current {
+        width: 42%;
+        max-width: 540px;
+        transform: translate(-50%, -50%);
+        z-index: 3;
+        flex: none;
+    }
+    .pvm-tile--prev,
+    .pvm-tile--next {
+        display: block;
+        width: 28%;
+        max-width: 320px;
+        background: rgba(0,0,0,.55);
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        opacity: .58;
+        filter: saturate(.55) brightness(.55);
+        z-index: 1;
+    }
+    .pvm-tile--prev {
+        transform: translate(calc(-50% - 60%), -50%) scale(.82) rotateY(24deg);
+    }
+    .pvm-tile--next {
+        transform: translate(calc(-50% + 60%), -50%) scale(.82) rotateY(-24deg);
+    }
+    .pvm-tile--prev:hover {
+        transform: translate(calc(-50% - 58%), -50%) scale(.86) rotateY(20deg);
+        opacity: .92;
+        filter: saturate(1) brightness(.85);
+    }
+    .pvm-tile--next:hover {
+        transform: translate(calc(-50% + 58%), -50%) scale(.86) rotateY(-20deg);
+        opacity: .92;
+        filter: saturate(1) brightness(.85);
+    }
+    .pvm-tile--prev:focus-visible,
+    .pvm-tile--next:focus-visible {
+        outline: 2px solid var(--pv-accent, #4f46e5);
+        outline-offset: 4px;
+        opacity: .92;
+    }
+    .pvm-tile--prev[hidden],
+    .pvm-tile--next[hidden] { display: none !important; }
+
+    .pvm-tile__thumb-wrap {
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        border-radius: inherit;
+    }
+    .pvm-tile__thumb {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .pvm-tile__thumb-wrap::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,.82) 100%);
+        pointer-events: none;
+    }
+    .pvm-tile__label {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 12px;
+        font-size: .9rem;
+        font-weight: 600;
+        color: rgba(255,255,255,.94);
+        text-align: center;
+        line-height: 1.25;
+        text-shadow: 0 1px 3px rgba(0,0,0,.7);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        pointer-events: none;
+    }
+
+    /* Coverflow slide. JS sets the "from" state instantly with --no-anim,
+       then removes the from-* class on the next frame; tiles transition
+       smoothly to their new default positions. */
+    .pvm-stage--no-anim .pvm-tile { transition: none !important; }
+
+    /* sliding next: new tiles "started" one slot to the right */
+    .pvm-stage--from-next .pvm-tile--prev {
+        transform: translate(-50%, -50%) scale(1) rotateY(0);
+        opacity: 1;
+        filter: none;
+    }
+    .pvm-stage--from-next .pvm-tile--current {
+        transform: translate(calc(-50% + 60%), -50%) scale(.82) rotateY(-24deg);
+        opacity: .58;
+        filter: saturate(.55) brightness(.55);
+    }
+    .pvm-stage--from-next .pvm-tile--next {
+        transform: translate(calc(-50% + 140%), -50%) scale(.55) rotateY(-45deg);
+        opacity: 0;
+    }
+
+    /* sliding prev: mirror */
+    .pvm-stage--from-prev .pvm-tile--next {
+        transform: translate(-50%, -50%) scale(1) rotateY(0);
+        opacity: 1;
+        filter: none;
+    }
+    .pvm-stage--from-prev .pvm-tile--current {
+        transform: translate(calc(-50% - 60%), -50%) scale(.82) rotateY(24deg);
+        opacity: .58;
+        filter: saturate(.55) brightness(.55);
+    }
+    .pvm-stage--from-prev .pvm-tile--prev {
+        transform: translate(calc(-50% - 140%), -50%) scale(.55) rotateY(45deg);
+        opacity: 0;
+    }
+
+    /* Up Next aligns with the player-control column (460px wide). */
+    .pvm-queue-section { margin-top: 22px; max-width: 460px; }
+    .pvm-queue-list   { max-height: 220px; }
+}
+
+/* Hide the volume slider on mobile — system volume covers it. */
+@media (max-width: 1023px) {
+    .pvm-volume-row { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pvm-tile { transition: none !important; }
+    .pvm-art-poster { transition: none !important; }
+}
